@@ -1,0 +1,3067 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Motionreis SUITE</title>
+    <!-- Use standard link for Google Fonts to prevent CEF @import bugs -->
+    <link rel="stylesheet" href="../../shared/theme.css">
+    <style>
+.setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        select { background: var(--bg-hover); color: var(--text-primary); border: 1px solid var(--border-strong); border-radius: 4px; padding: 6px; outline: none; }
+        .toggle-btn { background: var(--bg-active); border: 1px solid var(--border-strong); padding: 4px 12px; border-radius: 12px; cursor: pointer; color: var(--text-muted); transition: 0.2s;}
+        .toggle-btn.on { background: var(--accent-success); color: white; border-color: transparent;}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .color-swatch { width: 32px; height: 32px; border-radius: 4px; border: 1px solid var(--border-strong); cursor: pointer; }
+
+        /* Customize Modal */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal-content { background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 16px; width: 90%; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; flex-direction: column; }
+        .modal-header h3 { margin: 0 0 4px 0; font-size: 14px; color: var(--text-primary); }
+
+
+        /* Ease Slider (Keyframe Wingman) */
+        .ease-slider-wrap { margin-bottom: 14px; }
+        .ease-slider-wrap label { font-size: 11px; color: var(--text-secondary); display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .ease-slider-wrap label span { color: var(--accent-primary); font-weight: 600; }
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; background: var(--bg-active); border-radius: 2px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent-primary); cursor: pointer; }
+
+        /* Small number input */
+        .num-input { width: 52px; background: var(--bg-hover); color: var(--text-primary); border: 1px solid var(--border-strong); border-radius: 4px; padding: 4px 6px; text-align: center; font-size: 11px; outline: none; }
+
+        /* Section label */
+        .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+
+        /* Smart Panel Emphasis Styles */
+        .btn.smart-emphasis {
+            background: var(--bg-active) !important;
+            border: 2px solid var(--accent-primary) !important;
+            color: var(--text-primary) !important;
+            box-shadow: none !important;
+        }
+        .btn.smart-emphasis:hover {
+            background: var(--bg-hover) !important;
+            border: 2px solid var(--accent-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Cohesive Card Icon Themes (Default Mode) */
+        #card-motiontools .btn .material-symbols-rounded {
+            color: #2563eb; /* Pure Royal Blue */
+        }
+        .create-layers-group .btn .material-symbols-rounded {
+            color: #d97706 !important; /* Premium Amber (BEDA WARNA SAMA MOTION TOOLS) */
+        }
+        #card-pathrigging .btn .material-symbols-rounded {
+            color: #2563eb; /* Pure Royal Blue */
+        }
+        #mod-kinetics .btn .material-symbols-rounded,
+        #card-wingman .btn .material-symbols-rounded,
+        #card-presets .btn .material-symbols-rounded {
+            color: #d97706; /* Amber */
+        }
+        #card-expressions .btn .material-symbols-rounded {
+            color: #9333ea; /* Purple */
+        }
+        #mod-design .btn .material-symbols-rounded {
+            color: #8b5cf6; /* Pure Violet instead of Emerald Green */
+        }
+        #mod-scene .btn .material-symbols-rounded {
+            color: #e11d48; /* Rose */
+        }
+        #mod-layers .btn .material-symbols-rounded {
+            color: #2563eb; /* Blue */
+        }
+        #mod-macro .btn .material-symbols-rounded {
+            color: #ea580c; /* Orange */
+        }
+
+        /* Ensure primary buttons always have white text and white icons for proper contrast */
+        .btn-primary,
+        .btn-primary .material-symbols-rounded,
+        body.theme-icons .btn-primary .material-symbols-rounded {
+            color: #ffffff !important;
+        }
+
+        /* Dynamic Theme Icon Color Override */
+        body.theme-icons .btn .material-symbols-rounded {
+            color: var(--accent-primary) !important;
+        }
+
+        /* Ease preset chips */
+        .ease-presets { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+        .ease-chip { background: var(--bg-hover); border: 1px solid var(--border-strong); border-radius: 4px; padding: 3px 8px; font-size: 10px; cursor: pointer; color: var(--text-secondary); transition: 0.15s; }
+        .ease-chip:hover { background: var(--accent-primary); color: white; border-color: transparent; }
+
+        /* Ease Library */
+        .ease-library { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .ease-lib-card {
+            background: var(--bg-card); border: 1px solid var(--border-strong);
+            border-radius: var(--radius-md); padding: 8px 4px; cursor: pointer; position: relative;
+            transition: border-color 0.15s, background 0.15s;
+            display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center;
+        }
+        .ease-lib-card:hover { border-color: var(--accent-primary); background: var(--bg-active); }
+        .ease-lib-card .lib-name { 
+            font-size: 10px; font-weight: 600; color: var(--text-primary); 
+            margin-top: 4px; white-space: nowrap; overflow: hidden; 
+            text-overflow: ellipsis; max-width: 100%; 
+        }
+        .ease-lib-card .lib-vals { font-size: 9px; color: var(--text-secondary); margin-top: 2px; }
+        .ease-lib-card .lib-del {
+            position: absolute; top: 2px; right: 2px;
+            background: transparent; border: none; color: var(--text-muted);
+            cursor: pointer; font-size: 14px; line-height: 1; padding: 2px;
+            border-radius: 3px; display: flex; align-items: center;
+        }
+        .ease-lib-card .lib-del:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
+        .ease-lib-card svg { display: block; overflow: visible; }
+        .lib-empty { font-size: 11px; color: var(--text-muted); text-align: center; padding: 12px 0; }
+        .save-row { display: flex; gap: 6px; margin-top: 10px; }
+        .save-row input { flex: 1; background: var(--bg-app); border: 1px solid var(--border-strong); color: var(--text-primary); padding: 5px 8px; border-radius: 4px; font-size: 11px; outline: none; }
+        .save-row input:focus        .toast.success { border-left-color: var(--accent-success); }
+        .toast.error { border-left-color: var(--accent-danger); }
+        .toast.info { border-left-color: var(--accent-primary); }
+        
+        .segmented-control {
+            display: flex; align-items: center; justify-content: center;
+            padding: 6px; font-size: 10px; color: var(--text-secondary);
+            border: 1px solid var(--border-strong); border-radius: 4px;
+            cursor: pointer; transition: all 0.2s; background: var(--bg-panel);
+        }
+        .segmented-control.active {
+            background: var(--accent-primary); color: #fff; border-color: var(--accent-primary); font-weight: bold;
+        }
+        .segmented-control:hover:not(.active) {
+            background: var(--bg-app);
+        }
+
+        /* Recent Projects Panel styles */
+        #card-recent-projects {
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            overflow: hidden;
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 500px;
+            margin-bottom: 16px !important;
+        }
+        #card-recent-projects.hidden-proj {
+            opacity: 0;
+            transform: translateY(-20px);
+            max-height: 0 !important;
+            margin-bottom: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            border-top-width: 0 !important;
+            border-bottom-width: 0 !important;
+            border-color: transparent !important;
+            pointer-events: none;
+        }
+        .recent-proj-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-md, 6px);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .recent-proj-row:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--accent-primary);
+            transform: translateX(4px);
+        }
+        .recent-proj-row .proj-icon {
+            font-size: 20px;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.85;
+            transition: transform 0.2s;
+        }
+        .recent-proj-row:hover .proj-icon {
+            transform: scale(1.1);
+        }
+        .recent-proj-row .proj-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+        }
+        .recent-proj-row .proj-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .recent-proj-row .proj-path {
+            font-size: 9px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 1px;
+            opacity: 0.85;
+        }
+        .recent-proj-row .proj-time {
+            font-size: 9px;
+            font-weight: 500;
+            color: var(--accent-primary);
+            white-space: nowrap;
+            margin-left: auto;
+            padding-left: 8px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Global Initial Loader -->
+        <div id="app-loader">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <!-- HOME -->
+            <!-- HOME -->
+            <button class="tab-btn active" data-target="mod-home"><span class="material-symbols-rounded">space_dashboard</span> Home</button>
+            <hr>
+            <button class="tab-btn" data-target="mod-rigging" data-tooltip="Anchor & Nulls"><span class="material-symbols-rounded">anchor</span> Rigging</button>
+            <button class="tab-btn" data-target="mod-kinetics" data-tooltip="Wingman & Expr"><span class="material-symbols-rounded">tune</span> Kinetics</button>
+            <button class="tab-btn" data-target="mod-design" data-tooltip="Text & Layout"><span class="material-symbols-rounded">match_case</span> Design</button>
+            <button class="tab-btn" data-target="mod-scene" data-tooltip="Camera & Audio"><span class="material-symbols-rounded">videocam</span> Scene</button>
+            <button class="tab-btn" data-target="mod-layers" data-tooltip="Timeline & Flow"><span class="material-symbols-rounded">layers</span> Layers</button>
+            <button class="tab-btn" data-target="mod-macro" data-tooltip="Scripts & IDE"><span class="material-symbols-rounded">extension</span> Macro</button>
+            <button class="tab-btn" data-target="mod-output" data-tooltip="Render & VFX"><span class="material-symbols-rounded">movie</span> Render</button>
+            <div style="flex-grow:1;"></div>
+            <button class="tab-btn" data-target="mod-info" data-tooltip="Info & Help"><span class="material-symbols-rounded">settings</span> Info</button>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- HOME -->
+            <div id="mod-home" class="module-container active">
+                <div class="module-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span><span class="material-symbols-rounded" style="vertical-align:bottom; margin-right:4px;">space_dashboard</span> Dashboard</span>
+                    <button class="btn" style="padding:4px 8px; font-size:10px;" onclick="openCustomizeModal()"><span class="material-symbols-rounded" style="font-size:12px; margin-right:4px;">settings</span>Customize</button>
+                </div>
+                
+                <!-- Recent Projects Card -->
+                <div class="card" id="card-recent-projects" style="display:none;">
+                    <div class="section-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span>Recent Projects</span>
+                        <span class="material-symbols-rounded" style="font-size:14px; opacity:0.6; color:var(--accent-primary);">history</span>
+                    </div>
+                    <div id="recent-projects-list" style="display:flex; flex-direction:column; gap:8px;">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+                
+                <div id="home-widgets" style="display:flex; flex-direction:column; gap:16px;"></div>
+                <!-- Source Templates (Hidden) -->
+                <!-- Welcome Banner -->
+                <div class="card" id="card-welcome" style="display:none; text-align:center; padding:24px 16px; background:linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(30, 31, 34, 0) 100%); border:1px solid var(--border-strong); position:relative; overflow:hidden;">
+                    <span class="material-symbols-rounded" style="position:absolute; font-size:120px; color:rgba(88, 101, 242, 0.05); top:-20px; right:-20px; transform:rotate(-15deg); pointer-events:none;">rocket_launch</span>
+                    <div style="font-size:20px; font-weight:800; color:var(--text-primary); margin-bottom:2px; letter-spacing:0.5px;">MOTIONREIS</div>
+                    <div style="font-size:10px; font-weight:600; color:var(--accent-primary); margin-bottom:12px; letter-spacing:2px; text-transform:uppercase;">Master Suite</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin:0; line-height:1.5;">Welcome to your ultimate pipeline companion. Organize files, rig characters, and automate workflows effortlessly.</p>
+                </div>
+                
+                <div class="card" id="card-organizer" style="display:none;">
+                    <div class="section-label">Master Organizer</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Auto-sort your chaotic files into the standard structured folders based on extensions (.psd, .mp4, etc).</p>
+                    
+                    <button class="btn btn-primary" style="width:100%; margin-bottom:8px; justify-content:center;" onclick="exec('pipeline', 'osOrganizeProject')">
+                        <span class="material-symbols-rounded">folder_managed</span> Organize Finder (OS)
+                    </button>
+                    <button class="btn" style="width:100%; justify-content:center;" onclick="exec('pipeline', 'organizeProject')">
+                        <span class="material-symbols-rounded">account_tree</span> Organize Project (AE)
+                    </button>
+                </div>
+
+                <div class="card" id="card-memory" style="display:none;">
+                    <div class="section-label">Memory Utilities</div>
+                    <div class="grid-2">
+                        <button class="btn" style="justify-content:center; color:var(--accent-warning); border-color:var(--border-strong);" onclick="exec('pipeline', 'purgeCache')" title="Purge AE Cache">
+                            <span class="material-symbols-rounded" style="color:var(--accent-warning);">cleaning_services</span> AE Cache
+                        </button>
+                        <button class="btn" style="justify-content:center; color:var(--accent-danger); border-color:var(--border-strong);" onclick="purgeOSRAM()" title="Purge System RAM (OS Level)">
+                            <span class="material-symbols-rounded" style="color:var(--accent-danger);">memory</span> OS RAM
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGGING -->
+            <div id="mod-rigging" class="module-container">
+                <div class="module-header"><span class="material-symbols-rounded">anchor</span> Rigging</div>
+                <div class="card" id="card-anchor">
+                    <div class="section-label">Anchor Point</div>
+                    <div style="display:flex; justify-content:center; align-items:center; gap: 20px; padding: 10px 0;">
+                    <div style="display:grid; grid-template-columns: repeat(3, 30px); gap: 4px;">
+                        <button class="btn" style="height:30px; padding:0; justify-content:center;" onclick="exec('motion','TL', {comp: document.getElementById('anchor-compensate').checked})"><span class="material-symbols-rounded" style="transform:rotate(-45deg); font-size:16px;">arrow_upward</span></button>
+                        <button class="btn" style="height:30px; padding:0; justify-content:center;" onclick="exec('motion','TC', {comp: document.getElementById('anchor-compensate').checked})"><span class="material-symbols-rounded" style="font-size:16px;">arrow_upward</span></button>
+                        <button class="btn" style="height:30px; padding:0; justify-content:center;" onclick="exec('motion','TR', {comp: document.getElementById('anchor-compensate').checked})"><span class="material-symbols-rounded" style="transform:rotate(45deg); font-size:16px;">arrow_upward</span></button>
+                        <button class="btn" style="height:30px; padding:0; justify-content:center;" onclick="exec('motion','ML', {comp: document.getElementById('anchor-compensate').checked})"><span class="material-symbols-rounded" style="transform:rotate(-90deg); font-size:16px;">arrow_upward</span></button>
+                        <button class="btn" style="height:30px; padding:0; justify-content:center;" onclick="exec('motion','MC', {comp: document.getElementById('anchor-compensate').checked})"><span class="material-symbols-rounded" style="font-size:14px">fiber_manual_record</span></button>
+                        <button class="btn" style="height:30px; padding:0; justify-content:center;" onclick="exec('motion','MR', {comp: document.getElementById('anchor-compensate').checked})"><span class="material-symbols-rounded" style="transform:rotate(90deg); font-size:16px;">arrow_upward</span></button>
+                        <button class="btn" style="height:30px; padding:0; justify-content:center;" onclick="exec('motion','BL', {comp: document.getElementById('anchor-compensate').checked})"><span class="material-symbols-rounded" style="transform:rotate(-135deg); font-size:16px;">arrow_upward</span></button>
+                        <button class="btn" style="height:30px; padding:0; justify-content:center;" onclick="exec('motion','BC', {comp: document.getElementById('anchor-compensate').checked})"><span class="material-symbols-rounded" style="transform:rotate(180deg); font-size:16px;">arrow_upward</span></button>
+                        <button class="btn" style="height:30px; padding:0; justify-content:center;" onclick="exec('motion','BR', {comp: document.getElementById('anchor-compensate').checked})"><span class="material-symbols-rounded" style="transform:rotate(135deg); font-size:16px;">arrow_upward</span></button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <label style="font-size:10px;"><input type="checkbox" id="anchor-compensate" checked> Compensate Pos</label>
+                    </div>
+                </div>
+                </div>
+                <div class="card" id="card-motiontools">
+                    <div class="section-label" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>Motion Tools</span>
+                        <label style="font-size:10px; font-weight:normal; display:flex; align-items:center; gap:4px; margin:0; text-transform:none; letter-spacing:0;"><input type="checkbox" id="null-3d"> 3D Null</label>
+                    </div>
+
+                    <!-- Shapes & Nulls -->
+                    <div class="grid-3" style="margin-bottom:8px;">
+                        <button class="btn" onclick="exec('motion','nullFromSelection', {null3d: document.getElementById('null-3d').checked})" title="Create Null"><span class="material-symbols-rounded" style="font-size:16px;">center_focus_strong</span> Null</button>
+                        <button class="btn" onclick="exec('layers','explodeShapeLayer')" title="Extract Shape"><span class="material-symbols-rounded" style="font-size:16px;">call_split</span> Extract</button>
+                        <button class="btn" onclick="exec('layers','mergeShapeLayers')" title="Merge Shapes"><span class="material-symbols-rounded" style="font-size:16px;">call_merge</span> Merge</button>
+                    </div>
+                    
+                    <!-- Keys -->
+                    <div class="grid-3" style="margin-bottom:8px;">
+                        <button class="btn" onclick="exec('motion','cloneKeys')" title="Clone Keys"><span class="material-symbols-rounded" style="font-size:16px;">content_copy</span> Clone</button>
+                        <button class="btn" onclick="exec('motion','reverseKeys')" title="Reverse Keys"><span class="material-symbols-rounded" style="font-size:16px;">compare_arrows</span> Reverse</button>
+                        <button class="btn" onclick="exec('motion','snapKeys')" title="Snap Keys (Fix Sub-frames)"><span class="material-symbols-rounded" style="font-size:16px;">align_horizontal_center</span> Snap</button>
+                    </div>
+
+                    <!-- Comp & Render Tools -->
+                    <div class="grid-3" style="margin-bottom:8px;">
+                        <button class="btn" onclick="exec('layers','preRender')" title="Precompose Selected Layers"><span class="material-symbols-rounded" style="font-size:16px;">folder_zip</span> Precomp</button>
+                        <button class="btn" onclick="exec('motion','autoPrecompCrop')" title="Crop Comp Duration to Tightest Bounds"><span class="material-symbols-rounded" style="font-size:16px;">crop</span> Crop Comp</button>
+                        <button class="btn" onclick="exec('pipeline','addToRenderQueue')" title="Add Active Comp to AE Render Queue"><span class="material-symbols-rounded" style="font-size:16px;">add_to_queue</span> Add RQ</button>
+                    </div>
+                    
+                    <!-- Sequence Control -->
+                    <div style="display:flex; align-items:center; gap:6px; background:var(--bg-active); border:1px solid var(--border-strong); border-radius:var(--radius-md); padding:4px;">
+                        <span style="font-size:11px; color:var(--text-secondary); margin-left:4px;"><span class="material-symbols-rounded" style="font-size:14px; vertical-align:middle; margin-right:4px;">format_list_numbered</span>Seq</span>
+                        <input type="number" id="mt-sequence-frames" value="2" style="width:36px; text-align:center; padding:2px; font-size:11px; background:var(--bg-app); border:1px solid var(--border-strong); color:var(--text-primary); border-radius:4px; outline:none; margin-left:auto;">
+                        <button class="btn" style="flex:1; justify-content:center; padding:2px 0;" onclick="exec('motion','staggerLayers', {frames: document.getElementById('mt-sequence-frames').value})">Layers</button>
+                        <button class="btn" style="flex:1; justify-content:center; padding:2px 0;" onclick="exec('motion','staggerKeys', {frames: document.getElementById('mt-sequence-frames').value})">Keys</button>
+                    </div>
+
+                    <!-- Quick Layers -->
+                    <div class="section-label" style="margin-top:12px; margin-bottom:6px;">Create Layers</div>
+                    <div class="create-layers-group">
+                        <div class="grid-3" style="margin-bottom:6px;">
+                            <button class="btn" onclick="exec('motion','createNewLayer', {type: 'solid'})" title="Create Solid Layer"><span class="material-symbols-rounded" style="font-size:16px;">layers</span> Solid</button>
+                            <button class="btn" onclick="exec('motion','createNewLayer', {type: 'adjustment'})" title="Create Adjustment Layer"><span class="material-symbols-rounded" style="font-size:16px;">blur_on</span> Adjust</button>
+                            <button class="btn" onclick="exec('motion','createNewLayer', {type: 'text'})" title="Create Text Layer"><span class="material-symbols-rounded" style="font-size:16px;">title</span> Text</button>
+                        </div>
+                        <div class="grid-3">
+                            <button class="btn" onclick="exec('motion','createNewLayer', {type: 'shape'})" title="Create Shape Layer"><span class="material-symbols-rounded" style="font-size:16px;">category</span> Shape</button>
+                            <button class="btn" onclick="exec('motion','createNewLayer', {type: 'camera'})" title="Create Camera Layer"><span class="material-symbols-rounded" style="font-size:16px;">videocam</span> Camera</button>
+                            <button class="btn" onclick="exec('motion','createNewLayer', {type: 'light'})" title="Create Light Layer"><span class="material-symbols-rounded" style="font-size:16px;">lightbulb</span> Light</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" id="card-pathrigging">
+                    <div class="section-label">Path Rigging</div>
+                    <div class="grid-3" style="margin-top:6px;">
+                        <button class="btn" onclick="exec('motion','pointsFollowNulls')" title="Points Follow Nulls">Pts &rarr; Null</button>
+                        <button class="btn" onclick="exec('motion','nullsFollowPoints')" title="Nulls Follow Points">Null &rarr; Pts</button>
+                        <button class="btn" onclick="exec('motion','tracePath')" title="Trace Path">Trace</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KINETICS -->
+            <div id="mod-kinetics" class="module-container">
+                <div class="module-header"><span class="material-symbols-rounded">tune</span> Kinetics</div>
+                <div class="card" id="card-wingman">
+                    <div class="section-label">Keyframe Wingman</div>
+                    <!-- Top section: Graph (Left), Controls (Right) -->
+                    <div style="display: grid; grid-template-columns: 80px 1fr; gap: 12px; margin-bottom: 10px;">
+                        <!-- LEFT: GRAPH -->
+                        <div style="background:var(--bg-active); border:1px solid var(--border-strong); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; height: 80px;">
+                            <svg id="wingman-preview" width="70" height="70" viewBox="0 0 80 80" style="overflow:visible;">
+                                <!-- Map the 0-80, 0-40 original path into an 80x80 box, so scale Y by 2 -->
+                                <path id="wingman-curve" d="" stroke="var(--accent-primary)" stroke-width="3" fill="none" />
+                                <line x1="0" y1="80" x2="80" y2="0" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="3,3"/>
+                            </svg>
+                        </div>
+                        
+                        <!-- RIGHT: SLIDERS & BUTTONS -->
+                        <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:10px; color:var(--text-secondary); width:20px;">Out</span>
+                                <input type="range" id="ease-out-slider" min="0" max="100" value="66" style="flex:1; height:4px;" oninput="document.getElementById('ease-out-val-input').value=this.value; updateWingmanPreview()">
+                                <input type="number" id="ease-out-val-input" value="66" min="0" max="100" style="width: 36px; text-align:center; font-size:10px; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:4px; padding:2px; color:var(--text-primary);" oninput="document.getElementById('ease-out-slider').value=this.value; updateWingmanPreview()">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:10px; color:var(--text-secondary); width:20px;">In</span>
+                                <input type="range" id="ease-in-slider" min="0" max="100" value="66" style="flex:1; height:4px;" oninput="document.getElementById('ease-in-val-input').value=this.value; updateWingmanPreview()">
+                                <input type="number" id="ease-in-val-input" value="66" min="0" max="100" style="width: 36px; text-align:center; font-size:10px; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:4px; padding:2px; color:var(--text-primary);" oninput="document.getElementById('ease-in-slider').value=this.value; updateWingmanPreview()">
+                            </div>
+                            <div class="grid-3" style="margin-top:2px;">
+                                <button class="btn btn-primary" style="justify-content:center; padding:0; " onclick="applyWingman('both')">Apply</button>
+                                <button class="btn" style="justify-content:center; padding:0; " onclick="applyWingman('out')">Out</button>
+                                <button class="btn" style="justify-content:center; padding:0; " onclick="applyWingman('in')">In</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-bottom:8px;">
+                        <button class="btn" style="justify-content:center; padding:0;  font-size:10px;" onclick="exec('motion', 'copyEase')" title="Extract Bezier Data without spatial values">Copy Ease</button>
+                        <button class="btn" style="justify-content:center; padding:0;  font-size:10px;" onclick="exec('motion', 'pasteEase')" title="Inject Bezier Data">Paste Ease</button>
+                    </div>
+
+                    <!-- Bottom section: Quick Presets -->
+                    <div class="grid-compact">
+                        <button class="ease-chip" onclick="setWingman(0, 0)" title="Linear">LIN</button>
+                        <button class="ease-chip" onclick="setWingman(33, 33)" title="Easy Ease">EAS</button>
+                        <button class="ease-chip" onclick="setWingman(75, 75)" title="Strong">STR</button>
+                        <button class="ease-chip" onclick="setWingman(100, 100)" title="Max">MAX</button>
+                        <button class="ease-chip" onclick="setWingman(0, 100)" title="Ease In">IN</button>
+                        <button class="ease-chip" onclick="setWingman(100, 0)" title="Ease Out">OUT</button>
+                        <button class="ease-chip" onclick="setWingman(80, -20)" title="Overshoot">OVR</button>
+                    </div>
+                </div>
+
+                <div class="card" id="card-myeaselibrary">
+                    <div class="section-label">My Ease Library</div>
+                    <div style="display:flex; gap:6px; margin-bottom:8px;">
+                        <input type="text" id="ease-save-name" placeholder="Save current ease..." style="flex:1;  font-size:11px; padding:0 8px; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary);">
+                        <button class="btn btn-primary" style=" padding:0 8px; justify-content:center;" onclick="saveEasePreset()"><span class="material-symbols-rounded" style="font-size:14px;">save</span></button>
+                    </div>
+                    <div id="ease-lib-list" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+
+                <div class="card" id="card-wigglepro">
+                    <div class="section-label">Wiggle Pro</div>
+                    <div style="text-align:center; padding: 10px 0; display:flex; justify-content:center;">
+                        <svg width="180" height="40" viewBox="0 0 180 40" style="stroke: var(--accent-primary); stroke-width: 2.5; stroke-linecap: round; fill: none;">
+                            <path id="wiggle-curve" d=""></path>
+                        </svg>
+                    </div>
+                    <div class="setting-row">
+                        <span style="font-size:11px; color:var(--text-secondary);">Freq</span>
+                        <span id="wig-freq-val" style="font-weight:bold; font-size:11px;">2.0</span>
+                    </div>
+                    <input type="range" id="wig-freq" min="0.1" max="20" step="0.1" value="2.0" style="width:100%; margin-bottom:8px;" oninput="document.getElementById('wig-freq-val').innerText=this.value; updateWigglePreview();">
+                    <div class="setting-row">
+                        <span style="font-size:11px; color:var(--text-secondary);">Amp</span>
+                        <span id="wig-amp-val" style="font-weight:bold; font-size:11px;">50</span>
+                    </div>
+                    <input type="range" id="wig-amp" min="1" max="500" step="1" value="50" style="width:100%; margin-bottom:12px;" oninput="document.getElementById('wig-amp-val').innerText=this.value; updateWigglePreview();">
+                    <div class="grid-2" style="align-items:center;">
+                        <label style="font-size:10px;"><input type="checkbox" id="wig-loop"> Loopable</label>
+                        <button class="btn btn-primary" onclick="applyWiggle()">
+                            <span class="material-symbols-rounded">bolt</span> Apply
+                        </button>
+                        <script>
+                        function applyWiggle() {
+                            var freq = document.getElementById('wig-freq').value;
+                            var amp = document.getElementById('wig-amp').value;
+                            var loop = document.getElementById('wig-loop').checked;
+                            exec('motion', 'applyWiggle', { freq: freq, amp: amp, loop: loop });
+                        }
+
+                        // ── OS RAM Purge ────────────────────────────────────────────────
+                        function purgeOSRAM() {
+                            var os = require('os');
+                            var cp = require('child_process');
+                            var isMac = os.platform() === 'darwin';
+
+                            if (isMac) {
+                                showToast("Requesting Admin access to purge RAM...", "success");
+                                // Uses AppleScript to prompt for password natively
+                                cp.exec('osascript -e \'do shell script "purge" with administrator privileges\'', function(err, stdout, stderr) {
+                                    if (err) {
+                                        showToast("RAM Purge Cancelled or Failed.", "error");
+                                    } else {
+                                        showToast("System RAM Purged Successfully!", "success");
+                                    }
+                                });
+                            } else {
+                                showToast("Processing System Idle Tasks...", "success");
+                                // Windows doesn't have a direct 'sudo purge', so we trigger ProcessIdleTasks to flush memory 
+                                cp.exec('rundll32.exe advapi32.dll,ProcessIdleTasks', function(err, stdout, stderr) {
+                                    showToast("System Memory Optimized.", "success");
+                                });
+                            }
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <div class="card" id="card-expression">
+                    <div class="section-label">Master Linker</div>
+                    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="exec('motion','masterExpressionLinker')" title="Bind selected properties to a Master Null">Bind to Master Null</button>
+                </div>
+
+                <div class="card" id="card-utilities">
+                    <div class="section-label">Utilities</div>
+                    <button class="btn" style="width:100%; color:var(--text-primary); border-color:var(--accent-warning);" onclick="exec('motion','bakeExpressions')"><span class="material-symbols-rounded">cookie</span> Bake Expressions to Keys</button>
+                </div>
+
+                <div class="card" id="card-expressionengine">
+                    <div class="section-label">Expression Engine</div>
+                    
+                    <!-- Loop -->
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                        <span style="font-size:11px; color:var(--text-secondary); width:45px;">Loop</span>
+                        <select id="expr-loop-type" style="width:60px; padding:4px; font-size:10px; background:var(--bg-hover); border:1px solid var(--border-strong); color:var(--text-primary); border-radius:4px; outline:none;">
+                            <option value="cycle">Cycle</option>
+                            <option value="pingpong">PingPong</option>
+                            <option value="continue">Continue</option>
+                            <option value="offset">Offset</option>
+                        </select>
+                        <button class="btn" style="flex:1; justify-content:center; padding:4px 0; font-size:10px;" onclick="exec('motion','applyLoop', {type: document.getElementById('expr-loop-type').value, io: 'out'})">Out</button>
+                        <button class="btn" style="flex:1; justify-content:center; padding:4px 0; font-size:10px;" onclick="exec('motion','applyLoop', {type: document.getElementById('expr-loop-type').value, io: 'in'})">In</button>
+                    </div>
+
+                    <!-- Wiggle (Basic + X/Y) -->
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                        <span style="font-size:11px; color:var(--text-secondary); width:45px;">Wiggle</span>
+                        <button class="btn" style="flex:1; justify-content:center; padding:4px 0; font-size:10px;" onclick="exec('pipeline', 'applyIDEExpression', {expression: 'wiggle(5, 20);'})">Basic</button>
+                        <button class="btn" style="flex:1; justify-content:center; padding:4px 0; font-size:10px;" onclick="exec('pipeline', 'applyIDEExpression', {expression: 'var w = wiggle(5, 50);\n[w[0], value[1]];'})">X-Only</button>
+                        <button class="btn" style="flex:1; justify-content:center; padding:4px 0; font-size:10px;" onclick="exec('pipeline', 'applyIDEExpression', {expression: 'var w = wiggle(5, 50);\n[value[0], w[1]];'})">Y-Only</button>
+                    </div>
+
+                    <!-- Time -->
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                        <span style="font-size:11px; color:var(--text-secondary); width:45px;">Time</span>
+                        <input type="number" id="expr-time-speed" value="100" style="width:60px; text-align:center; padding:4px; font-size:10px; background:var(--bg-hover); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary); outline:none;">
+                        <button class="btn" style="flex:1; justify-content:center; padding:4px 0; font-size:10px;" onclick="exec('pipeline', 'applyIDEExpression', {expression: 'time * ' + document.getElementById('expr-time-speed').value})">Apply</button>
+                    </div>
+
+                    <!-- Posterize Time -->
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                        <span style="font-size:11px; color:var(--text-secondary); width:45px;">StopMo</span>
+                        <input type="number" id="expr-posterize-fps" value="12" style="width:60px; text-align:center; padding:4px; font-size:10px; background:var(--bg-hover); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary); outline:none;">
+                        <button class="btn" style="flex:1; justify-content:center; padding:4px 0; font-size:10px;" onclick="exec('pipeline', 'applyIDEExpression', {expression: 'posterizeTime(' + document.getElementById('expr-posterize-fps').value + ');\nvalue;'})">Apply</button>
+                    </div>
+
+                    <!-- Delay -->
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                        <span style="font-size:11px; color:var(--text-secondary); width:45px;">Delay (s)</span>
+                        <input type="number" id="expr-delay-sec" value="0.5" step="0.1" style="width:60px; text-align:center; padding:4px; font-size:10px; background:var(--bg-hover); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary); outline:none;">
+                        <button class="btn" style="flex:1; justify-content:center; padding:4px 0; font-size:10px;" onclick="exec('pipeline', 'applyIDEExpression', {expression: 'var delay = ' + document.getElementById('expr-delay-sec').value + ';\nvalueAtTime(time - delay);'})">Apply</button>
+                    </div>
+
+                    <!-- Random -->
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                        <span style="font-size:11px; color:var(--text-secondary); width:45px;">Random</span>
+                        <div style="display:flex; gap:4px; width:60px;">
+                            <input type="number" id="expr-rnd-min" value="0" style="width:100%; text-align:center; padding:4px 0; font-size:10px; background:var(--bg-hover); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary); outline:none;">
+                            <input type="number" id="expr-rnd-max" value="100" style="width:100%; text-align:center; padding:4px 0; font-size:10px; background:var(--bg-hover); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary); outline:none;">
+                        </div>
+                        <button class="btn" style="flex:1; justify-content:center; padding:4px 0; font-size:10px;" onclick="exec('pipeline', 'applyIDEExpression', {expression: 'random(' + document.getElementById('expr-rnd-min').value + ', ' + document.getElementById('expr-rnd-max').value + ');'})">Apply</button>
+                    </div>
+                    
+                    <!-- One Click: Physics & Math -->
+                    <div class="grid-3" style="margin-bottom:12px;">
+                        <button class="btn" style="justify-content:center; font-size:10px; padding:4px;" onclick="exec('pipeline', 'applyIDEExpression', {expression: 'linear(time, 0, 1, 0, 100);'})">Linear Map</button>
+                        <button class="btn" style="justify-content:center; font-size:10px; padding:4px;" onclick="exec('pipeline', 'applyIDEExpression', {expression: 'Math.round(value);'})">Math.round()</button>
+                        <button class="btn" style="justify-content:center; font-size:10px; padding:4px;" onclick="exec('pipeline', 'applyIDEExpression', {expression: 'var n = 0;\nif (numKeys > 0) {\n  n = nearestKey(time).index;\n  if (key(n).time > time) { n--; }\n}\nif (n == 0) { value; }\nelse {\n  var t = time - key(n).time;\n  if (n > 1) {\n    var v1 = key(n-1).value;\n    var v2 = key(n).value;\n    var freq = 3;\n    var decay = 5;\n    var amp = (v2 - v1) / (key(n).time - key(n-1).time);\n    var w = freq * Math.PI * 2;\n    value + amp * (Math.sin(t*w)/Math.exp(decay*t))/w;\n  } else { value; }\n}'})">Inertia</button>
+                        <button class="btn" style="justify-content:center; font-size:10px; padding:4px;" onclick="exec('motion','applyBounce')">Bounce</button>
+                        <button class="btn" style="justify-content:center; font-size:10px; padding:4px;" onclick="exec('motion','applyElastic')">Elastic</button>
+                        <button class="btn" style="justify-content:center; font-size:10px; padding:4px;" onclick="exec('motion','applyAutoSway')">Sway</button>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; padding-top:8px; border-top:1px solid var(--border-strong);">
+                        <span style="font-size:10px; color:var(--text-secondary);">Custom Code:</span>
+                        <div style="display:flex; gap:4px;">
+                            <select id="expr-lib-select" style="width:60px; padding:2px; font-size:9px; background:var(--bg-app); border:1px solid var(--border-strong); color:var(--text-primary); border-radius:4px;" onchange="if(this.value) document.getElementById('ideInput').value=this.value;">
+                                <option value="">Saved...</option>
+                            </select>
+                            <button class="btn" style="padding:2px 6px; font-size:9px;" onclick="saveExprPreset()" title="Save Current Expression"><span class="material-symbols-rounded" style="font-size:12px; margin-right:2px;">save</span> Save</button>
+                        </div>
+                    </div>
+                    <div style="padding:0; overflow:hidden; border:1px solid var(--border-strong);">
+                        <textarea id="ideInput" style="width:100%; height:80px; background:#000; color:#10b981; border:none; padding:8px; font-family:monospace; resize:none;" placeholder="// Write your expression here..."></textarea>
+                    </div>
+                    <div class="grid-2" style="margin-top:8px;">
+                        <button class="btn btn-primary" style="justify-content:center; padding:0;" onclick="exec('pipeline', 'applyIDEExpression')">Apply Code</button>
+                        <button class="btn" style="justify-content:center; padding:0;" onclick="document.getElementById('ideInput').value=''">Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DESIGN -->
+            <div id="mod-design" class="module-container">
+                <div class="module-header"><span class="material-symbols-rounded">match_case</span> Design</div>
+                <div class="card" id="card-textanimations">
+                    <div class="section-label">Text Animations</div>
+                    <div class="grid-2">
+                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'typewriter'})">Typewriter</button>
+                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'scramble'})">Scramble</button>
+                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'fadeUp'})">Fade Up</button>
+                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'slideIn'})">Slide In</button>
+                    </div>
+                </div>
+                <div class="card" id="card-autotextbox">
+                    <div class="section-label">Auto Text Box</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Create dynamic shape layers that perfectly frame your text layers.</p>
+                    <button class="btn btn-primary" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'autoTextBox')"><span class="material-symbols-rounded">check_box_outline_blank</span> Auto Text Box</button>
+                </div>
+                <div class="card" id="card-splittext">
+                    <div class="section-label">Split Text</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Fragment a text layer into separate layer elements.</p>
+                    <div class="grid-2">
+                        <button class="btn" onclick="exec('creative', 'splitText', {mode: 'words'})">Split to Words</button>
+                        <button class="btn" onclick="exec('creative', 'splitText', {mode: 'chars'})">Split to Chars</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCENE -->
+            <div id="mod-scene" class="module-container">
+                <div class="module-header"><span class="material-symbols-rounded">videocam</span> Scene</div>
+                <div class="card" id="card-camerarig">
+                    <div class="section-label">Camera Rig</div>
+                    <button class="btn" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'addHandheldShake')"><span class="material-symbols-rounded">vibration</span> Add Handheld Shake</button>
+                    <button class="btn" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'generateParallaxRig')"><span class="material-symbols-rounded">video_camera_front</span> Generate Parallax Rig</button>
+                    <button class="btn" style="width:100%;" onclick="exec('creative', 'toggleCameraNode')"><span class="material-symbols-rounded">sync_alt</span> Toggle 1-Node / 2-Node</button>
+                </div>
+                <div class="card" id="card-audioreactive">
+                    <div class="section-label">Audio Reactive</div>
+                    <button class="btn" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'audioToKeyframes')"><span class="material-symbols-rounded">graphic_eq</span> Audio to Keyframes</button>
+                    <button class="btn" style="width:100%;" onclick="exec('creative', 'generateWaveform')"><span class="material-symbols-rounded">waves</span> Generate Waveform</button>
+                </div>
+            </div>
+
+            <!-- LAYERS -->
+            <div id="mod-layers" class="module-container">
+                <div class="module-header"><span class="material-symbols-rounded">layers</span> Layers</div>
+                <div class="card" id="card-autocolorcoderprism">
+                    <div class="section-label">Auto Color Coder (Prism)</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Automatically color-code layers based on keywords in their names.</p>
+                    <button class="btn btn-primary" style="width:100%;" onclick="exec('pipeline', 'autoLabelLayers')"><span class="material-symbols-rounded">palette</span> Auto Label Layers</button>
+                </div>
+                <div class="card" id="card-layergroupingworkflowerlite">
+                    <div class="section-label">Layer Grouping (Workflower Lite)</div>
+                    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="exec('pipeline', 'groupSelectedLayers')"><span class="material-symbols-rounded">folder_zip</span> Group to Null</button>
+                </div>
+                
+                <div class="card" id="card-transitionshifter">
+                    <div class="section-label">Transition Shifter</div>
+                    <div class="setting-row" style="margin-bottom:8px;">
+                        <span style="font-size:11px; color:var(--text-secondary);">Stagger Frames</span>
+                        <input type="number" id="ts-frames" value="3" style="width: 40px; text-align:center; font-size:10px; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary);">
+                    </div>
+                    <div style="margin-bottom:8px;">
+                        <select id="ts-mode" style="width:100%; padding:4px; background:var(--bg-app); border:1px solid var(--border-strong); color:var(--text-primary); border-radius:4px; font-size:11px;">
+                            <option value="asc">Ascending (top → bottom)</option>
+                            <option value="desc">Descending (bottom → top)</option>
+                            <option value="random">Randomized</option>
+                        </select>
+                    </div>
+                    <div class="grid-3" style="margin-bottom:12px;">
+                        <button class="btn" onclick="execTS('layers')">Layers</button>
+                        <button class="btn" onclick="execTS('inPoint')">In Point</button>
+                        <button class="btn" onclick="execTS('outPoint')">Out Point</button>
+                    </div>
+                    
+                    <div class="setting-row" style="margin-bottom:8px; padding-top:8px; border-top:1px solid var(--border-strong);">
+                        <span style="font-size:11px; color:var(--text-secondary);">Shift Frames</span>
+                        <input type="number" id="ts-shift" value="5" style="width: 40px; text-align:center; font-size:10px; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary);">
+                    </div>
+                    <div class="grid-2" style="margin-bottom:12px;">
+                        <button class="btn" onclick="exec('motion','shiftLayers',{frames: document.getElementById('ts-shift').value})">Shift +</button>
+                        <button class="btn" onclick="exec('motion','shiftLayers',{frames: -document.getElementById('ts-shift').value})">Shift −</button>
+                    </div>
+
+                    <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">Align to Playhead</div>
+                    <div class="grid-3">
+                        <button class="btn" onclick="exec('motion','alignTransitions',{target:'inPoint'})">In Point</button>
+                        <button class="btn" onclick="exec('motion','alignTransitions',{target:'outPoint'})">Out Point</button>
+                        <button class="btn" onclick="exec('motion','alignTransitions',{target:'startTime'})">Start</button>
+                    </div>
+                </div>
+
+                <div class="card" id="card-timeshift">
+                    <div class="section-label">VFX Data Bridge</div>
+                    <div style="display:flex; gap:6px; margin-bottom:8px;">
+                        <select id="vfx-export-format" style="width:80px; padding:0 4px;  background:var(--bg-app); border:1px solid var(--border-strong); color:var(--text-primary); border-radius:4px;">
+                            <option value="chan">.chan</option>
+                            <option value="python">Python</option>
+                        </select>
+                        <button class="btn btn-primary" style="flex:1; justify-content:center; padding:0; " onclick="exec('pipeline', 'exportVFXData', {format: document.getElementById('vfx-export-format').value})">Export Transform Data</button>
+                    </div>
+                </div>
+                <div class="card" id="card-deepduplicator">
+                    <div class="section-label">Deep Duplicator</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Duplicate composition and all of its nested pre-comps recursively. Expressions are automatically updated.</p>
+                    <div class="setting-row">
+                        <span style="font-size:11px; color:var(--text-secondary);">Suffix</span>
+                        <input type="text" id="dup-suffix" value=" _v2" style="width:80px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-strong); border-radius:4px; padding:4px 6px; outline:none; font-size:11px;">
+                    </div>
+                    <button class="btn btn-primary" style="width:100%;" onclick="exec('pipeline', 'deepDuplicate', {suffix: document.getElementById('dup-suffix').value})"><span class="material-symbols-rounded">file_copy</span> True Duplicate</button>
+                </div>
+            </div>
+
+            <!-- MACRO -->
+            <div id="mod-macro" class="module-container">
+                <div class="module-header"><span class="material-symbols-rounded">extension</span> Macro</div>
+                <div class="card" id="card-smartsequencetrim">
+                    <div class="section-label">Smart Sequence & Trim</div>
+                    <div style="display:flex; gap:6px; margin-bottom:8px;">
+                        <input type="number" id="macro-stagger-frames" value="2" min="1" max="60" style="width: 40px; text-align:center; font-size:10px; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary);">
+                        <button class="btn btn-primary" style="flex:1; justify-content:center; padding:0; " onclick="exec('motion', 'smartStagger', {frames: document.getElementById('macro-stagger-frames').value})">Stagger Layers</button>
+                    </div>
+                    <div class="grid-2">
+                        <button class="btn" style="justify-content:center; padding:0; " onclick="exec('motion', 'smartTrim')">Trim to Keys</button>
+                        <button class="btn" style="justify-content:center; padding:0; " onclick="exec('motion', 'autoPrecompCrop')">Crop Precomp</button>
+                    </div>
+                </div>
+
+                <div class="card" id="card-keysmacro">
+                    <div class="section-label">Keys Macro</div>
+                    <button class="btn" style="width:100%; justify-content:center; padding:0; " onclick="exec('motion', 'reverseKeys')">Time-Reverse Keyframes</button>
+                </div>
+
+                
+                <div class="card" id="card-keyframetransform">
+                    <div class="section-label">Keyframe Transform</div>
+                    <div class="grid-2" style="margin-bottom:8px;">
+                        <button class="btn" onclick="exec('motion','mirrorKeys')"><span class="material-symbols-rounded">flip</span> Mirror</button>
+                        <button class="btn" onclick="exec('motion','reverseKeys')"><span class="material-symbols-rounded">swap_vert</span> Reverse</button>
+                        <button class="btn" onclick="exec('motion','cloneKeys')"><span class="material-symbols-rounded">copy_all</span> Clone</button>
+                        <button class="btn" onclick="exec('motion','randomizeKeys', {maxOffset: document.getElementById('kfa-rnd').value})"><span class="material-symbols-rounded">casino</span> Random</button>
+                    </div>
+                    <div class="setting-row">
+                        <span style="font-size:11px; color:var(--text-secondary);">Random max offset</span>
+                        <input type="number" id="kfa-rnd" value="3" style="width: 40px; text-align:center; font-size:10px; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary);">
+                    </div>
+                </div>
+
+                <div class="card" id="card-shiftalignkeys">
+                    <div class="section-label">Shift & Align Keys</div>
+                    <div class="setting-row" style="margin-bottom:8px;">
+                        <span style="font-size:11px; color:var(--text-secondary);">Shift Frames</span>
+                        <input type="number" id="kfa-shift" value="2" style="width: 40px; text-align:center; font-size:10px; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary);">
+                    </div>
+                    <div class="grid-2" style="margin-bottom:8px;">
+                        <button class="btn" onclick="exec('motion','shiftKeys',{frames: document.getElementById('kfa-shift').value})"><span class="material-symbols-rounded">chevron_right</span> Shift +</button>
+                        <button class="btn" onclick="exec('motion','shiftKeys',{frames: -document.getElementById('kfa-shift').value})"><span class="material-symbols-rounded">chevron_left</span> Shift −</button>
+                    </div>
+                    <div class="grid-2">
+                        <button class="btn" onclick="exec('motion','alignKeys',{alignTo:'first'})"><span class="material-symbols-rounded">align_horizontal_left</span> Align First</button>
+                        <button class="btn" onclick="exec('motion','alignKeys',{alignTo:'last'})"><span class="material-symbols-rounded">align_horizontal_right</span> Align Last</button>
+                    </div>
+                </div>
+
+                <div class="card" id="card-macro">
+                    <div class="section-label">Custom Scripts</div>
+                    <div class="grid-compact" id="macro-grid">
+                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 1})">S1</button>
+                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 2})">S2</button>
+                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 3})">S3</button>
+                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 4})">S4</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OUTPUT -->
+            <div id="mod-output" class="module-container">
+                <div class="module-header"><span class="material-symbols-rounded">movie</span> Render Engine</div>
+                
+                <!-- 0. FFMPEG AUTO-SETUP CARD -->
+                <div class="card" id="card-ffmpeg-setup" style="display:none; background: linear-gradient(135deg, rgba(88, 101, 242, 0.15) 0%, rgba(30, 31, 34, 0.05) 100%); border: 1px solid var(--accent-primary); position: relative; overflow: hidden; margin-bottom: 12px;">
+                    <div class="section-label" style="color:var(--accent-primary); display:flex; align-items:center; gap:6px;"><span class="material-symbols-rounded" style="font-size:16px;">bolt</span> Render Engine Optimizer</div>
+                    <p style="font-size:11px; color:var(--text-secondary); line-height:1.4; margin-top:6px; margin-bottom:12px;">
+                        Motionreis uses a decoupled multi-threaded parallel engine to boost rendering speeds by up to 5x. Click below to automatically install and configure FFmpeg in the background.
+                    </p>
+                    
+                    <button id="ffmpeg-install-btn" class="btn btn-primary" style="width:100%; justify-content:center; padding:10px; font-weight:bold; font-size:12px;" onclick="runFFmpegAutoInstall()">
+                        <span class="material-symbols-rounded" style="margin-right:6px; font-size:16px;">download</span> ⚡ START AUTO-INSTALL
+                    </button>
+                    
+                    <!-- Progress controls -->
+                    <div id="ffmpeg-setup-status" style="display:none; font-size:10px; color:var(--text-secondary); margin-top:10px; font-family:monospace;">Ready...</div>
+                    <div id="ffmpeg-setup-progress-bg" style="display:none; width:100%; height:4px; background:var(--bg-app); border-radius:2px; overflow:hidden; margin-top:4px;">
+                        <div id="ffmpeg-setup-progress-bar" style="width:0%; height:100%; background:var(--accent-primary); transition:width 0.2s;"></div>
+                    </div>
+                </div>
+
+                <!-- 1. TARGET & FORMAT -->
+                <div class="card" id="card-output-format">
+                    <div class="section-label">Target & Format</div>
+                    
+                    <div class="setting-row" style="background:var(--bg-app); border-radius:4px; padding:6px 8px; margin-bottom:8px;">
+                        <span style="font-size:10px; color:var(--text-secondary); flex:1;">Active Comp:</span>
+                        <span id="active-comp-name" style="font-weight:bold; font-size:11px; color:var(--accent-primary); margin-right:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right;">[Auto-Detecting...]</span>
+                        <button id="pin-comp-btn" class="btn" style="padding:2px; background:transparent; border:none; color:var(--text-secondary);" onclick="togglePinComp()" title="Pin this Comp for rendering">
+                            <span class="material-symbols-rounded" style="font-size:14px;">push_pin</span>
+                        </button>
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Render</span>
+                        <input type="text" id="render-output-name" placeholder="Waiting for comp..." class="theme-input" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); outline:none; transition:0.2s;" onfocus="this.style.borderColor='var(--accent-primary)'" onblur="this.style.borderColor='var(--border-strong)'">
+                    </div>
+
+                    <div class="grid-2" style="margin-bottom:12px;">
+                        <div>
+                            <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Render Preset</span>
+                            <select id="render-settings-select" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;" onchange="
+                                var codec = document.getElementById('render-codec-select');
+                                if(this.value === 'Best Settings') codec.value = 'ProRes 422';
+                                else if(this.value === 'Draft Settings') codec.value = 'H.264';
+                                else if(this.value === 'DV Settings') codec.value = 'Lossless';
+                            ">
+                                <option value="Best Settings">Best Settings (Full Res)</option>
+                                <option value="Draft Settings">Draft Settings (Half Res)</option>
+                                <option value="DV Settings">DV Settings</option>
+                                <option value="custom">Custom...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Render Codec</span>
+                            <select id="render-codec-select" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;" onchange="
+                                document.getElementById('render-settings-select').value = 'custom';
+                            ">
+                                <optgroup label="Web & Social">
+                                    <option value="H.264">H.264 (MP4)</option>
+                                    <option value="High Quality">High Quality</option>
+                                    <option value="Animated GIF">Animated GIF</option>
+                                </optgroup>
+                                <optgroup label="Professional & Master">
+                                    <option value="ProRes 422">ProRes 422</option>
+                                    <option value="ProRes 4444">ProRes 4444 (with Alpha)</option>
+                                    <option value="Lossless">Lossless</option>
+                                    <option value="Lossless with Alpha">Lossless with Alpha</option>
+                                </optgroup>
+                                <optgroup label="Image Sequences">
+                                    <option value="PNG Sequence">PNG Sequence</option>
+                                    <option value="JPEG Sequence">JPEG Sequence</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:8px;">
+                        <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Time Range</span>
+                        <div class="grid-2" id="time-range-group">
+                            <label class="segmented-control active"><input type="radio" name="render_range" value="workarea" checked style="display:none;"> Work Area</label>
+                            <label class="segmented-control"><input type="radio" name="render_range" value="fullcomp" style="display:none;"> Entire Comp</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. AUTOMATION -->
+                <div class="card" id="card-output-auto">
+                    <div class="section-label">Automation & Path</div>
+                    
+                    <div style="margin-bottom:12px;">
+                        <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Destination</span>
+                        <div style="display:flex; gap:6px;">
+                            <input type="text" id="render-path" value="[Same as Project Folder]" readonly style="flex:1; padding:6px 8px; font-size:10px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-app); color:var(--text-secondary);">
+                            <button class="btn" style="padding:6px; justify-content:center;" onclick="selectRenderFolder()" title="Browse Folder"><span class="material-symbols-rounded" style="font-size:14px;">folder_open</span></button>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="render-save-next" checked> Save next to AEP</label>
+                        <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="render-auto-version" checked> Auto-Versioning (append _v01)</label>
+                        <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="render-auto-save" checked> Auto-Save Project before Render</label>
+                    </div>
+                </div>
+
+                <!-- 3. CLI ENGINE -->
+                <div class="card" id="card-clirender">
+                    <div class="section-label">CLI Engine (aerender)</div>
+                    
+                    <div style="margin-bottom:12px;">
+                        <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Performance Throttle</span>
+                        <select id="render-throttle" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;">
+                            <option value="balanced">🟡 Balanced (Standard Allocation)</option>
+                            <option value="slow">🟢 Slow & Silent (Leave CPU for Editing)</option>
+                            <option value="max">🔴 MAX POWER (100% CPU & RAM)</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom:16px;">
+                        <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Post-Render Action</span>
+                        <select id="render-postaction" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;">
+                            <option value="chime">🔔 Play Chime</option>
+                            <option value="explorer">📂 Show in Explorer/Finder</option>
+                            <option value="sleep">🌙 Auto-Sleep Computer</option>
+                            <option value="none">Do Nothing</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary" style="width:100%; justify-content:center; padding:10px; font-weight:bold; font-size:12px; border:1px solid var(--accent-primary); background:rgba(var(--accent-primary-rgb), 0.1); color:var(--text-primary);" onclick="startRenderV2()">
+                        <span class="material-symbols-rounded" style="color:var(--accent-primary); margin-right:6px;">rocket_launch</span> START CLI RENDER
+                    </button>
+                    
+                    <!-- Progress Bar (Hidden by default) -->
+                    <div id="aerender-status" style="display:none; font-size:10px; color:var(--text-secondary); margin-top:12px; font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Rendering...</div>
+                    <div id="aerender-progress-bg" style="display:none; width:100%; height:4px; background:var(--bg-app); border-radius:2px; overflow:hidden; margin-top:4px;">
+                        <div id="aerender-progress-bar" style="width:0%; height:100%; background:var(--accent-primary); transition:width 0.2s;"></div>
+                    </div>
+                </div>
+            </div><!-- INFO -->
+            <div id="mod-info" class="module-container">
+                <div class="module-header"><span class="material-symbols-rounded">info</span> Info & Help</div>
+                
+                <div class="card" style="text-align:center; padding:24px 16px; background:linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(30, 31, 34, 0) 100%); border:1px solid var(--border-strong); position:relative; overflow:hidden;">
+                    <span class="material-symbols-rounded" style="position:absolute; font-size:120px; color:rgba(88, 101, 242, 0.05); top:-20px; right:-20px; transform:rotate(-15deg); pointer-events:none;">rocket_launch</span>
+                    <div style="font-size:20px; font-weight:800; color:var(--text-primary); margin-bottom:2px; letter-spacing:0.5px;">MOTIONREIS</div>
+                    <div style="font-size:10px; font-weight:600; color:var(--accent-primary); margin-bottom:12px; letter-spacing:2px; text-transform:uppercase;">Master Suite</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin:0; line-height:1.5;">Your all-in-one assistant for After Effects.</p>
+                </div>
+
+                <!-- PREFERENCES -->
+                <div class="card" id="card-settings">
+                    <div class="section-label">Preferences</div>
+                    
+                    <div class="setting-row" style="align-items:flex-start;">
+                        <span style="font-size:11px; color:var(--text-primary); margin-top:4px;">Theme Color</span>
+                        <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:6px;">
+                            <div class="color-swatch" style="background:#5c6ac4;" onclick="setThemeColor('#5c6ac4')" title="Indigo"></div>
+                            <div class="color-swatch" style="background:#0891b2;" onclick="setThemeColor('#0891b2')" title="Cyan"></div>
+                            <div class="color-swatch" style="background:#10b981;" onclick="setThemeColor('#10b981')" title="Emerald"></div>
+                            <div class="color-swatch" style="background:#f59e0b;" onclick="setThemeColor('#f59e0b')" title="Amber"></div>
+                            <div class="color-swatch" style="background:#ef4444;" onclick="setThemeColor('#ef4444')" title="Rose"></div>
+                            
+                            <div class="color-swatch" style="background:#9333ea;" onclick="setThemeColor('#9333ea')" title="Purple"></div>
+                            <div class="color-swatch" style="background:#ec4899;" onclick="setThemeColor('#ec4899')" title="Pink"></div>
+                            <div class="color-swatch" style="background:#3b82f6;" onclick="setThemeColor('#3b82f6')" title="Blue"></div>
+                            <div class="color-swatch" style="background:#84cc16;" onclick="setThemeColor('#84cc16')" title="Lime"></div>
+                            <div class="color-swatch" style="background:#f97316;" onclick="setThemeColor('#f97316')" title="Orange"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-row" style="align-items:flex-start;">
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <span style="font-size:11px; color:var(--text-primary);">Speed Mode</span>
+                            <span style="font-size:9px; color:var(--text-secondary); line-height:1.3;">Disables "Are you sure?" confirmation dialogs<br>for faster workflow (Pro users).</span>
+                        </div>
+                        <button id="toggle-speed-btn" class="toggle-btn" onclick="toggleSpeedMode()" style="margin-top:2px;">OFF</button>
+                    </div>
+
+                    <div class="setting-row" style="align-items:flex-start; margin-top:12px;">
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <span style="font-size:11px; color:var(--text-primary);">Smart Panel Mode</span>
+                            <span style="font-size:9px; color:var(--text-secondary); line-height:1.3;">Highlights your most frequently used feature buttons<br>based on click metrics saved in Documents.</span>
+                        </div>
+                        <button id="toggle-smart-btn" class="toggle-btn" onclick="toggleSmartMode()" style="margin-top:2px;">OFF</button>
+                    </div>
+
+                    <div class="setting-row" style="align-items:flex-start; margin-top:12px;">
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <span style="font-size:11px; color:var(--text-primary);">Include Icon in Theme</span>
+                            <span style="font-size:9px; color:var(--text-secondary); line-height:1.3;">Overrides cohesive card icon colors with the active theme color.</span>
+                        </div>
+                        <button id="toggle-theme-icons-btn" class="toggle-btn" onclick="toggleThemeIcons()" style="margin-top:2px;">OFF</button>
+                    </div>
+                    
+                    <div class="grid-2" style="margin-top:16px;">
+                        <button class="btn" style="justify-content:center; color:var(--text-primary);" onclick="resetPreferences()" title="Reset theme settings only">Reset Prefs</button>
+                        <button class="btn" style="justify-content:center; color:var(--accent-danger); border-color:var(--border-strong);" onclick="factoryReset()" title="Delete everything, including Ease Library">Factory Reset</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-label" style="color:var(--accent-primary); font-size:12px; margin-bottom:12px;">What does everything do?</div>
+                    
+                    <div style="font-size:11px; color:var(--text-secondary); line-height:1.6;">
+                        
+                        <div style="margin-bottom:12px;"><b style="color:var(--accent-cyan); font-size:12px;">GENERAL & RIGGING</b></div>
+                        <b style="color:var(--text-primary);">Master Organizer:</b> Cleans up your messy project! The (OS) button organizes all the actual files (videos, images) on your computer's hard drive into neat folders. The (AE) button does the same thing, but for the folders inside your After Effects project window.<br><br>
+                        <b style="color:var(--text-primary);">Anchor Point:</b> The anchor point is the center dot that your layer spins or grows from. Click any dot on the 3x3 grid to instantly snap that center dot to any corner or exactly in the middle of your layer.<br><br>
+                        <b style="color:var(--text-primary);">Motion Tools (Null):</b> Creates an invisible helper box (called a Null) exactly in the dead center of all the layers you selected. You can then move or scale this one Null to control everything at once.<br><br>
+                        <b style="color:var(--text-primary);">Motion Tools (Sequence):</b> Arranges your selected layers like a staircase in the timeline, so they appear on screen one after another instead of all popping up at the exact same time.<br><br>
+                        <b style="color:var(--text-primary);">Motion Tools (Keys):</b> "Clone" makes a perfect duplicate of your selected keyframes. "Paste Keys" lets you paste keyframes exactly where your blue timeline needle (playhead) is.<br><br>
+                        <b style="color:var(--text-primary);">Path Rigging:</b> "Pts &rarr; Null" takes the points of a shape and turns them into Nulls so you can animate each point easily. "Null &rarr; Pts" does the reverse (makes a shape follow Nulls). "Trace" makes a layer stick to a path and follow it like a train on tracks.<br><br>
+
+                        <div style="margin-bottom:12px; margin-top:16px;"><b style="color:var(--accent-cyan); font-size:12px;">KINETICS (ANIMATION)</b></div>
+                        <b style="color:var(--text-primary);">Keyframe Wingman:</b> Makes your animations look professional and smooth! Select your keyframes and move the "Out" and "In" sliders to change how fast or slow the movement starts and ends. You can also just click the quick presets like "STR" (Strong smooth) or "MAX" (Maximum smooth).<br><br>
+                        <b style="color:var(--text-primary);">Copy / Paste Ease:</b> Copies the exact speed, smoothness, and graph shape from one animation, and pastes it perfectly onto a completely different animation.<br><br>
+                        <b style="color:var(--text-primary);">My Ease Library:</b> Built a really cool animation graph? Type a name and click save! It will be saved here forever as a preset button, so you can reuse that exact smoothness anytime without guessing the numbers.<br><br>
+                        <b style="color:var(--text-primary);">Expression Engine:</b> Magically writes complex animation code for you! Select a property (like rotation) and choose "Loop" to make it spin forever, or "Pingpong" to make it swing back and forth automatically.<br><br>
+
+                        <div style="margin-bottom:12px; margin-top:16px;"><b style="color:var(--accent-cyan); font-size:12px;">DESIGN & SCENE</b></div>
+                        <b style="color:var(--text-primary);">Responsive Design:</b> Ever wanted a colored box behind your text that automatically changes size when you type longer or shorter words? Just click this, and it builds that smart auto-resizing box for you.<br><br>
+                        <b style="color:var(--text-primary);">Shape to Comp:</b> Takes a normal shape layer and converts it into its very own composition, perfectly cropped to fit the shape's exact size.<br><br>
+                        <b style="color:var(--text-primary);">Auto Crop:</b> Automatically scans your composition, finds all the empty useless transparent space around your graphics, and crops the composition to fit perfectly tight around your art.<br><br>
+                        <b style="color:var(--text-primary);">Trim Comp:</b> Trims the total time of your composition so it starts and ends exactly where your layers start and end. No more empty black video at the end!<br><br>
+                        <b style="color:var(--text-primary);">Precomp & Un-Precomp:</b> "Precomp" packs your selected layers into a new composition (like putting them in a folder). "Un-precomp" magically extracts layers out of a precomp back into your main timeline.<br><br>
+
+                        <div style="margin-bottom:12px; margin-top:16px;"><b style="color:var(--accent-cyan); font-size:12px;">LAYERS & MACRO</b></div>
+                        <b style="color:var(--text-primary);">Smart Layers:</b> Instantly rename 50 layers at once. You can also click the quick buttons to Solo (hide everything else), Shy (hide from timeline), Lock, or turn on/off all your selected layers with one click.<br><br>
+                        <b style="color:var(--text-primary);">Transition Shifter:</b> Push a bunch of layers forward or backward in time easily. You can push them by exactly 5 frames, or even shuffle them randomly for a chaotic glitch effect!<br><br>
+                        <b style="color:var(--text-primary);">Keyframe Macro:</b> "Reverse" flips your animation so it plays backwards. "Mirror" creates a mirrored copy of your animation. "Align" snaps all your messy keyframes into one neat line.<br><br>
+                        <b style="color:var(--text-primary);">Layer Macro:</b> "Sort" arranges your messy layers neatly alphabetically by name. "Reverse Layers" flips the order of your layers completely upside down in the timeline stack.<br><br>
+                        <b style="color:var(--text-primary);">Color Palettes:</b> Save your brand's specific colors here. Just click a color box to instantly apply it to whatever text or shape you have selected. No more copy-pasting hex codes!<br><br>
+
+                        <div style="margin-bottom:12px; margin-top:16px;"><b style="color:var(--accent-cyan); font-size:12px;">RENDER & EXTRAS</b></div>
+                        <b style="color:var(--text-primary);">Render Engine:</b> Configure your render settings, codec, and file name directly inside the panel, then send it straight to the Render Queue without opening clunky menus.<br><br>
+                        <b style="color:var(--text-primary);">VFX Data Bridge:</b> Export your tracking data, camera moves, or animation numbers so you can send it out to other software, plugins, or your team.<br><br>
+                        <b style="color:var(--text-primary);">Media Encoder:</b> Sends your current composition straight to Adobe Media Encoder with a single click, ready to be rendered into an MP4 video.<br><br>
+                    </div>
+                </div>
+
+                <!-- CREDIT -->
+                <div class="card" style="text-align:center; padding:24px 16px;">
+                    <div style="font-size:12px; font-weight:600; color:var(--text-primary); margin-bottom:8px;">Motionreis Suite</div>
+                    <div style="font-size:10px; color:var(--text-secondary); line-height:1.5;">
+                        Developed by Sebastian.<br><br>
+                        A powerhouse utility designed to accelerate your After Effects workflow, eliminating repetitive tasks so you can focus purely on motion design.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMIZE MODAL -->
+    <div id="customize-modal" class="modal">
+        <div class="modal-content" style="max-width:280px;">
+            <div class="modal-header">
+                <h3>Customize Home</h3>
+            </div>
+            <div style="font-size:11px; color:var(--text-secondary); margin-bottom:12px;">Select tools to pin to your Dashboard.</div>
+            
+            <div id="customize-list" style="display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; padding-right:8px; margin-bottom:16px;">
+                <!-- Dynamically populated -->
+            </div>
+            
+            <div style="display:flex; gap:8px;">
+                <button class="btn" style="flex:1; justify-content:center;" onclick="closeCustomizeModal()">Cancel</button>
+                <button class="btn btn-primary" style="flex:1; justify-content:center;" onclick="saveCustomizeModal()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- CONFIRM MODAL -->
+    <div id="confirm-modal" class="modal" style="z-index:3000;">
+        <div class="modal-content" style="max-width:280px; text-align:center;">
+            <div class="modal-header" style="justify-content:center; border-bottom:none; margin-bottom:0;">
+                <h3 id="confirm-title" style="color:var(--text-primary); font-size:14px;">Confirm</h3>
+            </div>
+            <div id="confirm-desc" style="font-size:12px; color:var(--text-secondary); margin-bottom:20px;">Are you sure?</div>
+            <div style="display:flex; gap:8px;">
+                <button class="btn" style="flex:1; justify-content:center; background:var(--bg-hover);" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn btn-primary" id="confirm-btn-yes" style="flex:1; justify-content:center; background:var(--accent-danger); border-color:var(--accent-danger);">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TEXT PROMPT MODAL -->
+    <div id="text-prompt-modal" class="modal" style="z-index:2000;">
+        <div class="modal-content" style="max-width:280px;">
+            <div class="modal-header">
+                <h3 id="prompt-title">Enter Name</h3>
+            </div>
+            <div id="prompt-desc" style="font-size:11px; color:var(--text-secondary); margin-bottom:12px;">Please enter a value:</div>
+            
+            <input type="text" id="prompt-input" style="width:100%; background:var(--bg-app); border:1px solid var(--border-strong); color:var(--text-primary); padding:8px; border-radius:4px; font-size:12px; margin-bottom:16px; outline:none; box-sizing:border-box;">
+            
+            <div style="display:flex; gap:8px;">
+                <button class="btn" style="flex:1; justify-content:center;" onclick="closeTextPrompt()">Cancel</button>
+                <button class="btn btn-primary" style="flex:1; justify-content:center;" onclick="submitTextPrompt()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container" style="position:fixed; bottom:-80px; left:0; width:100%; background:var(--accent-danger, #ef4444); color:#ffffff; padding:12px 16px; font-size:11px; font-weight:600; box-shadow:0 -4px 16px rgba(0,0,0,0.4); transition:bottom 0.3s cubic-bezier(0.2, 0, 0, 1), background 0.3s, opacity 0.3s; z-index:9999; display:flex; align-items:center; gap:8px; opacity:0;">
+        <span class="material-symbols-rounded" style="font-size:16px; color:rgba(255,255,255,0.7); cursor:pointer;" onclick="closeToast()">close</span>
+        <span id="toast-icon" class="material-symbols-rounded" style="font-size:16px; color:rgba(255,255,255,0.9);">error</span>
+        <span id="toast-msg" style="flex:1; white-space:normal; line-height:1.4;">Error</span>
+    </div>
+
+    <script src="../../shared/csinterface.js"></script>
+    <script src="../../shared/bridge.js"></script>
+    <script>
+        const fs = require('fs');
+        const path = require('path');
+        const os = require('os');
+        const EASE_LIB_DIR = path.join(os.homedir(), 'Documents', 'Motionreis SUITE');
+        const EASE_LIB_FILE = path.join(EASE_LIB_DIR, 'ease_presets.json');
+        
+        // ── NATIVE RECENT PROJECTS SYSTEM ───────────────────────────
+        const RECENT_CACHE_FILE = path.join(EASE_LIB_DIR, 'recent_project_cache.json');
+        const THEME_CONFIG_FILE = path.join(EASE_LIB_DIR, 'theme_config.json');
+        let currentlyOpenProjectPath = null;
+        let currentlyOpenProjectLastActive = null;
+        
+        // Helper to format timestamps to relative time (universal)
+        function formatRelativeTime(isoString) {
+            if (!isoString) return "";
+            try {
+                // ISO format: YYYY-MM-DDTHH:mm:ss
+                const past = new Date(isoString);
+                const now = new Date();
+                const diffMs = now - past;
+                if (isNaN(diffMs) || diffMs < 0) return "Just now";
+                
+                const diffSec = Math.floor(diffMs / 1000);
+                const diffMin = Math.floor(diffSec / 60);
+                const diffHr = Math.floor(diffMin / 60);
+                const diffDays = Math.floor(diffHr / 24);
+                
+                if (diffSec < 60) return "Just now";
+                if (diffMin < 60) return diffMin + "m ago";
+                if (diffHr < 24) return diffHr + "h ago";
+                if (diffDays === 1) return "Yesterday";
+                if (diffDays < 7) return diffDays + " days ago";
+                
+                // Fallback to localized date
+                return past.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            } catch (e) {
+                return "";
+            }
+        }
+
+        // Helper to parse AE timestamp formats (like 20260524T213943)
+        function parseAETimestamp(ts) {
+            if (!ts || ts.length < 15) return null;
+            try {
+                const y = ts.substring(0, 4);
+                const m = ts.substring(4, 6);
+                const d = ts.substring(6, 8);
+                const h = ts.substring(9, 11);
+                const min = ts.substring(11, 13);
+                const s = ts.substring(13, 15);
+                return `${y}-${m}-${d}T${h}:${min}:${s}`;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Dynamically find and parse the native After Effects Prefs file
+        function getNativeRecentProjects() {
+            try {
+                // If variables are null, try to load from persistent JSON cache
+                if (!currentlyOpenProjectPath && fs.existsSync(RECENT_CACHE_FILE)) {
+                    try {
+                        const cache = JSON.parse(fs.readFileSync(RECENT_CACHE_FILE, 'utf8'));
+                        if (cache && cache.path) {
+                            currentlyOpenProjectPath = cache.path;
+                            currentlyOpenProjectLastActive = cache.lastActive;
+                        }
+                    } catch (e) {
+                        console.error("[RecentProjects] Failed to read recent cache:", e);
+                    }
+                }
+
+                const isWin = process.platform === 'win32';
+                let aePrefsBaseDir = "";
+                if (isWin) {
+                    if (process.env.APPDATA) {
+                        aePrefsBaseDir = path.join(process.env.APPDATA, 'Adobe', 'After Effects');
+                    } else {
+                        aePrefsBaseDir = path.join(os.homedir(), 'AppData', 'Roaming', 'Adobe', 'After Effects');
+                    }
+                } else {
+                    aePrefsBaseDir = path.join(os.homedir(), 'Library', 'Preferences', 'Adobe', 'After Effects');
+                }
+
+                if (!fs.existsSync(aePrefsBaseDir)) {
+                    console.log("[RecentProjects] AE Prefs directory not found:", aePrefsBaseDir);
+                    return [];
+                }
+
+                // Scan all folders (e.g. 26.2, 26.0) to find version directories
+                const subdirs = fs.readdirSync(aePrefsBaseDir).filter(name => {
+                    const fullPath = path.join(aePrefsBaseDir, name);
+                    return fs.statSync(fullPath).isDirectory() && /^\d+(\.\d+)*$/.test(name);
+                });
+
+                if (subdirs.length === 0) {
+                    console.log("[RecentProjects] No version subdirectories found");
+                    return [];
+                }
+
+                // Sort descending to get the highest version directory
+                subdirs.sort((a, b) => {
+                    return parseFloat(b) - parseFloat(a);
+                });
+
+                const highestVersionDir = path.join(aePrefsBaseDir, subdirs[0]);
+                console.log("[RecentProjects] Using AE preferences folder:", highestVersionDir);
+
+                // Find the Prefs.txt file (e.g., Adobe After Effects 26.2 Prefs.txt)
+                const files = fs.readdirSync(highestVersionDir);
+                const prefsFile = files.find(file => {
+                    return file.startsWith('Adobe After Effects') && file.endsWith('Prefs.txt');
+                });
+
+                if (!prefsFile) {
+                    console.log("[RecentProjects] Prefs.txt file not found in:", highestVersionDir);
+                    return [];
+                }
+
+                const prefsPath = path.join(highestVersionDir, prefsFile);
+                const content = fs.readFileSync(prefsPath, 'utf8');
+
+                // Preprocess line continuations: replace backslash + newline + tabs + optional quotes
+                // Example of AE wrapping:
+                // "MRU Project Path ID # 9, File Path" = "/Volumes/SomePath"\\
+                // \t\t"remainder.aep"
+                const cleanedContent = content.replace(/\\\r?\n\t*"/g, '');
+
+                const projects = {};
+                let match;
+
+                // Match paths
+                const pathRegex = /"MRU Project Path ID # (\d+), File Path" = "(.*?)"/g;
+                while ((match = pathRegex.exec(cleanedContent)) !== null) {
+                    const id = match[1];
+                    const filePath = match[2];
+                    if (filePath && filePath.toLowerCase().endsWith('.aep')) {
+                        if (!projects[id]) projects[id] = {};
+                        projects[id].id = parseInt(id, 10);
+                        projects[id].path = filePath;
+                    }
+                }
+
+                // Match timestamps
+                const timeRegex = /"MRU Project Path ID # (\d+), Last Opened" = "(.*?)"/g;
+                while ((match = timeRegex.exec(cleanedContent)) !== null) {
+                    const id = match[1];
+                    const timestamp = match[2];
+                    if (projects[id]) {
+                        projects[id].timestamp = timestamp;
+                        projects[id].isoDate = parseAETimestamp(timestamp);
+                    }
+                }
+
+                // Convert to array and filter out entries that have no path
+                let list = Object.keys(projects)
+                    .map(key => projects[key])
+                    .filter(proj => proj.path);
+
+                // Dynamically inject/update the last known active project path (which AE hasn't written to disk yet)
+                if (currentlyOpenProjectPath && currentlyOpenProjectPath !== "none") {
+                    const normalizedOpenPath = currentlyOpenProjectPath.replace(/\\/g, '/');
+                    let found = false;
+                    for (let i = 0; i < list.length; i++) {
+                        const normalizedProjPath = list[i].path.replace(/\\/g, '/');
+                        if (normalizedProjPath === normalizedOpenPath) {
+                            list[i].isoDate = currentlyOpenProjectLastActive;
+                            list[i].timestamp = new Date(currentlyOpenProjectLastActive).toISOString();
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found && currentlyOpenProjectPath.toLowerCase().endsWith('.aep')) {
+                        list.push({
+                            id: 999, // temporary ID
+                            path: currentlyOpenProjectPath,
+                            timestamp: new Date(currentlyOpenProjectLastActive).toISOString(),
+                            isoDate: currentlyOpenProjectLastActive
+                        });
+                    }
+                }
+
+                // Sort by date (descending) or by ID if no timestamp (lower ID usually means more recent in MRU)
+                list.sort((a, b) => {
+                    if (a.isoDate && b.isoDate) {
+                        return new Date(b.isoDate) - new Date(a.isoDate);
+                    }
+                    return a.id - b.id; // Fallback
+                });
+
+                // Return top 5 recent files
+                return list.slice(0, 5);
+            } catch (err) {
+                console.error("[RecentProjects] Error loading native recent projects:", err);
+                return [];
+            }
+        }
+
+        // Render projects inside our glassmorphic panel list
+        function renderRecentProjectsList() {
+            const listEl = document.getElementById('recent-projects-list');
+            if (!listEl) return;
+
+            const recentProjects = getNativeRecentProjects();
+            if (recentProjects.length === 0) {
+                listEl.innerHTML = `
+                    <div style="font-size:11px; color:var(--text-muted); text-align:center; padding: 12px 0;">
+                        No recent After Effects projects found.
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = "";
+            recentProjects.forEach(proj => {
+                const basename = proj.path.split(/[/\\]/).pop();
+                const relativeTime = proj.isoDate ? formatRelativeTime(proj.isoDate) : "";
+                
+                // Escape paths properly for string parameters inside HTML
+                const escapedPath = proj.path.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+                const row = document.createElement('div');
+                row.className = "recent-proj-row";
+                row.onclick = () => openRecentProject(escapedPath);
+                row.innerHTML = `
+                    <span class="material-symbols-rounded proj-icon" style="font-size:18px;">receipt_long</span>
+                    <div class="proj-info">
+                        <span class="proj-name">${basename}</span>
+                        <span class="proj-path" title="${proj.path}">${proj.path}</span>
+                    </div>
+                    ${relativeTime ? `<span class="proj-time">${relativeTime}</span>` : ""}
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        // Run ExtendScript to open the project file
+        function openRecentProject(projectPath) {
+            if (!projectPath) return;
+            console.log("[RecentProjects] Opening project:", projectPath);
+            showToast("Opening project...", "success"); // Show safe loading toast
+            
+            const script = `(function() {
+                try {
+                    var file = new File("${projectPath}");
+                    if (file.exists) {
+                        app.open(file);
+                        return JSON.stringify({ success: true });
+                    } else {
+                        return JSON.stringify({ error: "File not found" });
+                    }
+                } catch(e) {
+                    return JSON.stringify({ error: e.toString() });
+                }
+            })()`;
+            
+            Bridge.eval(script)
+                .then(res => {
+                    if (res && res.success) {
+                        showToast("Project opened successfully!", "success");
+                        checkProjectStatus(); // Update UI state immediately
+                    } else if (res && res.error) {
+                        showToast("Failed to open project: " + res.error, "error");
+                    } else {
+                        showToast("Failed to open project.", "error");
+                    }
+                })
+                .catch(err => {
+                    showToast("Failed to open project: " + err.message, "error");
+                });
+        }
+
+        // Check if there is an active saved project open in After Effects
+        let lastProjectState = null; // Track last state to avoid unnecessary DOM redraws
+        function checkProjectStatus() {
+            const script = `(function() {
+                try {
+                    if (app.project && app.project.file) {
+                        return JSON.stringify({ path: app.project.file.fsName });
+                    }
+                    return JSON.stringify({ path: "none" });
+                } catch (e) {
+                    return JSON.stringify({ path: "none" });
+                }
+            })()`;
+
+            Bridge.eval(script)
+                .then(res => {
+                    const card = document.getElementById('card-recent-projects');
+
+                    if (!card) return;
+
+                    const projectPath = res ? res.path : "none";
+                    const hasProjectOpen = projectPath && projectPath !== "none";
+
+                    if (hasProjectOpen) {
+                        // Keep track of the currently open project path and update its active timestamp in memory
+                        currentlyOpenProjectPath = projectPath;
+                        currentlyOpenProjectLastActive = new Date().toISOString();
+
+                        // Persist to local JSON cache file so it stays across panel reloads
+                        try {
+                            if (!fs.existsSync(EASE_LIB_DIR)) fs.mkdirSync(EASE_LIB_DIR, { recursive: true });
+                            fs.writeFileSync(RECENT_CACHE_FILE, JSON.stringify({
+                                path: currentlyOpenProjectPath,
+                                lastActive: currentlyOpenProjectLastActive
+                            }), 'utf8');
+                        } catch(e) {
+                            console.error("[RecentProjects] Failed to save recent cache:", e);
+                        }
+                    }
+
+                    if (lastProjectState !== hasProjectOpen) {
+                        lastProjectState = hasProjectOpen;
+                        if (hasProjectOpen) {
+                            // Slide out and fade away
+                            card.classList.add('hidden-proj');
+                            // Delay actual display = none to allow transition to complete
+                            setTimeout(() => {
+                                if (lastProjectState === true) {
+                                    card.style.display = 'none';
+                                }
+                            }, 500);
+                        } else {
+                            // Show and slide in
+                            renderRecentProjectsList(); // Refresh list on show
+                            card.style.display = 'block';
+                            // Force reflow
+                            card.offsetHeight;
+                            card.classList.remove('hidden-proj');
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error("[RecentProjects] Error checking project status:", err);
+                });
+        }
+        
+        setupTabs();
+
+        // ── INITIALIZE RECENT PROJECTS CHECKS & LISTENERS ───────────
+        checkProjectStatus();
+        setInterval(checkProjectStatus, 3000);
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.getAttribute('data-target') === 'mod-home') {
+                    checkProjectStatus();
+                }
+            });
+        });
+
+        const originalParents = {};
+        const originalNextSiblings = {};
+        let cardsRegistered = false;
+
+        function renderHomeWidgets() {
+            var container = document.getElementById('home-widgets');
+            if(!container) return;
+            
+            if (!cardsRegistered) {
+                document.querySelectorAll('.card').forEach(function(c) {
+                    originalParents[c.id] = c.parentNode;
+                    originalNextSiblings[c.id] = c.nextSibling;
+                });
+                cardsRegistered = true;
+            }
+            
+            document.querySelectorAll('.moved-placeholder').forEach(function(el) { el.remove(); });
+
+            Array.from(container.children).forEach(function(child) {
+                var p = originalParents[child.id];
+                var n = originalNextSiblings[child.id];
+                if (p) {
+                    if (n) { p.insertBefore(child, n); } 
+                    else { p.appendChild(child); }
+                    child.style.display = 'none';
+                }
+            });
+            
+            var saved = [];
+            try {
+                const WIDGETS_FILE = path.join(EASE_LIB_DIR, 'home_widgets.json');
+                if (fs.existsSync(WIDGETS_FILE)) {
+                    saved = JSON.parse(fs.readFileSync(WIDGETS_FILE, 'utf8'));
+                } else {
+                    saved = ['card-welcome', 'card-recent-projects', 'card-organizer', 'card-memory'];
+                }
+            } catch(e) { saved = ['card-welcome', 'card-recent-projects', 'card-organizer', 'card-memory']; }
+            
+            saved.forEach(function(id) {
+                var original = document.getElementById(id);
+                if (original) {
+                    // Create placeholder in original location
+                    var p = originalParents[id];
+                    var n = originalNextSiblings[id];
+                    if (p && id !== 'card-welcome' && id !== 'card-recent-projects' && id !== 'card-organizer' && id !== 'card-memory') {
+                        var labelName = id.replace('card-', '').replace(/-/g, ' ');
+                        labelName = labelName.charAt(0).toUpperCase() + labelName.slice(1);
+                        var sectionLabel = original.querySelector('.section-label');
+                        if (sectionLabel) labelName = sectionLabel.innerText;
+                        
+                        var ph = document.createElement('div');
+                        ph.className = 'card moved-placeholder';
+                        ph.style.display = 'flex';
+                        ph.style.flexDirection = 'column';
+                        ph.style.alignItems = 'center';
+                        ph.style.justifyContent = 'center';
+                        ph.style.padding = '24px 16px';
+                        ph.style.textAlign = 'center';
+                        ph.style.border = '1px dashed var(--border-strong)';
+                        ph.style.background = 'rgba(255,255,255,0.02)';
+                        ph.innerHTML = '<span class="material-symbols-rounded" style="font-size:24px; color:var(--accent-primary); margin-bottom:8px; opacity:0.8;">push_pin</span><span style="font-size:11px; color:var(--text-secondary);"><b>' + labelName + '</b> is currently pinned to your Dashboard.</span>';
+                        
+                        if (n) { p.insertBefore(ph, n); }
+                        else { p.appendChild(ph); }
+                    }
+
+                    // Respect real-time open project state for the recent projects card display
+                    if (id === 'card-recent-projects') {
+                        original.style.display = (lastProjectState === true) ? 'none' : 'block';
+                    } else {
+                        original.style.display = 'block';
+                    }
+                    container.appendChild(original);
+                }
+            });
+
+            // Fallback: If recent projects card was not in saved JSON (and thus not appended in the loop),
+            // put it inside the container, immediately after the welcome card (or at the top if welcome card is unpinned)
+            var recentCard = document.getElementById('card-recent-projects');
+            if (recentCard && recentCard.parentNode !== container) {
+                var welcomeCard = document.getElementById('card-welcome');
+                if (welcomeCard && welcomeCard.parentNode === container) {
+                    if (welcomeCard.nextSibling) {
+                        container.insertBefore(recentCard, welcomeCard.nextSibling);
+                    } else {
+                        container.appendChild(recentCard);
+                    }
+                } else {
+                    if (container.firstChild) {
+                        container.insertBefore(recentCard, container.firstChild);
+                    } else {
+                        container.appendChild(recentCard);
+                    }
+                }
+                // Ensure correct display based on active project state
+                recentCard.style.display = (lastProjectState === true) ? 'none' : 'block';
+            }
+        }
+        
+        
+        var activeConfirmCallback = null;
+        function showConfirmModal(title, msg, callback) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-desc').innerText = msg;
+            activeConfirmCallback = callback;
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').style.display = 'none';
+            activeConfirmCallback = null;
+        }
+        document.getElementById('confirm-btn-yes').addEventListener('click', function() {
+            var cb = activeConfirmCallback;
+            closeConfirmModal();
+            if (cb) cb();
+        });
+
+        function openCustomizeModal() {
+            var modal = document.getElementById('customize-modal');
+            modal.style.display = 'flex';
+            
+            var saved = [];
+            try {
+                const WIDGETS_FILE = path.join(EASE_LIB_DIR, 'home_widgets.json');
+                if (fs.existsSync(WIDGETS_FILE)) {
+                    saved = JSON.parse(fs.readFileSync(WIDGETS_FILE, 'utf8'));
+                } else {
+                    saved = ['card-welcome', 'card-recent-projects', 'card-organizer', 'card-memory'];
+                }
+            } catch(e) { saved = ['card-welcome', 'card-recent-projects', 'card-organizer', 'card-memory']; }
+            
+            var listContainer = document.getElementById('customize-list');
+            listContainer.innerHTML = '';
+            
+            // Collect cards and group by their ORIGINAL module
+            var groups = {};
+            var allCards = document.querySelectorAll('.card[id]');
+            
+            allCards.forEach(function(card) {
+                if (card.id === 'card-settings' || card.id === 'card-about' || card.id === 'card-output-auto') return; // Exclude system cards
+                
+                var mod = null;
+                // If it was moved, originalParents knows its true parent
+                var originalParent = originalParents[card.id];
+                if (originalParent) {
+                    mod = originalParent.closest('.module-container');
+                } else {
+                    mod = card.closest('.module-container');
+                }
+                
+                if (!mod || mod.id === 'mod-info' || mod.id === 'mod-output') return;
+                
+                var modId = mod.id;
+                if (!groups[modId]) groups[modId] = [];
+                groups[modId].push(card);
+            });
+            
+            // Define order
+            var modOrder = ['mod-home', 'mod-rigging', 'mod-kinetics', 'mod-design', 'mod-scene', 'mod-layers', 'mod-macro'];
+            
+            modOrder.forEach(function(modId) {
+                if (!groups[modId] || groups[modId].length === 0) return;
+                
+                var modName = modId.replace('mod-', '').toUpperCase();
+                if (modName === 'OUTPUT') modName = 'RENDER';
+                
+                var modHeader = document.createElement('div');
+                modHeader.style.fontSize = '11px';
+                modHeader.style.fontWeight = 'bold';
+                modHeader.style.color = 'var(--accent-primary)';
+                modHeader.style.marginTop = '12px';
+                modHeader.style.marginBottom = '6px';
+                modHeader.innerText = modName;
+                listContainer.appendChild(modHeader);
+                
+                groups[modId].forEach(function(card) {
+                    var labelName = card.id.replace('card-', '').replace(/-/g, ' ');
+                    labelName = labelName.charAt(0).toUpperCase() + labelName.slice(1);
+                    
+                    var sectionLabel = card.querySelector('.section-label');
+                    if (sectionLabel) labelName = sectionLabel.innerText;
+                    
+                    var isChecked = saved.indexOf(card.id) !== -1 ? 'checked' : '';
+                    
+                    var labelEl = document.createElement('label');
+                    labelEl.style.fontSize = '12px';
+                    labelEl.style.display = 'flex';
+                    labelEl.style.alignItems = 'center';
+                    labelEl.style.gap = '8px';
+                    labelEl.style.cursor = 'pointer';
+                    labelEl.style.marginLeft = '4px';
+                    labelEl.style.marginBottom = '4px';
+                    labelEl.innerHTML = '<input type="checkbox" value="' + card.id + '" ' + isChecked + '> <span style="flex:1;">' + labelName + '</span>';
+                    listContainer.appendChild(labelEl);
+                });
+            });
+        }
+        
+        function closeCustomizeModal() {
+            document.getElementById('customize-modal').style.display = 'none';
+        }
+        
+        function saveCustomizeModal() {
+            var checkboxes = document.getElementById('customize-list').querySelectorAll('input[type="checkbox"]');
+            var selected = [];
+            checkboxes.forEach(function(cb) {
+                if (cb.checked) selected.push(cb.value);
+            });
+            try {
+                const WIDGETS_FILE = path.join(EASE_LIB_DIR, 'home_widgets.json');
+                if (!fs.existsSync(EASE_LIB_DIR)) fs.mkdirSync(EASE_LIB_DIR, {recursive: true});
+                fs.writeFileSync(WIDGETS_FILE, JSON.stringify(selected, null, 2), 'utf8');
+            } catch(e) { console.error('Failed to save widgets:', e); }
+            closeCustomizeModal();
+            renderHomeWidgets();
+        }
+
+        // Init on load
+        window.addEventListener('DOMContentLoaded', function() {
+            updateWingmanPreview();
+            updateWigglePreview();
+            renderLibrary();
+            renderExprLibrary();
+            startContextPolling();
+            renderHomeWidgets();
+            
+            // Setup Segmented Control for Time Range
+            document.addEventListener('change', function(e) {
+                if(e.target.name === 'render_range') {
+                    var group = document.getElementById('time-range-group');
+                    if(group) {
+                        group.querySelectorAll('.segmented-control').forEach(function(label) {
+                            label.classList.remove('active');
+                        });
+                        e.target.parentElement.classList.add('active');
+                    }
+                }
+            });
+        });
+
+        
+        // ── Keyframe Wingman helpers ────────────────────────────────────
+        function buildCurvePath(easeOut, easeIn, W, H) {
+            var p1x = (easeOut / 100) * W;
+            var p1y = H;
+            var p2x = W - (easeIn / 100) * W;
+            var p2y = 0;
+            return 'M 0 ' + H + ' C ' + p1x + ' ' + p1y + ', ' + p2x + ' ' + p2y + ', ' + W + ' 0';
+        }
+
+        function updateWingmanPreview() {
+            var eOut = parseInt(document.getElementById('ease-out-slider').value);
+            var eIn  = parseInt(document.getElementById('ease-in-slider').value);
+            var path = buildCurvePath(eOut, eIn, 80, 80);
+            var curveEl = document.getElementById('wingman-curve');
+            if (curveEl) curveEl.setAttribute('d', path);
+        }
+
+        // ── Wiggle Pro helpers ──────────────────────────────────────────
+        function updateWigglePreview() {
+            var freq = parseFloat(document.getElementById('wig-freq').value) || 2;
+            var amp = parseFloat(document.getElementById('wig-amp').value) || 50;
+            
+            var W = 180;
+            var H = 40;
+            var centerY = H / 2;
+            
+            // Map amp (1-500) to pixel amplitude (max 18px so it doesn't clip)
+            var pixelAmp = Math.min((amp / 100) * 12, 18); // scale down visually so 50 amp looks good
+            pixelAmp = Math.max(pixelAmp, 1); // at least 1px wave
+            
+            // Map freq (0.1 - 20) to number of waves visible
+            var numWaves = Math.max(freq, 0.5); 
+            
+            var pathParts = [];
+            for (var x = 0; x <= W; x += 2) {
+                var angle = (x / W) * numWaves * Math.PI * 2;
+                var y = centerY - Math.sin(angle) * pixelAmp; // standard math coords
+                pathParts.push((x === 0 ? 'M' : 'L') + ' ' + x.toFixed(1) + ' ' + y.toFixed(1));
+            }
+            
+            var curveEl = document.getElementById('wiggle-curve');
+            if (curveEl) curveEl.setAttribute('d', pathParts.join(' '));
+        }
+
+        function applyWingman(mode) {
+            exec('motion', 'applyEaseSlider', {
+                easeOut: document.getElementById('ease-out-slider').value,
+                easeIn:  document.getElementById('ease-in-slider').value,
+                mode:    mode
+            });
+        }
+
+        function updateWingmanUI(out, inVal) {
+            document.getElementById('ease-out-slider').value = out;
+            document.getElementById('ease-out-val-input').value = out;
+            document.getElementById('ease-in-slider').value = inVal;
+            document.getElementById('ease-in-val-input').value = inVal;
+            updateWingmanPreview();
+        }
+
+        function setWingman(out, inVal) {
+            updateWingmanUI(out, inVal);
+            applyWingman('both');
+        }
+
+        // ── Ease Library (File System) ─────────────────────────────────
+
+        function getEaseLibrary() {
+            try {
+                if (!fs.existsSync(EASE_LIB_DIR)) fs.mkdirSync(EASE_LIB_DIR, {recursive: true});
+                if (!fs.existsSync(EASE_LIB_FILE)) return [];
+                return JSON.parse(fs.readFileSync(EASE_LIB_FILE, 'utf8'));
+            } catch(e) { return []; }
+        }
+        
+        function saveEaseLibrary(lib) {
+            try {
+                if (!fs.existsSync(EASE_LIB_DIR)) fs.mkdirSync(EASE_LIB_DIR, {recursive: true});
+                fs.writeFileSync(EASE_LIB_FILE, JSON.stringify(lib, null, 2), 'utf8');
+            } catch(e) { alert('Error saving preset: ' + e); }
+        }
+
+        function saveEasePreset() {
+            var name = document.getElementById('ease-save-name').value.trim();
+            if (!name) { document.getElementById('ease-save-name').focus(); return; }
+            
+            Bridge.loadJSX('motion.jsx').then(function() {
+                Bridge.callMethod('motion', 'run', { action: 'getRawEaseData' })
+                    .then(function(res) {
+                        var rawData = null;
+                        var eOut = parseInt(document.getElementById('ease-out-slider').value);
+                        var eIn  = parseInt(document.getElementById('ease-in-slider').value);
+                        
+                        if (typeof res === 'string') {
+                            try { res = JSON.parse(res); } catch(e){}
+                        }
+                        
+                        // Bridge.js auto-unwraps JSON.parse and res.data
+                        if (res && res.inInfluence !== undefined) {
+                            rawData = res;
+                            eOut = Math.round(rawData.outInfluence);
+                            eIn  = Math.round(rawData.inInfluence);
+                        } else {
+                            // Silently fallback to saving UI sliders if no AE data
+                            rawData = null;
+                        }
+                        
+                        var lib  = getEaseLibrary();
+                        lib.push({ 
+                            id: Date.now(), 
+                            name: name, 
+                            easeOut: eOut, 
+                            easeIn: eIn,
+                            rawData: rawData
+                        });
+                        
+                        saveEaseLibrary(lib);
+                        document.getElementById('ease-save-name').value = '';
+                        renderLibrary();
+                        showToast("Ease saved to library!", "success");
+                    });
+            });
+        }
+
+        function deleteEasePreset(id, e) {
+            e.stopPropagation();
+            if (!window.SPEED_MODE_ENABLED) {
+                showConfirmModal("Delete Preset", "Delete this ease preset?", function() {
+                    var lib = getEaseLibrary().filter(function(p) { return p.id !== id; });
+                    saveEaseLibrary(lib);
+                    renderLibrary();
+                });
+            } else {
+                var lib = getEaseLibrary().filter(function(p) { return p.id !== id; });
+                saveEaseLibrary(lib);
+                renderLibrary();
+            }
+        }
+
+        function deleteColorSwatch(id, e) {
+            e.stopPropagation();
+            if (!window.SPEED_MODE_ENABLED) {
+                showConfirmModal("Delete Swatch", "Delete this swatch?", function() {
+                    // logic to update color storage
+                });
+            }
+        }
+
+        function loadEasePreset(pId) {
+            var lib = getEaseLibrary();
+            var preset = null;
+            for (var i=0; i<lib.length; i++) { if (lib[i].id === pId) preset = lib[i]; }
+            if (!preset) return;
+            
+            updateWingmanUI(preset.easeOut, preset.easeIn);
+            
+            if (preset.rawData) {
+                exec('motion', 'applyRawEase', { rawData: JSON.stringify(preset.rawData) });
+            } else {
+                applyWingman('both');
+            }
+        }
+
+                // ── Loader ──────────────────────────────────────────────────────
+        let loaderHidden = false, fontsReady = false, jsxReady = false;
+        function tryHideLoader() {
+            if (loaderHidden || !fontsReady || !jsxReady) return;
+            loaderHidden = true;
+            const l = document.getElementById('app-loader');
+            if (l) l.classList.add('hidden');
+        }
+        setTimeout(() => { fontsReady = true; jsxReady = true; tryHideLoader(); }, 6000);
+        document.fonts.ready.then(() => { fontsReady = true; tryHideLoader(); });
+        Promise.all([
+            Bridge.loadJSX('utils.jsx'),
+            Bridge.loadJSX('motion.jsx'),
+            Bridge.loadJSX('layers.jsx'),
+            Bridge.loadJSX('creative.jsx'),
+            Bridge.loadJSX('pipeline.jsx'),
+        ]).then(() => { jsxReady = true; tryHideLoader(); })
+          .catch(() => { jsxReady = true; tryHideLoader(); });
+        // ───────────────────────────────────────────────────────────────
+
+        // ── Custom Prompts ────────────────────────────────────────────────
+        let promptCallback = null;
+        function openTextPrompt(title, desc, callback) {
+            document.getElementById('prompt-title').innerText = title;
+            document.getElementById('prompt-desc').innerText = desc;
+            var input = document.getElementById('prompt-input');
+            input.value = '';
+            document.getElementById('text-prompt-modal').style.display = 'flex';
+            input.focus();
+            promptCallback = callback;
+        }
+        function closeTextPrompt() {
+            document.getElementById('text-prompt-modal').style.display = 'none';
+            promptCallback = null;
+        }
+        function submitTextPrompt() {
+            var val = document.getElementById('prompt-input').value.trim();
+            if (!val) { showToast("Name cannot be empty", "error"); return; }
+            document.getElementById('text-prompt-modal').style.display = 'none';
+            if (promptCallback) promptCallback(val);
+            promptCallback = null;
+        }
+
+        function closeToast() {
+            var t = document.getElementById('toast-container');
+            t.style.bottom = '-80px';
+            t.style.opacity = '0';
+        }
+
+        function showToast(msg, type) {
+            var t = document.getElementById('toast-container');
+            var icon = document.getElementById('toast-icon');
+            var msgEl = document.getElementById('toast-msg');
+            
+            if (type === 'error') {
+                t.style.background = 'var(--accent-danger, #ef4444)';
+                icon.innerText = 'error';
+                msgEl.innerText = "Error: " + msg;
+            } else {
+                t.style.background = 'var(--accent-success, #22c55e)';
+                icon.innerText = 'check_circle';
+                msgEl.innerText = msg;
+            }
+            
+            t.style.bottom = '0';
+            t.style.opacity = '1';
+            
+            if(window.toastTimer) clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(function() {
+                closeToast();
+            }, 5000);
+        }
+
+        function exec(module, action, extraArgs) {
+            var args = { action: action };
+            if (extraArgs) { for (var k in extraArgs) args[k] = extraArgs[k]; }
+            
+            // Track click for Smart Panel
+            trackButtonClick(module, action, extraArgs);
+            
+            Bridge.loadJSX(module + '.jsx').then(function() {
+                Bridge.callMethod(module, 'run', args).then(function(res) { 
+                    if (res) showToast(res, 'success');
+                }).catch(function(err) { showToast(err.message, 'error'); });
+            });
+        }
+
+        function renderLibrary() {
+            var container = document.getElementById('ease-lib-list');
+            var lib = getEaseLibrary();
+            if (lib.length === 0) {
+                container.innerHTML = '<div class="lib-empty" style="grid-column: 1 / -1; text-align:center; padding: 16px 0; font-size: 11px; color: var(--text-secondary);">No saved presets.</div>';
+                return;
+            }
+            container.innerHTML = lib.map(function(p) {
+                var path = buildCurvePath(p.easeOut, p.easeIn, 44, 44);
+                return '<div class="ease-lib-card" onclick="loadEasePreset(' + p.id + ')">' +
+                    '<button class="lib-del" onclick="deleteEasePreset(' + p.id + ', event)" title="Delete">' +
+                        '<span class="material-symbols-rounded" style="font-size:12px;">close</span>' +
+                    '</button>' +
+                    '<div style="background:var(--bg-active); border:1px solid var(--border-strong); border-radius:4px; padding:4px; margin-bottom:6px; display:flex; justify-content:center; align-items:center;">' +
+                        '<svg width="44" height="44" viewBox="0 0 44 44" style="overflow:visible;">' +
+                            '<line x1="0" y1="44" x2="44" y2="0" stroke="var(--border-strong)" stroke-width="1.5" stroke-dasharray="3,3"/>' +
+                            '<path d="' + path + '" stroke="var(--accent-primary)" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+                        '</svg>' +
+                    '</div>' +
+                    '<div class="lib-name">' + p.name + '</div>' +
+                    '<div class="lib-vals">O:' + p.easeOut + ' I:' + p.easeIn + '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        // Init on load
+        window.addEventListener('DOMContentLoaded', function() {
+            updateWingmanPreview();
+            updateWigglePreview();
+            renderLibrary();
+            renderExprLibrary();
+            startContextPolling();
+        });
+
+        // ── Expression Library (File System) ───────────────────────────
+        const EXPR_LIB_FILE = path.join(EASE_LIB_DIR, 'expr_presets.json');
+
+        function getExprLibrary() {
+            var defaultExpr = [];
+            try {
+                if (!fs.existsSync(EASE_LIB_DIR)) fs.mkdirSync(EASE_LIB_DIR, {recursive: true});
+                if (!fs.existsSync(EXPR_LIB_FILE)) {
+                    fs.writeFileSync(EXPR_LIB_FILE, JSON.stringify(defaultExpr, null, 2), 'utf8');
+                    return defaultExpr;
+                }
+                var lib = JSON.parse(fs.readFileSync(EXPR_LIB_FILE, 'utf8'));
+                return lib;
+            } catch(e) { return defaultExpr; }
+        }
+
+        function saveExprLibrary(lib) {
+            try {
+                if (!fs.existsSync(EASE_LIB_DIR)) fs.mkdirSync(EASE_LIB_DIR, {recursive: true});
+                fs.writeFileSync(EXPR_LIB_FILE, JSON.stringify(lib, null, 2), 'utf8');
+            } catch(e) { alert('Error saving expression: ' + e); }
+        }
+
+        function renderExprLibrary() {
+            var lib = getExprLibrary();
+            var select = document.getElementById('expr-lib-select');
+            if(!select) return;
+            select.innerHTML = '<option value="">Saved...</option>';
+            lib.forEach(function(p) {
+                var opt = document.createElement('option');
+                opt.value = p.code;
+                opt.innerText = p.name;
+                select.appendChild(opt);
+            });
+        }
+
+        function saveExprPreset() {
+            var code = document.getElementById('ideInput').value.trim();
+            if (!code) { showToast("Please write the expression code first!", "error"); return; }
+            
+            openTextPrompt("Save Expression", "Enter a name for this custom expression snippet:", function(name) {
+                var lib = getExprLibrary();
+                lib.push({ id: Date.now(), name: name, code: code });
+                saveExprLibrary(lib);
+                renderExprLibrary();
+                showToast("Expression successfully saved to library!", "success");
+            });
+        }
+
+        // Context-Aware Polling
+        var contextPoller;
+        function startContextPolling() {
+            if (contextPoller) clearInterval(contextPoller);
+            contextPoller = setInterval(function() {
+                Bridge.eval('MotionreisUtils.getContext()').then(function(res) {
+                    var activeCompEl = document.getElementById('active-comp-name');
+                    if (!res || !res.valid) {
+                        if (activeCompEl) activeCompEl.innerText = '[No Comp Selected]';
+                        return;
+                    }
+                    var pinBtn = document.getElementById('pin-comp-btn');
+                    var isPinned = pinBtn && pinBtn.classList.contains('pinned');
+
+                    if (!isPinned) {
+                        if (activeCompEl) {
+                            activeCompEl.innerText = res.compName || '[Unknown]';
+                        }
+                        var outputNameInput = document.getElementById('render-output-name');
+                        if (outputNameInput && res.compName) {
+                            outputNameInput.placeholder = res.compName;
+                        }
+                    }
+                    
+                    // Example Context-Aware Logic: Highlight Audio Reactive if audio layer selected
+                    var audioCard = document.querySelector('#mod-scene .card:nth-child(3)'); // Audio Reactive is 2nd card in scene, wait it's the 2nd card (nth-child(3) because of header)
+                    if (audioCard) {
+                        if (res.types.audio) {
+                            audioCard.style.borderColor = 'var(--accent-primary)';
+                            audioCard.style.boxShadow = '0 0 8px rgba(99,102,241,0.2)';
+                        } else {
+                            audioCard.style.borderColor = 'var(--border-strong)';
+                            audioCard.style.boxShadow = 'none';
+                        }
+                    }
+
+                    // Highlight Text Animations if text layer selected
+                    var textCard = document.querySelector('#mod-design .card:nth-child(2)');
+                    if (textCard) {
+                        if (res.types.text) {
+                            textCard.style.borderColor = 'var(--accent-primary)';
+                            textCard.style.boxShadow = '0 0 8px rgba(99,102,241,0.2)';
+                        } else {
+                            textCard.style.borderColor = 'var(--border-strong)';
+                            textCard.style.boxShadow = 'none';
+                        }
+                    }
+                }).catch(function(e){ /* ignore eval errors during poll */ });
+            }, 500);
+        }
+
+        // Transition Shifter helper
+        function execTS(target) {
+            exec('motion', 'staggerTransitions', {
+                frames: document.getElementById('ts-frames').value,
+                mode:   document.getElementById('ts-mode').value,
+                target: target
+            });
+        }
+
+        // Folder Picker Helper using ExtendScript dialog
+        function selectRenderFolder() {
+            Bridge.eval('var f = Folder.selectDialog("Select Output Folder"); f ? f.fsName : ""').then(function(folderPath) {
+                if (folderPath) {
+                    document.getElementById('render-path').value = folderPath;
+                }
+            }).catch(function(err) {
+                console.error("Folder picker failed:", err);
+            });
+        }
+
+        // Render V2 High-Performance Engine
+        let activeRenderProcesses = []; // Keep track of processes to kill them if needed
+        let renderWatchdogs = [];       // Watchdog timers
+        const { spawn } = require('child_process');
+
+        function killAllActiveRenders() {
+            activeRenderProcesses.forEach(proc => {
+                try { proc.kill(); } catch(e) {}
+            });
+            activeRenderProcesses = [];
+            renderWatchdogs.forEach(w => clearInterval(w));
+            renderWatchdogs = [];
+            
+            document.getElementById('aerender-status').innerText = 'Render Canceled.';
+            document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
+        }
+
+        function startRenderV2() {
+            // Check if project path is saved
+            Bridge.eval('app.project.file ? app.project.file.fsName : ""').then(projPath => {
+                if (!projPath) {
+                    showToast("Please save your project first (File > Save) before CLI Rendering!", "error");
+                    return;
+                }
+                
+                // Show Progress elements
+                document.getElementById('aerender-status').style.display = 'block';
+                document.getElementById('aerender-status').innerText = 'Initializing Pipeline...';
+                document.getElementById('aerender-progress-bg').style.display = 'block';
+                document.getElementById('aerender-progress-bar').style.width = '0%';
+                document.getElementById('aerender-progress-bar').style.background = 'var(--accent-primary)';
+                
+                // 1. Gather UI Inputs
+                const activeCompText = document.getElementById('active-comp-name').innerText;
+                const renderSettings = document.getElementById('render-settings-select').value;
+                const codec = document.getElementById('render-codec-select').value;
+                const outputPath = document.getElementById('render-path').value;
+                
+                const timeRangeInput = document.querySelector('input[name="render_range"]:checked');
+                const timeRange = timeRangeInput ? timeRangeInput.value : 'workarea';
+                
+                const saveNextToAEP = document.getElementById('render-save-next').checked;
+                const autoVersion = document.getElementById('render-auto-version').checked;
+                const autoSave = document.getElementById('render-auto-save').checked;
+                const throttle = document.getElementById('render-throttle').value;
+                const postAction = document.getElementById('render-postaction').value;
+                
+                // Setup custom name or fallback to comp name
+                let outputName = document.getElementById('render-output-name').value.trim();
+                if (!outputName || outputName === "Waiting for comp...") {
+                    outputName = ""; // JSX will fallback to activeComp name
+                }
+                
+                // Write temp config JSON file
+                const pluginRoot = csInterface.getSystemPath(SystemPath.EXTENSION);
+                const configPath = path.join(pluginRoot, 'data', 'temp_render_config.json');
+                
+                const configData = {
+                    compName: activeCompText,
+                    renderSettings: renderSettings,
+                    codec: codec,
+                    outputPath: outputPath,
+                    timeRange: timeRange,
+                    saveNextToAEP: saveNextToAEP,
+                    autoSave: autoSave,
+                    outputName: outputName
+                };
+                
+                // Ensure data folder exists
+                const dataFolder = path.join(pluginRoot, 'data');
+                if (!fs.existsSync(dataFolder)) {
+                    fs.mkdirSync(dataFolder, { recursive: true });
+                }
+                
+                fs.writeFileSync(configPath, JSON.stringify(configData, null, 4));
+                
+                // 2. Call ExtendScript to prepare Render Queue & AEP file
+                document.getElementById('aerender-status').innerText = 'Preparing Composition & Saving AEP...';
+                
+                Bridge.loadJSX('pipeline.jsx').then(() => {
+                    Bridge.callMethod('pipeline', 'prepareRenderQueue', { configPath: configPath }).then(res => {
+                        if (!res || !res.projectPath) {
+                            const errMessage = (res && res.error) ? res.error : "Failed to prepare render queue in AE.";
+                            document.getElementById('aerender-status').innerText = 'Error: ' + errMessage;
+                            document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
+                            return;
+                        }
+                        
+                        // Queue prepared successfully! We now run parallel chunk render.
+                        runParallelChunks(res, throttle, codec, postAction);
+                        
+                    }).catch(err => {
+                        document.getElementById('aerender-status').innerText = 'ExtendScript Error: ' + err.message;
+                        document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
+                    });
+                }).catch(err => {
+                    document.getElementById('aerender-status').innerText = 'Failed to load pipeline.jsx';
+                    document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
+                });
+            });
+        }
+
+        function runParallelChunks(renderInfo, throttle, codec, postAction) {
+            const startFrame = renderInfo.startFrame;
+            const endFrame = renderInfo.endFrame;
+            const totalFrames = endFrame - startFrame + 1;
+            const fps = renderInfo.fps;
+            const projectPath = renderInfo.projectPath;
+            const compName = renderInfo.compName;
+            const chunksDir = renderInfo.chunksDir;
+            const finalDestDir = renderInfo.finalDestDir;
+            const finalName = renderInfo.finalName;
+            
+            // Kill any existing processes first
+            killAllActiveRenders();
+            
+            // Determine thread pool size — aerender is very RAM heavy (~2GB each instance!)
+            // Cap to safe values that won't crash the system
+            const cpus = os.cpus().length;
+            let threadCount = 1;
+            if (throttle === 'max') {
+                threadCount = Math.max(1, Math.min(3, Math.floor(cpus / 4)));
+            } else if (throttle === 'balanced') {
+                threadCount = Math.max(1, Math.min(2, Math.floor(cpus / 4)));
+            } else {
+                threadCount = 1; // Slow & Silent
+            }
+            // Safety cap: never more than totalFrames
+            threadCount = Math.min(threadCount, totalFrames);
+            
+            // Resolve aerender path
+            const appPath = csInterface.getSystemPath(SystemPath.HOST_APPLICATION);
+            let aerenderPath = '';
+            if (os.platform() === 'darwin') {
+                const baseDir = appPath.substring(0, appPath.indexOf('.app/'));
+                aerenderPath = path.join(path.dirname(baseDir + '.app'), 'aerender');
+            } else {
+                aerenderPath = path.join(path.dirname(appPath), 'aerender.exe');
+            }
+            
+            if (!fs.existsSync(aerenderPath)) {
+                document.getElementById('aerender-status').innerText = 'Error: aerender not found at ' + aerenderPath;
+                document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
+                return;
+            }
+            
+            // Split frame range into N chunks
+            const chunks = [];
+            const framesPerChunk = Math.ceil(totalFrames / threadCount);
+            for (let i = 0; i < threadCount; i++) {
+                const chunkStart = startFrame + (i * framesPerChunk);
+                if (chunkStart > endFrame) break;
+                const chunkEnd = Math.min(endFrame, chunkStart + framesPerChunk - 1);
+                chunks.push({
+                    id: i + 1,
+                    start: chunkStart,
+                    end: chunkEnd,
+                    total: chunkEnd - chunkStart + 1,
+                    rendered: 0
+                });
+            }
+            
+            // Track rendered frames per chunk
+            const chunkProgress = {};
+            chunks.forEach(c => { chunkProgress[c.id] = 0; });
+            
+            function updateProgressBar() {
+                let totalRendered = 0;
+                for (let cid in chunkProgress) {
+                    totalRendered += chunkProgress[cid];
+                }
+                const pct = Math.min(100, Math.floor((totalRendered / totalFrames) * 100));
+                document.getElementById('aerender-progress-bar').style.width = pct + '%';
+                document.getElementById('aerender-status').innerText = `Rendering: ${pct}% (${totalRendered}/${totalFrames} frames)`;
+            }
+            
+            const chunkPromises = chunks.map(chunk => {
+                return new Promise((resolve, reject) => {
+                    const spawnChunkProcess = (startFrameIndex) => {
+                        // CRITICAL: Do NOT pass -output flag here.
+                        // aerender reads the output module path from the saved AEP on disk.
+                        // Passing -output with [#####] pattern via CLI arg does NOT work reliably!
+                        const args = [
+                            '-project', projectPath,
+                            '-comp', compName,
+                            '-s', startFrameIndex.toString(),
+                            '-e', chunk.end.toString(),
+                            '-mem_usage', '60', '30'  // limit AE RAM usage so parallel instances don't OOM
+                        ];
+                        
+                        document.getElementById('aerender-status').innerText = `Thread ${chunk.id}: Launching aerender (frames ${startFrameIndex}-${chunk.end})...`;
+                        
+                        const proc = spawn(aerenderPath, args);
+                        activeRenderProcesses.push(proc);
+                        
+                        let lastActivity = Date.now();
+                        let stderrLog = '';
+                        
+                        // Watchdog: kill if no stdout for 90 seconds
+                        const watchdog = setInterval(() => {
+                            if (Date.now() - lastActivity > 90000) {
+                                console.warn(`Watchdog: Chunk ${chunk.id} stuck (90s no output). Killing...`);
+                                clearInterval(watchdog);
+                                try { proc.kill('SIGKILL'); } catch(e) {}
+                                activeRenderProcesses = activeRenderProcesses.filter(p => p !== proc);
+                                resolve(); // continue pipeline even if this chunk timed out
+                            }
+                        }, 5000);
+                        
+                        renderWatchdogs.push(watchdog);
+                        
+                        proc.stdout.on('data', (data) => {
+                            lastActivity = Date.now();
+                            const output = data.toString();
+                            
+                            // Error filtering
+                            if (/Missing footage|Footage.*missing|Could not open footage/i.test(output)) {
+                                clearInterval(watchdog);
+                                killAllActiveRenders();
+                                showToast("Render aborted: Missing Footage in project!", "error");
+                                reject(new Error("Missing footage."));
+                                return;
+                            }
+                            if (/Missing font|Font not found/i.test(output)) {
+                                showToast("Warning: Missing fonts detected.", "info");
+                            }
+                            if (/Out of memory|51::/i.test(output)) {
+                                clearInterval(watchdog);
+                                killAllActiveRenders();
+                                showToast("Render crashed: Out of Memory! Use Slow mode.", "error");
+                                reject(new Error("Out of memory."));
+                                return;
+                            }
+                            
+                            // Parse progress - aerender outputs lines like: "PROGRESS: frame 42 (42.00 secs)"
+                            const lines = output.split('\n');
+                            lines.forEach(line => {
+                                const frameMatch = line.match(/frame\s+(\d+)/i);
+                                if (frameMatch) {
+                                    const frameNum = parseInt(frameMatch[1], 10);
+                                    const framesDone = frameNum - chunk.start + 1;
+                                    if (framesDone > 0 && framesDone > chunkProgress[chunk.id]) {
+                                        chunkProgress[chunk.id] = framesDone;
+                                        let totalRendered = 0;
+                                        for (let cid in chunkProgress) totalRendered += chunkProgress[cid];
+                                        const pct = Math.min(94, Math.floor((totalRendered / totalFrames) * 94));
+                                        document.getElementById('aerender-progress-bar').style.width = pct + '%';
+                                        document.getElementById('aerender-status').innerText = `Rendering: ${pct}% — Thread ${chunk.id} on frame ${frameNum}/${chunk.end}`;
+                                    }
+                                }
+                            });
+                        });
+                        
+                        proc.stderr.on('data', (data) => {
+                            stderrLog += data.toString();
+                            // Show last meaningful stderr line in status
+                            const errLines = stderrLog.split('\n').filter(l => l.trim().length > 0);
+                            if (errLines.length > 0) {
+                                const lastErr = errLines[errLines.length - 1].trim();
+                                if (lastErr.length < 200) { // Don't overflow UI
+                                    document.getElementById('aerender-status').innerText = `Thread ${chunk.id}: ${lastErr}`;
+                                }
+                            }
+                        });
+                        
+                        proc.on('close', (code) => {
+                            clearInterval(watchdog);
+                            activeRenderProcesses = activeRenderProcesses.filter(p => p !== proc);
+                            chunkProgress[chunk.id] = chunk.total;
+                            
+                            if (code !== 0) {
+                                console.error(`Chunk ${chunk.id} exited with code ${code}. stderr: ${stderrLog.slice(-500)}`);
+                                // Show actual error from AE in the UI
+                                const lastErr = stderrLog.split('\n').filter(l => l.trim()).pop() || ('Exit code: ' + code);
+                                document.getElementById('aerender-status').innerText = `Error (Thread ${chunk.id}): ${lastErr.trim().slice(0, 120)}`;
+                            }
+                            resolve(); // Always resolve to continue pipeline — FFmpeg will handle missing frames gracefully
+                        });
+                    };
+                    
+                    spawnChunkProcess(chunk.start);
+                });
+            });
+            
+            Promise.all(chunkPromises).then(() => {
+                document.getElementById('aerender-status').innerText = 'Render done! Compiling video with FFmpeg...';
+                document.getElementById('aerender-progress-bar').style.width = '95%';
+                document.getElementById('aerender-progress-bar').style.background = '#eab308';
+                compileFinalVideo(chunksDir, finalDestDir, finalName, fps, startFrame, codec, postAction);
+                
+            }).catch(err => {
+                console.error("Render pool failed:", err);
+                if (!document.getElementById('aerender-status').innerText.includes('Canceled')) {
+                    document.getElementById('aerender-status').innerText = 'Render failed: ' + err.message;
+                    document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
+                }
+            });
+        }
+
+        // 5. FFmpeg Decoupled Encoding
+        function compileFinalVideo(chunksDir, finalDestDir, finalName, fps, startFrame, codec, postAction) {
+            const extensionRoot = csInterface.getSystemPath(SystemPath.EXTENSION);
+            const isMac = os.platform() === 'darwin';
+            
+            let ffmpegPath = '';
+            if (isMac) {
+                ffmpegPath = path.join(extensionRoot, 'bin', 'mac', 'ffmpeg');
+            } else {
+                ffmpegPath = path.join(extensionRoot, 'bin', 'win', 'ffmpeg.exe');
+            }
+            
+            if (!fs.existsSync(ffmpegPath)) {
+                document.getElementById('aerender-status').innerHTML = `
+                    <div style="color:var(--accent-warning); margin-bottom:6px;"><b>FFmpeg Binary Missing!</b></div>
+                    To compile raw frames into MP4/ProRes, please download FFmpeg and place it in the plugin directory.
+                    <div style="margin-top:6px; display:flex; gap:6px;">
+                        <button class="btn" style="padding:4px 8px; font-size:10px;" onclick="require('electron').shell.openExternal('https://ffmpeg.org/download.html')">🌐 Download FFmpeg</button>
+                        <button class="btn btn-primary" style="padding:4px 8px; font-size:10px;" onclick="openPluginBinFolder()">📂 Open Plugin Bin</button>
+                    </div>
+                `;
+                document.getElementById('aerender-progress-bar').style.background = 'var(--accent-warning)';
+                return;
+            }
+            
+            // ─── PRE-FLIGHT: Scan chunksDir for actual PNG frames ───────────────────
+            let actualFirstFrame = -1;
+            let actualLastFrame = -1;
+            let frameCount = 0;
+            try {
+                const files = fs.readdirSync(chunksDir);
+                const frameNums = [];
+                files.forEach(f => {
+                    const m = f.match(/^frame_(\d+)\.png$/i);
+                    if (m) frameNums.push(parseInt(m[1], 10));
+                });
+                frameNums.sort((a, b) => a - b);
+                if (frameNums.length > 0) {
+                    actualFirstFrame = frameNums[0];
+                    actualLastFrame  = frameNums[frameNums.length - 1];
+                    frameCount = frameNums.length;
+                }
+            } catch(e) {
+                console.error('Pre-flight scan failed:', e);
+            }
+            
+            if (frameCount === 0) {
+                // aerender wrote NOTHING → tell the user clearly
+                document.getElementById('aerender-status').innerText =
+                    'aerender failed: 0 frames written to disk. Check AE project has an active render queue item, all footage is online, and output path is writable.';
+                document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
+                return;
+            }
+            
+            document.getElementById('aerender-status').innerText =
+                `Found ${frameCount} frames (${actualFirstFrame}–${actualLastFrame}). Running FFmpeg...`;
+            // ────────────────────────────────────────────────────────────────────────
+            
+            let outputExt = 'mp4';
+            let codecArgs = [];
+            
+            if (codec === 'H.264' || codec === 'High Quality') {
+                outputExt = 'mp4';
+                codecArgs = [
+                    '-c:v', 'libx264',
+                    '-crf', '16',
+                    '-preset', 'fast',
+                    '-pix_fmt', 'yuv420p'
+                ];
+            } else if (codec === 'ProRes 422') {
+                outputExt = 'mov';
+                codecArgs = [
+                    '-c:v', 'prores_ks',
+                    '-profile:v', '2',
+                    '-vendor', 'ap10',
+                    '-pix_fmt', 'yuv422p10le'
+                ];
+            } else if (codec === 'ProRes 4444') {
+                outputExt = 'mov';
+                codecArgs = [
+                    '-c:v', 'prores_ks',
+                    '-profile:v', '4',
+                    '-vendor', 'ap10',
+                    '-pix_fmt', 'yuva444p10le'
+                ];
+            } else if (codec === 'Animated GIF') {
+                outputExt = 'gif';
+                codecArgs = [
+                    '-vf', 'fps=' + fps + ',scale=720:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse'
+                ];
+            } else if (codec === 'PNG Sequence' || codec === 'JPEG Sequence') {
+                const finalSeqDir = path.join(finalDestDir, finalName);
+                if (fs.existsSync(finalSeqDir)) {
+                    try { deleteFolderRecursive(finalSeqDir); } catch(e) {}
+                }
+                fs.renameSync(chunksDir, finalSeqDir);
+                finishRenderV2(finalSeqDir, postAction);
+                return;
+            } else {
+                outputExt = 'mp4';
+                codecArgs = [
+                    '-c:v', 'libx264',
+                    '-crf', '10',
+                    '-pix_fmt', 'yuv420p'
+                ];
+            }
+            
+            const finalOutputFile = path.join(finalDestDir, `${finalName}.${outputExt}`);
+            if (fs.existsSync(finalOutputFile)) {
+                try { fs.unlinkSync(finalOutputFile); } catch(e) {}
+            }
+            
+            // Use actualFirstFrame (discovered on disk) as start_number — not assumed startFrame
+            const ffmpegArgs = [
+                '-y',
+                '-framerate', fps.toString(),
+                '-start_number', actualFirstFrame.toString(),
+                '-i', path.join(chunksDir, 'frame_%05d.png'),
+                ...codecArgs,
+                finalOutputFile
+            ];
+            
+            let ffmpegStderr = '';
+            document.getElementById('aerender-status').innerText = 'FFmpeg: Assembling video files...';
+            const ffProcess = spawn(ffmpegPath, ffmpegArgs);
+            
+            ffProcess.stderr.on('data', (data) => {
+                ffmpegStderr += data.toString();
+                // FFmpeg outputs progress on stderr - show frame progress
+                const m = ffmpegStderr.match(/frame=\s*(\d+)/);
+                if (m) {
+                    const done = parseInt(m[1], 10);
+                    const pct = Math.min(100, Math.floor(95 + (done / frameCount) * 5));
+                    document.getElementById('aerender-progress-bar').style.width = pct + '%';
+                    document.getElementById('aerender-status').innerText = `FFmpeg: encoding frame ${done}/${frameCount}...`;
+                }
+            });
+            
+            ffProcess.on('close', (code) => {
+                if (code === 0) {
+                    try {
+                        deleteFolderRecursive(chunksDir);
+                    } catch(e) {
+                        console.error("Purging chunks temp folder failed:", e);
+                    }
+                    
+                    finishRenderV2(finalOutputFile, postAction);
+                } else {
+                    // Show the last meaningful FFmpeg error line
+                    const errLines = ffmpegStderr.split('\n').filter(l => l.trim() && !l.startsWith('  '));
+                    const lastErr = errLines.filter(l => /error|invalid|no such|cannot|failed/i.test(l)).pop()
+                                 || errLines.pop()
+                                 || ('FFmpeg exited with code ' + code);
+                    document.getElementById('aerender-status').innerText = 'FFmpeg error: ' + lastErr.trim().slice(0, 150);
+                    document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
+                }
+            });
+        }
+
+
+        function finishRenderV2(filePath, postAction) {
+            document.getElementById('aerender-status').innerText = 'Render Complete!';
+            document.getElementById('aerender-progress-bar').style.width = '100%';
+            document.getElementById('aerender-progress-bar').style.background = '#10b981';
+            
+            if (postAction === 'chime') {
+                try {
+                    const audio = new Audio('../../shared/chime.mp3');
+                    audio.play();
+                } catch(e) {}
+            } else if (postAction === 'explorer') {
+                const { exec } = require('child_process');
+                const isMac = os.platform() === 'darwin';
+                const cmd = isMac ? `open -R "${filePath}"` : `explorer.exe /select,"${filePath}"`;
+                exec(cmd);
+            } else if (postAction === 'sleep') {
+                const { exec } = require('child_process');
+                const isMac = os.platform() === 'darwin';
+                const cmd = isMac ? `osascript -e 'tell application "System Events" to sleep'` : `rundll32.exe powrprof.dll,SetSuspendState 0,1,0`;
+                exec(cmd);
+            }
+            
+            showToast("Render Finished Successfully!", "success");
+        }
+
+        function deleteFolderRecursive(dirPath) {
+            if (fs.existsSync(dirPath)) {
+                fs.readdirSync(dirPath).forEach((file) => {
+                    const curPath = path.join(dirPath, file);
+                    if (fs.lstatSync(curPath).isDirectory()) {
+                        deleteFolderRecursive(curPath);
+                    } else {
+                        fs.unlinkSync(curPath);
+                    }
+                });
+                fs.rmdirSync(dirPath);
+            }
+        }
+
+        function openPluginBinFolder() {
+            const extensionRoot = csInterface.getSystemPath(SystemPath.EXTENSION);
+            const binDir = path.join(extensionRoot, 'bin');
+            if (!fs.existsSync(binDir)) {
+                fs.mkdirSync(binDir, { recursive: true });
+            }
+            
+            const isMac = os.platform() === 'darwin';
+            const { exec } = require('child_process');
+            const cmd = isMac ? `open "${binDir}"` : `explorer.exe "${binDir}"`;
+            exec(cmd);
+        }
+
+        function checkFFmpegInstalled() {
+            const extensionRoot = csInterface.getSystemPath(SystemPath.EXTENSION);
+            const isMac = os.platform() === 'darwin';
+            let ffmpegPath = '';
+            if (isMac) {
+                ffmpegPath = path.join(extensionRoot, 'bin', 'mac', 'ffmpeg');
+            } else {
+                ffmpegPath = path.join(extensionRoot, 'bin', 'win', 'ffmpeg.exe');
+            }
+            
+            const setupCard = document.getElementById('card-ffmpeg-setup');
+            const renderBtn = document.querySelector('#card-clirender button');
+            
+            if (fs.existsSync(ffmpegPath)) {
+                if (setupCard) setupCard.style.display = 'none';
+                if (renderBtn) {
+                    renderBtn.disabled = false;
+                    renderBtn.style.opacity = '1';
+                    renderBtn.innerHTML = `<span class="material-symbols-rounded" style="color:var(--accent-primary); margin-right:6px;">rocket_launch</span> START CLI RENDER`;
+                }
+            } else {
+                if (setupCard) setupCard.style.display = 'block';
+                if (renderBtn) {
+                    renderBtn.disabled = true;
+                    renderBtn.style.opacity = '0.5';
+                    renderBtn.innerHTML = `<span class="material-symbols-rounded" style="margin-right:6px;">warning</span> FFmpeg Setup Required`;
+                }
+            }
+        }
+
+        function runFFmpegAutoInstall() {
+            const extensionRoot = csInterface.getSystemPath(SystemPath.EXTENSION);
+            const isMac = os.platform() === 'darwin';
+            const exec = require('child_process').exec;
+            
+            document.getElementById('ffmpeg-setup-status').style.display = 'block';
+            document.getElementById('ffmpeg-setup-progress-bg').style.display = 'block';
+            document.getElementById('ffmpeg-setup-progress-bar').style.width = '10%';
+            document.getElementById('ffmpeg-setup-progress-bar').style.background = 'var(--accent-primary)';
+            document.getElementById('ffmpeg-install-btn').disabled = true;
+            document.getElementById('ffmpeg-install-btn').innerText = 'Downloading...';
+            
+            if (isMac) {
+                const binDir = path.join(extensionRoot, 'bin', 'mac');
+                if (!fs.existsSync(binDir)) {
+                    fs.mkdirSync(binDir, { recursive: true });
+                }
+                
+                const zipPath = path.join(binDir, 'ffmpeg.zip');
+                document.getElementById('ffmpeg-setup-status').innerText = 'Downloading stable FFmpeg release ZIP...';
+                document.getElementById('ffmpeg-setup-progress-bar').style.width = '40%';
+                
+                // Spawn curl in background to download Evermeet ZIP package
+                const downloadCmd = `curl -L -o "${zipPath}" "https://evermeet.cx/ffmpeg/getrelease/zip"`;
+                
+                exec(downloadCmd, (err, stdout, stderr) => {
+                    if (err) {
+                        console.error("FFmpeg auto-download failed:", err);
+                        document.getElementById('ffmpeg-setup-status').innerText = 'Error downloading. Please check internet connection.';
+                        document.getElementById('ffmpeg-setup-progress-bar').style.background = 'var(--accent-danger)';
+                        document.getElementById('ffmpeg-install-btn').disabled = false;
+                        document.getElementById('ffmpeg-install-btn').innerText = '⚡ START AUTO-INSTALL';
+                        return;
+                    }
+                    
+                    document.getElementById('ffmpeg-setup-status').innerText = 'Extracting binary, cleaning archive...';
+                    document.getElementById('ffmpeg-setup-progress-bar').style.width = '75%';
+                    
+                    // Unzip, delete zip, make executable
+                    const extractCmd = `unzip -o "${zipPath}" -d "${binDir}" && rm "${zipPath}" && chmod +x "${binDir}/ffmpeg"`;
+                    
+                    exec(extractCmd, (unzipErr, unzipStdout, unzipStderr) => {
+                        if (unzipErr) {
+                            console.error("FFmpeg auto-extraction failed:", unzipErr);
+                            document.getElementById('ffmpeg-setup-status').innerText = 'Error unzipping FFmpeg.';
+                            document.getElementById('ffmpeg-setup-progress-bar').style.background = 'var(--accent-danger)';
+                            document.getElementById('ffmpeg-install-btn').disabled = false;
+                            document.getElementById('ffmpeg-install-btn').innerText = '⚡ START AUTO-INSTALL';
+                            return;
+                        }
+                        
+                        // Successfully configured FFmpeg!
+                        document.getElementById('ffmpeg-setup-status').innerText = 'Auto-Setup complete!';
+                        document.getElementById('ffmpeg-setup-progress-bar').style.width = '100%';
+                        document.getElementById('ffmpeg-setup-progress-bar').style.background = '#10b981';
+                        
+                        showToast("FFmpeg parallel engine configured successfully!", "success");
+                        setTimeout(() => {
+                            checkFFmpegInstalled();
+                        }, 1200);
+                    });
+                });
+            } else {
+                // Windows Setup
+                const binDir = path.join(extensionRoot, 'bin', 'win');
+                if (!fs.existsSync(binDir)) {
+                    fs.mkdirSync(binDir, { recursive: true });
+                }
+                
+                const zipPath = path.join(binDir, 'ffmpeg.zip');
+                document.getElementById('ffmpeg-setup-status').innerText = 'Downloading Windows FFmpeg build...';
+                document.getElementById('ffmpeg-setup-progress-bar').style.width = '40%';
+                
+                // Windows PowerShell downloader command
+                const downloadCmd = `powershell -Command "Invoke-WebRequest -Uri 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip' -OutFile '${zipPath}'"`;
+                
+                exec(downloadCmd, (err, stdout, stderr) => {
+                    if (err) {
+                        console.error("FFmpeg Win download failed:", err);
+                        document.getElementById('ffmpeg-setup-status').innerText = 'Error downloading Windows FFmpeg.';
+                        document.getElementById('ffmpeg-setup-progress-bar').style.background = 'var(--accent-danger)';
+                        document.getElementById('ffmpeg-install-btn').disabled = false;
+                        document.getElementById('ffmpeg-install-btn').innerText = '⚡ START AUTO-INSTALL';
+                        return;
+                    }
+                    
+                    document.getElementById('ffmpeg-setup-status').innerText = 'Extracting essentials zip...';
+                    document.getElementById('ffmpeg-setup-progress-bar').style.width = '75%';
+                    
+                    // Windows PowerShell extraction
+                    const extractCmd = `powershell -Command "Expand-Archive -Path '${zipPath}' -DestinationPath '${binDir}' -Force; Remove-Item '${zipPath}'"`;
+                    
+                    exec(extractCmd, (unzipErr, unzipStdout, unzipStderr) => {
+                        if (unzipErr) {
+                            console.error("FFmpeg Win extraction failed:", unzipErr);
+                            document.getElementById('ffmpeg-setup-status').innerText = 'Extraction failed.';
+                            document.getElementById('ffmpeg-setup-progress-bar').style.background = 'var(--accent-danger)';
+                            document.getElementById('ffmpeg-install-btn').disabled = false;
+                            document.getElementById('ffmpeg-install-btn').innerText = '⚡ START AUTO-INSTALL';
+                            return;
+                        }
+                        
+                        // Gyan.dev extract yields a nested directory with "bin/ffmpeg.exe". Let's locate it and move it to bin/win/ffmpeg.exe
+                        try {
+                            const dirs = fs.readdirSync(binDir);
+                            const nestedDir = dirs.find(d => d.startsWith('ffmpeg-') && fs.lstatSync(path.join(binDir, d)).isDirectory());
+                            if (nestedDir) {
+                                const nestedFF = path.join(binDir, nestedDir, 'bin', 'ffmpeg.exe');
+                                if (fs.existsSync(nestedFF)) {
+                                    fs.renameSync(nestedFF, path.join(binDir, 'ffmpeg.exe'));
+                                    deleteFolderRecursive(path.join(binDir, nestedDir));
+                                }
+                            }
+                        } catch(renameErr) {
+                            console.error("Error moving Windows binary:", renameErr);
+                        }
+                        
+                        document.getElementById('ffmpeg-setup-status').innerText = 'Auto-Setup complete!';
+                        document.getElementById('ffmpeg-setup-progress-bar').style.width = '100%';
+                        document.getElementById('ffmpeg-setup-progress-bar').style.background = '#10b981';
+                        
+                        showToast("FFmpeg parallel engine configured successfully!", "success");
+                        setTimeout(() => {
+                            checkFFmpegInstalled();
+                        }, 1200);
+                    });
+                });
+            }
+        }
+        // ── SMART PANEL SYSTEM ──────────────────────────────────────────
+        const CLICK_METRICS_FILE = path.join(EASE_LIB_DIR, 'click_metrics.json');
+        window.SMART_PANEL_ENABLED = false;
+
+        function updateSmartButtons() {
+            // First, remove emphasis from all buttons
+            var allButtons = document.querySelectorAll('.btn');
+            allButtons.forEach(function(btn) {
+                btn.classList.remove('smart-emphasis');
+            });
+            
+            if (!window.SMART_PANEL_ENABLED) return;
+            
+            // Load metrics from disk
+            let metrics = {};
+            try {
+                if (fs.existsSync(CLICK_METRICS_FILE)) {
+                    metrics = JSON.parse(fs.readFileSync(CLICK_METRICS_FILE, 'utf8'));
+                }
+            } catch (e) {
+                console.error("[Smart Panel] Error reading metrics:", e);
+                return;
+            }
+            
+            // Get top buttons
+            var sortedActions = [];
+            for (var key in metrics) {
+                if (metrics.hasOwnProperty(key)) {
+                    sortedActions.push({ key: key, count: metrics[key] });
+                }
+            }
+            
+            // Sort by count descending
+            sortedActions.sort(function(a, b) {
+                return b.count - a.count;
+            });
+            
+            // Get top 5 with at least 3 clicks
+            var topKeys = [];
+            for (var i = 0; i < sortedActions.length; i++) {
+                if (sortedActions[i].count >= 3) {
+                    topKeys.push(sortedActions[i].key);
+                }
+                if (topKeys.length >= 5) break;
+            }
+            
+            // Apply emphasis class to matching buttons
+            allButtons.forEach(function(btn) {
+                var onclick = btn.getAttribute('onclick');
+                if (onclick) {
+                    var actionKey = onclick.trim().replace(/\s+/g, ' ');
+                    if (topKeys.indexOf(actionKey) !== -1) {
+                        // Exclude apply/preset save/theme buttons explicitly as requested by user
+                        var text = btn.innerText.toLowerCase();
+                        if (text.indexOf('apply') === -1 && onclick.indexOf('setThemeColor') === -1) {
+                            btn.classList.add('smart-emphasis');
+                        }
+                    }
+                }
+            });
+        }
+
+        function trackButtonClick(module, action, extraArgs) {
+            try {
+                if (!fs.existsSync(EASE_LIB_DIR)) fs.mkdirSync(EASE_LIB_DIR, { recursive: true });
+                
+                let metrics = {};
+                if (fs.existsSync(CLICK_METRICS_FILE)) {
+                    try {
+                        metrics = JSON.parse(fs.readFileSync(CLICK_METRICS_FILE, 'utf8'));
+                    } catch(e) {}
+                }
+                
+                // Get unique key from clicked button onclick attribute
+                var actionKey = null;
+                if (window.event) {
+                    var target = window.event.target;
+                    while (target && target.tagName !== 'BUTTON') {
+                        target = target.parentNode;
+                    }
+                    if (target && target.tagName === 'BUTTON' && target.getAttribute('onclick')) {
+                        actionKey = target.getAttribute('onclick').trim().replace(/\s+/g, ' ');
+                    }
+                }
+                
+                // Fallback to legacy key if event target not resolved
+                if (!actionKey) {
+                    var type = (extraArgs && extraArgs.type) ? extraArgs.type : '';
+                    actionKey = (action === 'createNewLayer' && type) ? (module + ':' + action + ':' + type) : (module + ':' + action);
+                }
+                
+                metrics[actionKey] = (metrics[actionKey] || 0) + 1;
+                
+                fs.writeFileSync(CLICK_METRICS_FILE, JSON.stringify(metrics, null, 2), 'utf8');
+                
+                if (window.SMART_PANEL_ENABLED) {
+                    updateSmartButtons();
+                }
+            } catch(e) {
+                console.error("[Smart Panel] Error tracking click:", e);
+            }
+        }
+
+        // ── USER PREFERENCES (LOCALSTORAGE) ──────────────────────────────
+
+        function loadPreferences() {
+            try {
+                // Theme (Try persistent file cache first, fallback to localStorage)
+                var savedTheme = null;
+                try {
+                    if (fs.existsSync(THEME_CONFIG_FILE)) {
+                        var themeData = JSON.parse(fs.readFileSync(THEME_CONFIG_FILE, 'utf8'));
+                        if (themeData && themeData.theme) {
+                            savedTheme = themeData.theme;
+                        }
+                    }
+                } catch(err) {
+                    console.error("[Preferences] Failed to load theme file cache:", err);
+                }
+
+                if (!savedTheme) {
+                    savedTheme = localStorage.getItem('motionreis_theme');
+                }
+
+                if (savedTheme) {
+                    document.documentElement.style.setProperty('--accent-primary', savedTheme);
+                    var customPicker = document.getElementById('custom-theme-picker');
+                    if (customPicker) customPicker.value = savedTheme;
+                    
+                    // Keep localStorage synced
+                    localStorage.setItem('motionreis_theme', savedTheme);
+                }
+
+                // Speed Mode
+                var savedSpeed = localStorage.getItem('motionreis_speed');
+                if (savedSpeed === 'on') {
+                    document.getElementById('toggle-speed-btn').classList.add('on');
+                    document.getElementById('toggle-speed-btn').innerText = 'ON';
+                    window.SPEED_MODE_ENABLED = true;
+                } else {
+                    document.getElementById('toggle-speed-btn').classList.remove('on');
+                    document.getElementById('toggle-speed-btn').innerText = 'OFF';
+                    window.SPEED_MODE_ENABLED = false;
+                }
+
+                // Smart Panel Mode
+                var savedSmart = localStorage.getItem('motionreis_smart_panel');
+                if (savedSmart === 'on' || savedSmart === null) {
+                    var smartBtn = document.getElementById('toggle-smart-btn');
+                    if (smartBtn) {
+                        smartBtn.classList.add('on');
+                        smartBtn.innerText = 'ON';
+                    }
+                    window.SMART_PANEL_ENABLED = true;
+                    if (savedSmart === null) {
+                        localStorage.setItem('motionreis_smart_panel', 'on');
+                    }
+                } else {
+                    var smartBtn = document.getElementById('toggle-smart-btn');
+                    if (smartBtn) {
+                        smartBtn.classList.remove('on');
+                        smartBtn.innerText = 'OFF';
+                    }
+                    window.SMART_PANEL_ENABLED = false;
+                }
+                updateSmartButtons();
+
+                // Theme Icons Mode
+                var savedThemeIcons = localStorage.getItem('motionreis_theme_icons');
+                if (savedThemeIcons === 'on' || savedThemeIcons === null) {
+                    var themeIconsBtn = document.getElementById('toggle-theme-icons-btn');
+                    if (themeIconsBtn) {
+                        themeIconsBtn.classList.add('on');
+                        themeIconsBtn.innerText = 'ON';
+                    }
+                    document.body.classList.add('theme-icons');
+                    if (savedThemeIcons === null) {
+                        localStorage.setItem('motionreis_theme_icons', 'on');
+                    }
+                } else {
+                    var themeIconsBtn = document.getElementById('toggle-theme-icons-btn');
+                    if (themeIconsBtn) {
+                        themeIconsBtn.classList.remove('on');
+                        themeIconsBtn.innerText = 'OFF';
+                    }
+                    document.body.classList.remove('theme-icons');
+                }
+            } catch(e) {}
+        }
+
+        // Global var to track speed mode
+        window.SPEED_MODE_ENABLED = false;
+
+        function setThemeColor(hex) {
+            document.documentElement.style.setProperty('--accent-primary', hex);
+            localStorage.setItem('motionreis_theme', hex);
+            
+            // Persist to local JSON file so it never gets wiped by CEF/CSXS cache issues
+            try {
+                if (!fs.existsSync(EASE_LIB_DIR)) fs.mkdirSync(EASE_LIB_DIR, { recursive: true });
+                fs.writeFileSync(THEME_CONFIG_FILE, JSON.stringify({ theme: hex }), 'utf8');
+            } catch(e) {
+                console.error("[Preferences] Failed to save theme file cache:", e);
+            }
+            
+            showToast("Theme color updated", "success");
+        }
+
+        function toggleSpeedMode() {
+            var btn = document.getElementById('toggle-speed-btn');
+            if (btn.classList.contains('on')) {
+                btn.classList.remove('on');
+                btn.innerText = 'OFF';
+                window.SPEED_MODE_ENABLED = false;
+                localStorage.setItem('motionreis_speed', 'off');
+                showToast("Speed Mode off", "success");
+            } else {
+                btn.classList.add('on');
+                btn.innerText = 'ON';
+                window.SPEED_MODE_ENABLED = true;
+                localStorage.setItem('motionreis_speed', 'on');
+                showToast("Speed Mode on", "success");
+            }
+        }
+
+        function toggleSmartMode() {
+            var btn = document.getElementById('toggle-smart-btn');
+            if (btn.classList.contains('on')) {
+                btn.classList.remove('on');
+                btn.innerText = 'OFF';
+                window.SMART_PANEL_ENABLED = false;
+                localStorage.setItem('motionreis_smart_panel', 'off');
+                showToast("Smart Panel disabled", "success");
+            } else {
+                btn.classList.add('on');
+                btn.innerText = 'ON';
+                window.SMART_PANEL_ENABLED = true;
+                localStorage.setItem('motionreis_smart_panel', 'on');
+                showToast("Smart Panel enabled", "success");
+            }
+            updateSmartButtons();
+        }
+
+        function toggleThemeIcons() {
+            var btn = document.getElementById('toggle-theme-icons-btn');
+            if (btn.classList.contains('on')) {
+                btn.classList.remove('on');
+                btn.innerText = 'OFF';
+                localStorage.setItem('motionreis_theme_icons', 'off');
+                document.body.classList.remove('theme-icons');
+                showToast("Theme icons disabled", "success");
+            } else {
+                btn.classList.add('on');
+                btn.innerText = 'ON';
+                localStorage.setItem('motionreis_theme_icons', 'on');
+                document.body.classList.add('theme-icons');
+                showToast("Theme icons enabled", "success");
+            }
+        }
+
+        function resetPreferences() {
+            showConfirmModal("Reset Theme", "Reset theme settings to default?", function() {
+                localStorage.removeItem('motionreis_theme');
+                try {
+                    if (fs.existsSync(THEME_CONFIG_FILE)) {
+                        fs.unlinkSync(THEME_CONFIG_FILE);
+                    }
+                } catch(e) {}
+                showToast("Preferences reset. Reloading...", "success");
+                setTimeout(function(){ location.reload(); }, 1000);
+            });
+        }
+
+        function factoryReset() {
+            showConfirmModal("Factory Reset", "Are you sure you want to completely reset? This will delete your library and preferences.", function() {
+                try {
+                    localStorage.clear();
+                    if (fs.existsSync(EASE_LIB_FILE)) fs.unlinkSync(EASE_LIB_FILE);
+                    if (fs.existsSync(CLICK_METRICS_FILE)) fs.unlinkSync(CLICK_METRICS_FILE);
+                    showToast("Factory Reset Complete. Reloading...", "success");
+                    setTimeout(function(){ location.reload(); }, 1500);
+                } catch(e) { alert(e); }
+            });
+        }
+
+        // Initialize preferences on boot
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPreferences();
+            checkFFmpegInstalled();
+        });
+
+        function togglePinComp() {
+            var btn = document.getElementById('pin-comp-btn');
+            if (btn) {
+                btn.classList.toggle('pinned');
+                if (btn.classList.contains('pinned')) {
+                    btn.style.color = 'var(--accent-primary)';
+                    showToast('Comp Pinned! The renderer will lock to this comp.', 'success');
+                } else {
+                    btn.style.color = 'var(--text-secondary)';
+                    showToast('Comp Unpinned. Auto-detecting active comp...', 'info');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

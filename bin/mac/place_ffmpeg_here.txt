@@ -1,0 +1,8 @@
+To enable lightning-fast v2.0 render parallelization:
+1. Download a static FFmpeg binary for macOS (e.g. from static-builds or evermeet.cx).
+2. Extract the archive.
+3. Rename the binary to exactly "ffmpeg" (lowercase, no extension).
+4. Place it in this exact folder: /Users/sebastian/Documents/Motionreis PLUGIN/bin/mac/ffmpeg
+5. Set execution permissions if needed (e.g., chmod +x ffmpeg).
+
+Once done, the Render Engine will immediately unlock high-performance parallel rendering!

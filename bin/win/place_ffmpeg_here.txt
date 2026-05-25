@@ -1,0 +1,5 @@
+To enable lightning-fast v2.0 render parallelization:
+1. Download a static FFmpeg binary for Windows (ffmpeg.exe).
+2. Place it in this exact folder: [PluginRoot]/bin/win/ffmpeg.exe
+
+Once done, the Render Engine will immediately unlock high-performance parallel rendering!
