@@ -35,15 +35,23 @@
 
         /* Smart Panel Emphasis Styles */
         .btn.smart-emphasis {
-            background: var(--bg-active) !important;
+            background: transparent !important;
             border: 2px solid var(--accent-primary) !important;
-            color: var(--text-primary) !important;
+            color: var(--accent-primary) !important;
             box-shadow: none !important;
+            transition: all 0.2s ease;
+        }
+        .btn.smart-emphasis .material-symbols-rounded {
+            color: var(--accent-primary) !important;
+            transition: all 0.2s ease;
         }
         .btn.smart-emphasis:hover {
-            background: var(--bg-hover) !important;
+            background: var(--accent-primary) !important;
             border: 2px solid var(--accent-primary) !important;
-            color: var(--text-primary) !important;
+            color: #ffffff !important;
+        }
+        .btn.smart-emphasis:hover .material-symbols-rounded {
+            color: #ffffff !important;
         }
 
         /* Cohesive Card Icon Themes (Default Mode) */
@@ -280,12 +288,20 @@
                     <div class="section-label">Master Organizer</div>
                     <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Auto-sort your chaotic files into the standard structured folders based on extensions (.psd, .mp4, etc).</p>
                     
-                    <button class="btn btn-primary" style="width:100%; margin-bottom:8px; justify-content:center;" onclick="exec('pipeline', 'osOrganizeProject')">
+                    <button class="btn btn-primary" style="width:100%; margin-bottom:8px; justify-content:center;" onclick="promptOsOrganizeProject()">
                         <span class="material-symbols-rounded">folder_managed</span> Organize Finder (OS)
                     </button>
-                    <button class="btn" style="width:100%; justify-content:center;" onclick="exec('pipeline', 'organizeProject')">
+                    <button class="btn" style="width:100%; justify-content:center;" onclick="triggerAeOrganize()">
                         <span class="material-symbols-rounded">account_tree</span> Organize Project (AE)
                     </button>
+                    <div id="undo-ae-container" style="display:none; width:100%; margin-top:8px; gap:4px;">
+                        <button class="btn" id="undo-ae-btn" style="flex:1; justify-content:center; opacity:0.8; font-size:10px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-subtle);" onclick="undoLastAction()">
+                            <span class="material-symbols-rounded" style="font-size:12px;">undo</span> Redo Last (20s)
+                        </button>
+                        <button class="btn" style="padding:4px; opacity:0.6; justify-content:center;" onclick="closeUndoAe()">
+                            <span class="material-symbols-rounded" style="font-size:14px;">close</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="card" id="card-memory" style="display:none;">
@@ -971,8 +987,20 @@
                         <button id="toggle-theme-icons-btn" class="toggle-btn" onclick="toggleThemeIcons()" style="margin-top:2px;">OFF</button>
                     </div>
                     
+                    <div style="margin-top:16px; border-top:1px solid var(--border-subtle); padding-top:16px;">
+                        <div style="font-size:11px; color:var(--text-primary); margin-bottom:4px;">Data Location</div>
+                        <div style="font-size:9px; color:var(--text-secondary); line-height:1.3; margin-bottom:8px;">Sync your data folder to Dropbox/Drive.</div>
+                        <div id="data-location-display" style="font-family:monospace; font-size:9px; color:var(--text-secondary); background:var(--bg-hover); padding:6px; border-radius:4px; margin-bottom:8px; word-break:break-all;"></div>
+                        <script>
+                            setTimeout(function(){ document.getElementById('data-location-display').innerText = EASE_LIB_DIR; }, 500);
+                        </script>
+                        <button class="btn" style="width:100%; justify-content:center;" onclick="promptMoveDataFolder()">
+                            <span class="material-symbols-rounded">folder_open</span> Move / Sync Folder
+                        </button>
+                    </div>
+                    
                     <div class="grid-2" style="margin-top:16px;">
-                        <button class="btn" style="justify-content:center; color:var(--text-primary);" onclick="resetPreferences()" title="Reset theme settings only">Reset Prefs</button>
+                        <button class="btn" style="justify-content:center; color:var(--text-primary);" onclick="resetPreferences()" title="Reset all UI and behavior settings">Reset Settings</button>
                         <button class="btn" style="justify-content:center; color:var(--accent-danger); border-color:var(--border-strong);" onclick="factoryReset()" title="Delete everything, including Ease Library">Factory Reset</button>
                     </div>
                 </div>
@@ -1064,6 +1092,72 @@
         </div>
     </div>
 
+    <!-- OS ORGANIZE WARNING MODAL -->
+    <div id="os-org-modal" class="modal" style="z-index:3000;">
+        <div class="modal-content" style="max-width:300px; text-align:center;">
+            <div class="modal-header" style="justify-content:center; border-bottom:none; margin-bottom:0;">
+                <h3 style="color:var(--accent-warning); font-size:16px; display:flex; align-items:center; gap:6px;"><span class="material-symbols-rounded">warning</span> Warning</h3>
+            </div>
+            <div style="font-size:12px; color:var(--text-secondary); margin-bottom:15px; line-height:1.4;">
+                You are about to organize the following folder:<br>
+                <div id="os-org-path-display" style="margin:8px 0; padding:6px; background:var(--bg-hover); border-radius:4px; font-family:monospace; word-break:break-all; color:var(--text-primary); font-size:11px;"></div>
+                Please ensure this is a project folder. Do NOT use this inside generic folders like Documents or Downloads!
+            </div>
+            
+            <label id="os-org-dont-ask-container" style="display:none; align-items:center; justify-content:center; gap:8px; font-size:11px; color:var(--text-secondary); margin-bottom:15px; cursor:pointer;">
+                <input type="checkbox" id="os-org-dont-ask" onchange="handleOsOrgCheckbox()">
+                Don't ask me again
+            </label>
+            
+            <div style="display:flex; gap:8px;">
+                <button class="btn" style="flex:1; justify-content:center; background:var(--bg-hover);" onclick="closeOsOrgModal()">Cancel</button>
+                <button class="btn btn-primary" id="os-org-btn-ok" style="flex:1; justify-content:center; background:var(--accent-primary); border-color:var(--accent-primary);" disabled onclick="confirmOsOrg()">OK (5s)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SYNC CONFLICT MODAL -->
+    <div id="sync-conflict-modal" class="modal" style="z-index:2500;">
+        <div class="modal-content" style="max-width:320px;">
+            <div class="modal-header">
+                <h3 style="color:var(--text-primary); font-size:14px; display:flex; align-items:center; gap:6px;">
+                    <span class="material-symbols-rounded" style="color:var(--accent-warning);">sync_problem</span> Data Conflict
+                </h3>
+            </div>
+            <div style="font-size:11px; color:var(--text-secondary); margin-bottom:12px; line-height:1.4;">
+                Motionreis data already exists in the target folder. How would you like to handle the conflict?
+            </div>
+            
+            <div style="background:var(--bg-hover); padding:10px; border-radius:6px; margin-bottom:12px;">
+                <div style="font-size:11px; color:var(--text-primary); margin-bottom:6px; font-weight:600;">Settings & Preferences</div>
+                <label style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-secondary); margin-bottom:6px; cursor:pointer;">
+                    <input type="radio" name="sync_settings" value="local" checked> Keep Local (Overwrite Target)
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-secondary); cursor:pointer;">
+                    <input type="radio" name="sync_settings" value="target"> Use Target (Load Target Settings)
+                </label>
+            </div>
+            
+            <div style="background:var(--bg-hover); padding:10px; border-radius:6px; margin-bottom:16px;">
+                <div style="font-size:11px; color:var(--text-primary); margin-bottom:6px; font-weight:600;">Saved Data (Ease Library, etc.)</div>
+                <label style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-secondary); margin-bottom:6px; cursor:pointer;">
+                    <input type="radio" name="sync_data" value="merge" checked> Merge (Combine Local & Target)
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-secondary); margin-bottom:6px; cursor:pointer;">
+                    <input type="radio" name="sync_data" value="local"> Keep Local (Overwrite Target)
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-secondary); cursor:pointer;">
+                    <input type="radio" name="sync_data" value="target"> Use Target (Load Target Data)
+                </label>
+            </div>
+            
+            <div style="display:flex; gap:8px;">
+                <button class="btn" style="flex:1; justify-content:center; background:var(--bg-hover);" onclick="closeSyncConflictModal()">Cancel</button>
+                <button class="btn btn-primary" style="flex:1; justify-content:center;" onclick="executeDataSync()">Proceed</button>
+            </div>
+        </div>
+    </div>
+
     <!-- TEXT PROMPT MODAL -->
     <div id="text-prompt-modal" class="modal" style="z-index:2000;">
         <div class="modal-content" style="max-width:280px;">
@@ -1094,12 +1188,32 @@
         const fs = require('fs');
         const path = require('path');
         const os = require('os');
-        const EASE_LIB_DIR = path.join(os.homedir(), 'Documents', 'Motionreis SUITE');
-        const EASE_LIB_FILE = path.join(EASE_LIB_DIR, 'ease_presets.json');
+        // Data Path Architecture
+        const POINTER_FILE = path.join(os.homedir(), 'Documents', 'Motionreis_Pointer.txt');
+        
+        let EASE_LIB_DIR = path.join(os.homedir(), 'Documents', 'Motionreis SUITE');
+        
+        try {
+            if (fs.existsSync(POINTER_FILE)) {
+                let p = fs.readFileSync(POINTER_FILE, 'utf8').trim();
+                if (fs.existsSync(p)) {
+                    if (!p.endsWith('Motionreis SUITE')) {
+                        EASE_LIB_DIR = path.join(p, 'Motionreis SUITE');
+                    } else {
+                        EASE_LIB_DIR = p;
+                    }
+                }
+            }
+        } catch(e) { console.error("Error reading pointer:", e); }
+        
+        // Create dir early if it doesn't exist
+        if (!fs.existsSync(EASE_LIB_DIR)) fs.mkdirSync(EASE_LIB_DIR, { recursive: true });
+
+        let EASE_LIB_FILE = path.join(EASE_LIB_DIR, 'ease_presets.json');
         
         // ── NATIVE RECENT PROJECTS SYSTEM ───────────────────────────
-        const RECENT_CACHE_FILE = path.join(EASE_LIB_DIR, 'recent_project_cache.json');
-        const THEME_CONFIG_FILE = path.join(EASE_LIB_DIR, 'theme_config.json');
+        let RECENT_CACHE_FILE = path.join(EASE_LIB_DIR, 'recent_project_cache.json');
+        let THEME_CONFIG_FILE = path.join(EASE_LIB_DIR, 'theme_config.json');
         let currentlyOpenProjectPath = null;
         let currentlyOpenProjectLastActive = null;
         
@@ -1544,9 +1658,18 @@
         
         
         var activeConfirmCallback = null;
-        function showConfirmModal(title, msg, callback) {
+        function showConfirmModal(title, msg, callback, btnText, btnColor) {
             document.getElementById('confirm-title').innerText = title;
             document.getElementById('confirm-desc').innerText = msg;
+            var btn = document.getElementById('confirm-btn-yes');
+            btn.innerText = btnText || "Delete";
+            if (btnColor) {
+                btn.style.background = btnColor;
+                btn.style.borderColor = btnColor;
+            } else {
+                btn.style.background = "var(--accent-danger)";
+                btn.style.borderColor = "var(--accent-danger)";
+            }
             activeConfirmCallback = callback;
             document.getElementById('confirm-modal').style.display = 'flex';
         }
@@ -1559,6 +1682,120 @@
             closeConfirmModal();
             if (cb) cb();
         });
+
+        // OS Organize Security Flow
+        var osOrgTimer = null;
+        var osOrgCountdown = 5;
+        var activeOsOrgPath = "";
+        
+        function promptOsOrganizeProject() {
+            Bridge.eval('pipeline.selectOSFolder()').then(function(resData) {
+                if (resData === "Cancelled.") return;
+                
+                var path = resData.path;
+                activeOsOrgPath = path;
+                
+                if (localStorage.getItem('dontAskOsOrganize') === 'true') {
+                    exec('pipeline', 'osOrganizeProject', {path: path});
+                    return;
+                }
+                
+                var pathParts = path.replace(/\\/g, '/').split('/');
+                var shortPath = path;
+                if (pathParts.length > 2) {
+                    shortPath = '... / ' + pathParts[pathParts.length - 2] + ' / ' + pathParts[pathParts.length - 1];
+                }
+                
+                document.getElementById('os-org-path-display').innerText = shortPath;
+                document.getElementById('os-org-modal').style.display = 'flex';
+                document.getElementById('os-org-dont-ask-container').style.display = 'none';
+                document.getElementById('os-org-dont-ask').checked = false;
+                
+                var btnOk = document.getElementById('os-org-btn-ok');
+                btnOk.disabled = true;
+                btnOk.innerText = 'OK (Wait ' + 5 + 's)';
+                osOrgCountdown = 5;
+                var phase = 1;
+                
+                clearInterval(osOrgTimer);
+                osOrgTimer = setInterval(function() {
+                    osOrgCountdown--;
+                    if (osOrgCountdown <= 0) {
+                        if (phase === 1) {
+                            document.getElementById('os-org-dont-ask-container').style.display = 'flex';
+                            phase = 2;
+                            osOrgCountdown = 3;
+                            btnOk.innerText = 'OK (Wait ' + osOrgCountdown + 's)';
+                        } else {
+                            clearInterval(osOrgTimer);
+                            btnOk.innerText = 'OK';
+                            btnOk.disabled = false;
+                        }
+                    } else {
+                        btnOk.innerText = 'OK (Wait ' + osOrgCountdown + 's)';
+                    }
+                }, 1000);
+            }).catch(function(err) {
+                if (err.message && err.message !== "Cancelled.") {
+                    showToast(err.message, 'error');
+                }
+            });
+        }
+        
+        function handleOsOrgCheckbox() {
+            // Checkbox interaction no longer resets the timer, the 3s delay is automatic.
+        }
+        
+        function closeOsOrgModal() {
+            clearInterval(osOrgTimer);
+            document.getElementById('os-org-modal').style.display = 'none';
+        }
+        
+        function confirmOsOrg() {
+            var isChecked = document.getElementById('os-org-dont-ask').checked;
+            if (isChecked) {
+                localStorage.setItem('dontAskOsOrganize', 'true');
+            }
+            closeOsOrgModal();
+            if (activeOsOrgPath) {
+                exec('pipeline', 'osOrganizeProject', {path: activeOsOrgPath});
+            }
+        }
+
+        var undoAeTimer = null;
+        var undoAeCountdown = 20;
+
+        function triggerAeOrganize() {
+            exec('pipeline', 'organizeProject');
+            
+            // Show the Redo/Undo button container
+            document.getElementById('undo-ae-container').style.display = 'flex';
+            var btn = document.getElementById('undo-ae-btn');
+            undoAeCountdown = 20;
+            btn.innerText = 'Redo Last (' + undoAeCountdown + 's)';
+            
+            clearInterval(undoAeTimer);
+            undoAeTimer = setInterval(function() {
+                undoAeCountdown--;
+                if (undoAeCountdown <= 0) {
+                    closeUndoAe();
+                } else {
+                    btn.innerText = 'Redo Last (' + undoAeCountdown + 's)';
+                }
+            }, 1000);
+        }
+        
+        function closeUndoAe() {
+            clearInterval(undoAeTimer);
+            var container = document.getElementById('undo-ae-container');
+            if (container) container.style.display = 'none';
+        }
+
+        function undoLastAction() {
+            var csInterface = new CSInterface();
+            csInterface.evalScript('app.executeCommand(app.findMenuCommandId("Undo"))');
+            closeUndoAe();
+        }
 
         function openCustomizeModal() {
             var modal = document.getElementById('customize-modal');
@@ -3019,16 +3256,20 @@
         }
 
         function resetPreferences() {
-            showConfirmModal("Reset Theme", "Reset theme settings to default?", function() {
+            showConfirmModal("Reset Settings", "Reset all preferences and UI settings to default?", function() {
                 localStorage.removeItem('motionreis_theme');
+                localStorage.removeItem('motionreis_theme_icons');
+                localStorage.removeItem('motionreis_speed');
+                localStorage.removeItem('motionreis_smart_panel');
+                localStorage.removeItem('dontAskOsOrganize');
                 try {
                     if (fs.existsSync(THEME_CONFIG_FILE)) {
                         fs.unlinkSync(THEME_CONFIG_FILE);
                     }
                 } catch(e) {}
-                showToast("Preferences reset. Reloading...", "success");
+                showToast("Settings reset. Reloading...", "success");
                 setTimeout(function(){ location.reload(); }, 1000);
-            });
+            }, "Reset", "var(--accent-danger)");
         }
 
         function factoryReset() {
@@ -3041,6 +3282,97 @@
                     setTimeout(function(){ location.reload(); }, 1500);
                 } catch(e) { alert(e); }
             });
+        }
+
+        let pendingSyncTarget = "";
+        
+        function promptMoveDataFolder() {
+            Bridge.eval('pipeline.selectOSFolder()').then(function(resData) {
+                if (resData === "Cancelled.") return;
+                
+                var basePath = resData.path;
+                var targetPath = path.join(basePath, 'Motionreis SUITE');
+                
+                if (targetPath === EASE_LIB_DIR || basePath === EASE_LIB_DIR) {
+                    showToast("Already using this directory.", "info");
+                    return;
+                }
+                
+                pendingSyncTarget = targetPath;
+                let hasData = false;
+                if (fs.existsSync(targetPath)) {
+                    if (fs.existsSync(path.join(targetPath, 'ease_presets.json')) || fs.existsSync(path.join(targetPath, 'theme_config.json'))) {
+                        hasData = true;
+                    }
+                }
+                
+                if (hasData) {
+                    document.getElementById('sync-conflict-modal').style.display = 'flex';
+                } else {
+                    executeDataSyncDirectly(targetPath, "local", "local");
+                }
+            }).catch(function(err) {
+                if (err.message && err.message !== "Cancelled.") showToast(err.message, 'error');
+            });
+        }
+        
+        function closeSyncConflictModal() {
+            document.getElementById('sync-conflict-modal').style.display = 'none';
+            pendingSyncTarget = "";
+        }
+        
+        function executeDataSync() {
+            let settingsChoice = document.querySelector('input[name="sync_settings"]:checked').value;
+            let dataChoice = document.querySelector('input[name="sync_data"]:checked').value;
+            closeSyncConflictModal();
+            executeDataSyncDirectly(pendingSyncTarget, settingsChoice, dataChoice);
+        }
+        
+        function executeDataSyncDirectly(targetPath, settingsChoice, dataChoice) {
+            try {
+                if (!fs.existsSync(targetPath)) {
+                    fs.mkdirSync(targetPath, { recursive: true });
+                }
+                
+                let dataFiles = ['ease_presets.json', 'expr_presets.json', 'home_widgets.json'];
+                dataFiles.forEach(function(f) {
+                    let localF = path.join(EASE_LIB_DIR, f);
+                    let targetF = path.join(targetPath, f);
+                    
+                    if (dataChoice === "merge") {
+                        let localData = [];
+                        let targetData = [];
+                        if (fs.existsSync(localF)) localData = JSON.parse(fs.readFileSync(localF, 'utf8'));
+                        if (fs.existsSync(targetF)) targetData = JSON.parse(fs.readFileSync(targetF, 'utf8'));
+                        
+                        let merged = targetData.slice();
+                        localData.forEach(item => {
+                            let exists = merged.find(m => (m.id && item.id && m.id === item.id) || (m.name && item.name && m.name === item.name));
+                            if (!exists) merged.push(item);
+                        });
+                        fs.writeFileSync(targetF, JSON.stringify(merged, null, 4));
+                    } else if (dataChoice === "local") {
+                        if (fs.existsSync(localF)) fs.copyFileSync(localF, targetF);
+                    }
+                });
+                
+                let settingsFiles = ['theme_config.json', 'recent_project_cache.json', 'click_metrics.json'];
+                settingsFiles.forEach(function(f) {
+                    let localF = path.join(EASE_LIB_DIR, f);
+                    let targetF = path.join(targetPath, f);
+                    
+                    if (settingsChoice === "local") {
+                        if (fs.existsSync(localF)) fs.copyFileSync(localF, targetF);
+                    }
+                });
+                
+                fs.writeFileSync(POINTER_FILE, targetPath, 'utf8');
+                showToast("Data Sync Complete! Reloading...", "success");
+                setTimeout(function(){ location.reload(); }, 1500);
+            } catch(e) {
+                console.error(e);
+                showToast("Sync Error: " + e.message, "error");
+            }
         }
 
         // Initialize preferences on boot

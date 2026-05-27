@@ -173,17 +173,38 @@ var creative = {
             solid.startTime = 0;
             solid.moveBefore(audioLayer);
             
-            // Add Audio Spectrum
-            var effect = solid.effect.addProperty("ADBE Audio Spectrum");
-            effect.property("Audio Layer").setValue(audioLayer.index);
+            // Cascading addition logic for extreme compatibility across AE versions/localizations
+            var effect = null;
+            var effectNames = ["ADBE Audio Waveform", "ADBE Audio Spectrum", "Audio Waveform", "Audio Spectrum"];
+            var addError = "";
+            for (var eIdx = 0; eIdx < effectNames.length; eIdx++) {
+                try {
+                    effect = solid.effect.addProperty(effectNames[eIdx]);
+                    if (effect) break;
+                } catch(err) {
+                    addError = err.message;
+                }
+            }
             
-            // Beautify it a bit
-            effect.property("Start Point").setValue([comp.width*0.2, comp.height/2]);
-            effect.property("End Point").setValue([comp.width*0.8, comp.height/2]);
-            effect.property("Maximum Height").setValue(1500);
-            effect.property("Thickness").setValue(5);
-            effect.property("Inside Color").setValue([0, 1, 0.8, 1]); // Cyan
-            effect.property("Outside Color").setValue([0, 0.5, 1, 1]); // Blue
+            if (!effect) {
+                return MotionreisUtils.sendError("Failed to add Waveform effect: " + addError);
+            }
+            
+            // Safe property setter helper to prevent localization crashes
+            function setSafeProperty(effectObj, propName, value) {
+                try {
+                    var prop = effectObj.property(propName);
+                    if (prop) prop.setValue(value);
+                } catch(e) {}
+            }
+            
+            setSafeProperty(effect, "Audio Layer", audioLayer.index);
+            setSafeProperty(effect, "Start Point", [comp.width * 0.2, comp.height / 2]);
+            setSafeProperty(effect, "End Point", [comp.width * 0.8, comp.height / 2]);
+            setSafeProperty(effect, "Maximum Height", 1500);
+            setSafeProperty(effect, "Thickness", 5);
+            setSafeProperty(effect, "Inside Color", [0, 1, 0.8, 1]); // Cyan
+            setSafeProperty(effect, "Outside Color", [0, 0.5, 1, 1]); // Blue
             
             app.endUndoGroup();
             return MotionreisUtils.sendResponse("Audio Waveform successfully generated from layers " + audioLayer.name);

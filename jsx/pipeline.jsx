@@ -78,7 +78,6 @@ var pipeline = {
                 "04_IMAGE": ["PSD", "PNG", "AI", "JPEG", "TIFF"],
                 "05_BRIEF": [],
                 "06_COMP": ["MAIN", "PRECOMP"],
-                "06_PROJECT": ["AE", "FCPX", "PR"],
                 "07_CG": [],
                 "08_VIDEO DATA": ["PRORESS", "REPORT", "RAW"]
             };
@@ -168,8 +167,6 @@ var pipeline = {
                         else if (ext === "ai" || ext === "eps") dest = folders["01_ASSET_AI"];
                         else if (ext === "wav" || ext === "mp3" || ext === "aac" || ext === "m4a") dest = folders["02_AUDIO_SFX"];
                         else if (ext === "mp4" || ext === "mov" || ext === "avi" || ext === "mxf") dest = folders["08_VIDEO DATA_RAW"];
-                        else if (ext === "aep") dest = folders["06_PROJECT_AE"];
-                        else if (ext === "prproj") dest = folders["06_PROJECT_PR"];
                         else dest = folders["01_ASSET"];
                     }
                 } else if (item instanceof FolderItem) {
@@ -197,7 +194,7 @@ var pipeline = {
         }
     },
     
-    osOrganizeProject: function(argsStr) {
+    selectOSFolder: function() {
         try {
             if (app && app.project && !app.project.file) {
                 return MotionreisUtils.sendError("You must save your project first!");
@@ -210,6 +207,21 @@ var pipeline = {
             
             var targetFolder = Folder.selectDialog("Select main folder to organize:");
             if (!targetFolder) return MotionreisUtils.sendResponse("Cancelled.");
+            
+            // Return special payload with the selected path
+            return MotionreisUtils.sendResponse({ path: targetFolder.fsName });
+        } catch(e) {
+            return MotionreisUtils.sendError(e.message);
+        }
+    },
+    
+    osOrganizeProject: function(argsStr) {
+        try {
+            var args = JSON.parse(argsStr);
+            var targetFolderPath = args.path;
+            var targetFolder = new Folder(targetFolderPath);
+            
+            if (!targetFolder.exists) return MotionreisUtils.sendError("Folder not found.");
             
             var struct = {
                 "01_ASSET": ["3D", "PSD", "PNG", "AI", "JPEG", "OTHER"],
@@ -321,33 +333,43 @@ var pipeline = {
                     var newFileObj = new File(dest.absoluteURI + "/" + decodedName);
                     
                     if (f.fsName !== newFileObj.fsName) {
-                        // Try native rename first (using absoluteURI path)
-                        var success = f.rename(newFileObj.absoluteURI);
-                        
-                        // Fallback to shell command (highly critical for moving open .aep files on macOS)
-                        if (!success) {
+                        var success = false;
+                        if (fObj.isAep) {
+                            // Specialized logic for AEP to keep project open and update Recent Files
                             try {
-                                var isMac = $.os.toLowerCase().indexOf("mac") !== -1;
-                                var escSrc = "'" + f.fsName.replace(/'/g, "'\\''") + "'";
-                                var escDest = "'" + newFileObj.fsName.replace(/'/g, "'\\''") + "'";
-                                var cmd = "";
-                                if (isMac) {
-                                    cmd = "mv " + escSrc + " " + escDest;
-                                } else {
-                                    cmd = 'cmd.exe /c move "' + f.fsName + '" "' + newFileObj.fsName + '"';
-                                }
-                                system.callSystem(cmd);
-                                if (newFileObj.exists) {
+                                app.project.save(newFileObj);
+                                try { f.remove(); } catch(e) {}
+                                success = true;
+                            } catch (e) {}
+                        } else {
+                            // Try native rename first (using absoluteURI path)
+                            success = f.rename(newFileObj.absoluteURI);
+                            
+                            // Fallback to shell command (highly critical for moving open files on macOS)
+                            if (!success) {
+                                try {
+                                    var isMac = $.os.toLowerCase().indexOf("mac") !== -1;
+                                    var escSrc = "'" + f.fsName.replace(/'/g, "'\\''") + "'";
+                                    var escDest = "'" + newFileObj.fsName.replace(/'/g, "'\\''") + "'";
+                                    var cmd = "";
+                                    if (isMac) {
+                                        cmd = "mv " + escSrc + " " + escDest;
+                                    } else {
+                                        cmd = 'cmd.exe /c move "' + f.fsName + '" "' + newFileObj.fsName + '"';
+                                    }
+                                    system.callSystem(cmd);
+                                    if (newFileObj.exists) {
+                                        success = true;
+                                    }
+                                } catch(e) {}
+                            }
+                            
+                            // Last resort fallback: copy & remove
+                            if (!success) {
+                                if (f.copy(newFileObj)) {
+                                    f.remove();
                                     success = true;
                                 }
-                            } catch(e) {}
-                        }
-                        
-                        // Last resort fallback: copy & remove
-                        if (!success) {
-                            if (f.copy(newFileObj)) {
-                                f.remove();
-                                success = true;
                             }
                         }
                         
@@ -392,10 +414,9 @@ var pipeline = {
             }
             
             if (movedCurrentAep) {
-                // If AEP was moved, force an un-ignorable AE alert, then forcefully close the project to prevent saving duplicates.
-                alert("🚨 CRITICAL ACTION 🚨\n\nYour project file (.aep) has been moved to the new Master Folder.\n\nTo prevent saving duplicates, this project will now close automatically. Please re-open the project from your new Master Folder.", "Motionreis Organizer", false);
-                app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
-                return MotionreisUtils.sendResponse("Organizer finished. Project was closed safely.");
+                // The AEP was saved to the new location natively via app.project.save(newLocation).
+                // AE updates Recent Files natively, and we can keep the project open!
+                return MotionreisUtils.sendResponse("SUCCESS: Moved " + movedCount + " files. Project has been updated to the new location.");
             } else {
                 return MotionreisUtils.sendResponse("SUCCESS: Moved " + movedCount + " files.");
             }

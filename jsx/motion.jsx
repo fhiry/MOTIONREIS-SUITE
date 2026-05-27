@@ -1528,11 +1528,57 @@ var motion = {
 
     bakeExpressions: function() {
         try {
+            var comp = MotionreisUtils.getActiveComp();
+            var selectedLayers = MotionreisUtils.getSelectedLayers(comp);
+            var selectedProps = comp.selectedProperties;
+            
+            if (selectedLayers.length === 0 && selectedProps.length === 0) {
+                return MotionreisUtils.sendError("Select a layer or property with an active expression.");
+            }
+            
+            function hasActiveExpression(propGroup) {
+                for (var i = 1; i <= propGroup.numProperties; i++) {
+                    var prop = propGroup.property(i);
+                    if (prop.propertyType === PropertyType.PROPERTY) {
+                        if (prop.canSetExpression && prop.expressionEnabled && prop.expression !== "") {
+                            return true;
+                        }
+                    } else if (prop.propertyType === PropertyType.INDEXED_GROUP || prop.propertyType === PropertyType.NAMED_GROUP) {
+                        if (hasActiveExpression(prop)) return true;
+                    }
+                }
+                return false;
+            }
+            
+            var foundExpr = false;
+            if (selectedProps.length > 0) {
+                for (var p = 0; p < selectedProps.length; p++) {
+                    if (selectedProps[p].canSetExpression && selectedProps[p].expressionEnabled && selectedProps[p].expression !== "") {
+                        foundExpr = true;
+                        break;
+                    }
+                }
+            } else {
+                for (var l = 0; l < selectedLayers.length; l++) {
+                    if (hasActiveExpression(selectedLayers[l])) {
+                        foundExpr = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (!foundExpr) {
+                return MotionreisUtils.sendError("No active expressions found in the current selection.");
+            }
+            
             app.beginUndoGroup("Bake Expressions");
             app.executeCommand(app.findMenuCommandId("Convert Expression to Keyframes"));
             app.endUndoGroup();
             return MotionreisUtils.sendResponse("Ekspresi berhasil di-bake menjadi keyframes.");
-        } catch(e) { app.endUndoGroup(); return MotionreisUtils.sendError(e.message); }
+        } catch(e) { 
+            app.endUndoGroup(); 
+            return MotionreisUtils.sendError(e.message); 
+        }
     },
 
     // ---- SMART SEQUENCE & TRIM ----

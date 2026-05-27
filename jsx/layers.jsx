@@ -390,9 +390,27 @@ var layers = {
             var indices = [];
             for (var i = 0; i < layers.length; i++) indices.push(layers[i].index);
             
-            var newComp = comp.layers.precompose(indices, "Pre-Render " + layers[0].name, true);
+            // Clean comp name
+            var cleanName = layers[0].name.replace(/[\/\*:\?\"\<\>\|]/g, "_");
+            var compName = "Pre-comp " + cleanName;
             
-            // Trim the newly created precomp layer in the main timeline to match original combined bounds
+            var newComp = comp.layers.precompose(indices, compName, true);
+            
+            // Trimming & Shifting logic (replicating AE native "Adjust composition duration to the time span of the selected layers" behavior)
+            var span = maxOut - minIn;
+            if (span <= 0) span = 1 / comp.frameRate;
+            
+            // 1. Shift all layers inside the new comp to start at 0
+            for (var k = 1; k <= newComp.numLayers; k++) {
+                newComp.layer(k).startTime -= minIn;
+            }
+            
+            // 2. Resize the new comp duration to exactly fit the span
+            newComp.duration = span;
+            newComp.workAreaStart = 0;
+            newComp.workAreaDuration = span;
+            
+            // 3. Find and adjust the precomp layer in the parent comp
             var precompLayer = null;
             for (var j = 1; j <= comp.numLayers; j++) {
                 if (comp.layer(j).source === newComp) {
@@ -401,6 +419,7 @@ var layers = {
                 }
             }
             if (precompLayer) {
+                precompLayer.startTime = minIn;
                 precompLayer.inPoint = minIn;
                 precompLayer.outPoint = maxOut;
             }
@@ -457,6 +476,17 @@ var layers = {
             var layers = MotionreisUtils.getSelectedLayers(comp);
             if (layers.length === 0) {
                 return MotionreisUtils.sendError("Select at least one Shape Layer.");
+            }
+            
+            var hasShapeLayer = false;
+            for (var i = 0; i < layers.length; i++) {
+                if (layers[i] instanceof ShapeLayer) {
+                    hasShapeLayer = true;
+                    break;
+                }
+            }
+            if (!hasShapeLayer) {
+                return MotionreisUtils.sendError("Selected layer is not a Shape Layer.");
             }
             
             var explodedLayersCount = 0;
@@ -585,6 +615,11 @@ var layers = {
                 
                 // Hide the original layer
                 shapeLayer.enabled = false;
+            }
+            
+            if (explodedLayersCount === 0) {
+                app.endUndoGroup();
+                return MotionreisUtils.sendError("No shapes or groups found inside the selected Shape Layer to extract.");
             }
             
             // Select the new extracted layers in the timeline
