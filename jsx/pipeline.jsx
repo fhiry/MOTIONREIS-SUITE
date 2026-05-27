@@ -52,6 +52,33 @@ var pipeline = {
         }
     },
 
+    getAESettingsPaths: function() {
+        try {
+            var majorVersion = app.version.split(".")[0] + ".0";
+            var isMac = (Folder.fs === "Macintosh");
+            var prefFolder;
+            if (isMac) {
+                // home is myDocuments' parent. /Library/Preferences is standard
+                prefFolder = new Folder(Folder.myDocuments.parent.fsName + "/Library/Preferences/Adobe/After Effects/" + majorVersion);
+            } else {
+                prefFolder = new Folder(Folder.userData.fsName + "/Adobe/After Effects/" + majorVersion);
+            }
+            
+            var userPresetsFolder = new Folder(Folder.myDocuments.fsName + "/Adobe/After Effects " + majorVersion + "/User Presets");
+            
+            var paths = {
+                majorVersion: majorVersion,
+                prefFolderPath: prefFolder.exists ? prefFolder.fsName : "",
+                modifiedWorkspacesPath: new Folder(prefFolder.fsName + "/Modified Workspaces").exists ? prefFolder.fsName + "/Modified Workspaces" : "",
+                userPresetsPath: userPresetsFolder.exists ? userPresetsFolder.fsName : ""
+            };
+            
+            return MotionreisUtils.sendResponse(paths);
+        } catch(e) {
+            return MotionreisUtils.sendError(e.message);
+        }
+    },
+
     purgeCache: function() {
         try {
             app.purge(PurgeTarget.ALL_CACHES);
@@ -193,7 +220,18 @@ var pipeline = {
             return MotionreisUtils.sendError(e.message);
         }
     },
-    
+    selectGenericFolder: function() {
+        try {
+            var targetFolder = Folder.selectDialog("Select Folder:");
+            if (!targetFolder) return MotionreisUtils.sendResponse("Cancelled.");
+            
+            // Return special payload with the selected path
+            return MotionreisUtils.sendResponse({ path: targetFolder.fsName });
+        } catch(e) {
+            return MotionreisUtils.sendError(e.message);
+        }
+    },
+
     selectOSFolder: function() {
         try {
             if (app && app.project && !app.project.file) {
@@ -525,33 +563,29 @@ var pipeline = {
         }
     },
 
-    prepareRenderQueue: function(argsStr) {
+    prepCLIRender: function(configPath) {
         try {
             app.beginUndoGroup("Prepare Render Queue V2");
+            // Suppress dialogs to prevent headless hangs!
+            app.suppressDialogs = true;
             
-            if (!app.project) {
-                return MotionreisUtils.sendError("No project open.");
-            }
+            if (!app.project) return MotionreisUtils.sendError("No project open.");
             
-            var args = JSON.parse(argsStr);
-            var configPath = args.configPath;
-            
-            // Read config file
+            // configPath is passed directly as a file path string
             var configFile = new File(configPath);
-            if (!configFile.exists) {
-                return MotionreisUtils.sendError("Render config file not found: " + configPath);
-            }
+            if (!configFile.exists) return MotionreisUtils.sendError("Render config file not found: " + configPath);
             
             configFile.open("r");
             var configContent = configFile.read();
             configFile.close();
-            
             var config = JSON.parse(configContent);
+            
+            // Force Viewer Focus to get correct active item!
+            try { app.activeViewer.setActive(); } catch(e) {}
             
             // Retrieve Target Comp
             var comp = null;
             if (config.compName && config.compName !== "[Auto-Detecting...]" && config.compName !== "Waiting for comp...") {
-                // Find comp by name
                 for (var i = 1; i <= app.project.numItems; i++) {
                     if (app.project.item(i) instanceof CompItem && app.project.item(i).name === config.compName) {
                         comp = app.project.item(i);
@@ -559,44 +593,72 @@ var pipeline = {
                     }
                 }
             }
-            
-            // Fallback to active comp
             if (!comp) {
-                comp = MotionreisUtils.getActiveComp();
+                if (app.project.activeItem && app.project.activeItem instanceof CompItem) {
+                    comp = app.project.activeItem;
+                } else {
+                    return MotionreisUtils.sendError("No active composition found. Please focus a composition first.");
+                }
             }
             
-            if (!comp) {
-                return MotionreisUtils.sendError("No active or matching composition found to render.");
+            // Path Validation & Save As
+            if (!app.project.file) {
+                app.project.save(); // Prompts Save As dialog
+                if (!app.project.file) {
+                    return MotionreisUtils.sendError("Project must be saved to disk before CLI rendering.");
+                }
             }
             
-            // Auto-Save Project if requested
-            if (config.autoSave && app.project.file) {
-                app.project.save();
-            } else if (config.autoSave && !app.project.file) {
-                return MotionreisUtils.sendError("Please save your project (.aep) at least once before auto-saving and rendering.");
+            var currentFile = app.project.file;
+            
+            // Auto-Versioning logic
+            if (config.autoVersion) {
+                var docName = currentFile.name;
+                var parentDir = currentFile.parent.fsName;
+                var newName = docName;
+                var match = docName.match(/_v(\d+)\.aep$/i);
+                
+                if (match) {
+                    var verNum = parseInt(match[1], 10) + 1;
+                    var verStr = verNum < 10 ? "0" + verNum : "" + verNum;
+                    newName = docName.replace(/_v\d+\.aep$/i, "_v" + verStr + ".aep");
+                } else {
+                    newName = docName.replace(/\.aep$/i, "_v01.aep");
+                }
+                
+                var newFileTarget = new File(parentDir + "/" + newName);
+                app.project.save(newFileTarget);
+                currentFile = app.project.file; // update to new file
+            } else if (config.autoSave) {
+                app.project.save(currentFile);
             }
             
-            // Clear existing Render Queue items
+            // Configure Render Queue
             var rq = app.project.renderQueue;
-            while (rq.numItems > 0) {
-                rq.item(1).remove();
-            }
+            while (rq.numItems > 0) { rq.item(1).remove(); }
             
-            // Add Comp to Render Queue
             var rqItem = rq.items.add(comp);
             
-            // Configure Render Settings Template
+            // Render Settings
             if (config.renderSettings && config.renderSettings !== "custom") {
-                try {
-                    rqItem.applyTemplate(config.renderSettings);
-                } catch(e) {
-                    try { rqItem.applyTemplate("Best Settings"); } catch(err) {}
-                }
+                try { rqItem.applyTemplate(config.renderSettings); } catch(e) { rqItem.applyTemplate("Best Settings"); }
             } else {
                 try { rqItem.applyTemplate("Best Settings"); } catch(err) {}
             }
             
-            // Force Render Settings Time Range
+            // Output Module
+            var om = rqItem.outputModule(1);
+            if (config.codec) {
+                try {
+                    om.applyTemplate(config.codec);
+                } catch(e) {
+                    try { om.applyTemplate("Lossless"); } catch(err) {}
+                }
+            } else {
+                try { om.applyTemplate("Lossless"); } catch(err) {}
+            }
+            
+            // Time Range
             var startFrame = 0;
             var endFrame = Math.round(comp.duration * comp.frameRate) - 1;
             
@@ -614,56 +676,39 @@ var pipeline = {
                 }
             } catch(err) {}
             
-            // Configure Output Module (Forced to PNG Sequence for multi-threaded chunk rendering!)
-            var om = rqItem.outputModule(1);
-            var success = false;
-            var seqTemplates = ["PNG Sequence", "PNG Sequence with Alpha", "PNG", "Photoshop", "TIFF Sequence", "JPEG Sequence"];
-            for (var t = 0; t < seqTemplates.length; t++) {
-                try {
-                    om.applyTemplate(seqTemplates[t]);
-                    success = true;
-                    break;
-                } catch(e) {}
-            }
-            if (!success) {
-                try { om.applyTemplate("Lossless"); } catch(err) {}
-            }
-            
-            // Determine Destination Path
-            var projectFile = app.project.file;
+            // Destination Path
             var destDirStr = "";
-            
-            if (config.saveNextToAEP && projectFile) {
-                destDirStr = projectFile.parent.fsName;
+            if (config.saveNextToAEP) {
+                destDirStr = currentFile.parent.fsName;
             } else if (config.outputPath && config.outputPath !== "[Same as Project Folder]") {
                 destDirStr = config.outputPath;
-            } else if (projectFile) {
-                destDirStr = projectFile.parent.fsName;
             } else {
-                return MotionreisUtils.sendError("No output path specified and project has not been saved yet.");
+                destDirStr = currentFile.parent.fsName;
             }
+            
+            var destFolder = new Folder(destDirStr);
+            if (!destFolder.exists) destFolder.create();
             
             var finalName = config.outputName || comp.name;
-            
-            // Ensure destination directory exists
-            var destFolder = new Folder(destDirStr);
-            if (!destFolder.exists) {
-                destFolder.create();
+            var isSequence = false;
+            var codecLC = (config.codec || "").toLowerCase();
+            if (codecLC.indexOf("sequence") !== -1 || codecLC.indexOf("png") !== -1 || codecLC.indexOf("jpeg") !== -1 || codecLC.indexOf("tiff") !== -1) {
+                isSequence = true;
             }
             
-            // Create a temp chunks directory next to output path
-            var chunksDirName = finalName + "_chunks";
-            var chunksFolder = new Folder(destFolder.fsName + "/" + chunksDirName);
-            if (!chunksFolder.exists) {
-                chunksFolder.create();
+            var filePattern = "";
+            if (isSequence) {
+                // create subfolder for sequence
+                var seqFolder = new Folder(destFolder.fsName + "/" + finalName);
+                if (!seqFolder.exists) seqFolder.create();
+                filePattern = seqFolder.fsName + "/" + finalName + "_[#####]";
+                om.file = new File(filePattern);
+            } else {
+                om.file = new File(destFolder.fsName + "/" + finalName);
             }
             
-            // Apply naming convention for output file (PNG sequence pattern: frame_[#####].png)
-            var filePattern = chunksFolder.fsName + "/frame_[#####].png";
-            om.file = new File(filePattern);
-            
-            // Save the project one last time to save the render queue item (so aerender CLI will see it in the saved AEP on disk!)
-            app.project.save();
+            // Save project before handing off to aerender so it sees the queue!
+            app.project.save(currentFile);
             
             // Clean up: IMMEDIATELY remove the queued item from the ACTIVE project inside After Effects,
             // so the Render Queue panel does not stay dirty, populated, or focused in the user's workspace!
@@ -674,17 +719,17 @@ var pipeline = {
             // Refocus the Composition viewer in AE to push the empty Render Queue panel back to the background!
             try {
                 comp.openInViewer();
+                app.activeViewer.setActive();
             } catch(e) {}
             
             app.endUndoGroup();
             
             return MotionreisUtils.sendResponse({
-                projectPath: projectFile.fsName,
+                projectPath: currentFile.fsName,
                 compName: comp.name,
                 startFrame: startFrame,
                 endFrame: endFrame,
                 fps: comp.frameRate,
-                chunksDir: chunksFolder.fsName,
                 finalDestDir: destFolder.fsName,
                 finalName: finalName
             });
@@ -764,45 +809,278 @@ var pipeline = {
                 return MotionreisUtils.sendError("Select or open a Composition to duplicate.");
             }
             
-            // Simplified deep duplicate logic: just duplicate the main comp
-            // A full deep duplicator requires recursive function which we built in previous session.
-            function updateExpressions(layers, oldName, newName) {
-                for (var i = 1; i <= layers.numProperties; i++) {
-                    var prop = layers.property(i);
-                    if (prop.canSetExpression && prop.expression !== "") {
-                        prop.expression = prop.expression.replace(new RegExp(oldName, 'g'), newName);
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+
+            function applyNamingRules(oldName) {
+                var newName = oldName;
+                
+                if (args.replaceCb && args.searchText !== "") {
+                    var regex = new RegExp(escapeRegExp(args.searchText), 'g');
+                    newName = newName.replace(regex, args.replaceText);
+                }
+                
+                if (args.incCb) {
+                    var numRegex = /\d+/g;
+                    var match;
+                    var matches = [];
+                    while ((match = numRegex.exec(newName)) !== null) {
+                        matches.push({val: match[0], index: match.index});
                     }
-                    if (prop.propertyType === PropertyType.PROPERTY || prop.propertyType === PropertyType.NAMED_GROUP) {
-                        if (prop.numProperties) updateExpressions(prop, oldName, newName);
+                    if (matches.length > 0) {
+                        var target = (args.incType === "first") ? matches[0] : matches[matches.length - 1];
+                        var numStr = target.val;
+                        var numLen = numStr.length;
+                        var newNum = parseInt(numStr, 10) + 1;
+                        var newNumStr = newNum.toString();
+                        while (newNumStr.length < numLen) newNumStr = "0" + newNumStr;
+                        newName = newName.substring(0, target.index) + newNumStr + newName.substring(target.index + numLen);
+                    }
+                }
+                
+                if (args.fixCb && args.fixText !== "") {
+                    if (args.fixType === "prefix") {
+                        newName = args.fixText + newName;
+                    } else {
+                        newName = newName + args.fixText;
+                    }
+                }
+                
+                return newName;
+            }
+
+            function updateExpressions(propGroup, nameMap) {
+                for (var i = 1; i <= propGroup.numProperties; i++) {
+                    var prop = propGroup.property(i);
+                    if (prop.propertyType === PropertyType.PROPERTY) {
+                        if (prop.canSetExpression && prop.expression !== "") {
+                            var expr = prop.expression;
+                            var changed = false;
+                            for (var oldName in nameMap) {
+                                if (nameMap.hasOwnProperty(oldName)) {
+                                    var newName = nameMap[oldName];
+                                    var compRegex = new RegExp('comp\\([\'"]' + escapeRegExp(oldName) + '[\'"]\\)', 'g');
+                                    if (compRegex.test(expr)) {
+                                        expr = expr.replace(compRegex, 'comp("' + newName + '")');
+                                        changed = true;
+                                    }
+                                }
+                            }
+                            if (changed) prop.expression = expr;
+                        }
+                    } else if (prop.propertyType === PropertyType.NAMED_GROUP || prop.propertyType === PropertyType.INDEXED_GROUP) {
+                        updateExpressions(prop, nameMap);
                     }
                 }
             }
 
-            function duplicateComp(comp, depth) {
-                if (depth > 20) throw new Error("Recursive limit reached (20). Terlalu banyak pre-comp bersarang, hati-hati Stack Overflow!");
+            var duplicatedRoots = [];
+            var targetFolder = null;
+            if (args.folderCb && args.folderName !== "") {
+                targetFolder = app.project.items.addFolder(args.folderName);
+            }
+
+            for (var c = 0; c < args.copies; c++) {
+                var dupMap = {};
+                var nameMap = {};
                 
-                var newComp = comp.duplicate();
-                newComp.name = comp.name + " " + args.suffix;
+                function duplicateTree(item, depth) {
+                    if (dupMap[item.id]) return dupMap[item.id];
+                    if (args.depthCb && depth > args.depthVal) return item;
+                    
+                    if (args.excludeCb && args.excludeText !== "") {
+                        if (args.excludeType === "prefix" && item.name.indexOf(args.excludeText) === 0) return item;
+                        if (args.excludeType === "suffix" && item.name.indexOf(args.excludeText, item.name.length - args.excludeText.length) !== -1) return item;
+                    }
+
+                    if (item instanceof FootageItem) {
+                        if (item.mainSource instanceof SolidSource && !args.solidsCb) return item;
+                        if (!(item.mainSource instanceof SolidSource) && !args.footageCb) return item;
+                    }
+
+                    var newItem = item.duplicate();
+                    newItem.name = applyNamingRules(item.name);
+                    
+                    if (args.colorCb) newItem.label = args.colorVal;
+                    if (targetFolder) newItem.parentFolder = targetFolder;
+
+                    dupMap[item.id] = newItem;
+                    nameMap[item.name] = newItem.name;
+
+                    if (newItem instanceof CompItem) {
+                        for (var i = 1; i <= newItem.numLayers; i++) {
+                            var layer = newItem.layers(i);
+                            if (layer.source) {
+                                var newSource = duplicateTree(layer.source, depth + 1);
+                                if (newSource.id !== layer.source.id) {
+                                    layer.replaceSource(newSource, false);
+                                }
+                            }
+                        }
+                    }
+                    return newItem;
+                }
+
+                var newRoot = duplicateTree(activeItem, 0);
                 
-                for (var i = 1; i <= newComp.numLayers; i++) {
-                    var layers = newComp.layers(i);
-                    if (layers.source && layers.source instanceof CompItem) {
-                        var newSubComp = duplicateComp(layers.source, depth + 1);
-                        layers.replaceSource(newSubComp, false);
+                if (args.exprCb) {
+                    for (var id in dupMap) {
+                        if (dupMap.hasOwnProperty(id) && dupMap[id] instanceof CompItem) {
+                            var compToUpdate = dupMap[id];
+                            for (var i = 1; i <= compToUpdate.numLayers; i++) {
+                                updateExpressions(compToUpdate.layers(i), nameMap);
+                            }
+                        }
                     }
                 }
                 
-                for (var i = 1; i <= newComp.numLayers; i++) {
-                    updateExpressions(newComp.layers(i), comp.name, newComp.name);
-                }
-                
-                return newComp;
+                duplicatedRoots.push(newRoot);
             }
             
-            var result = duplicateComp(activeItem, 0);
+            if (args.selectCb) {
+                for (var i = 1; i <= app.project.numItems; i++) app.project.items[i].selected = false;
+                for (var i = 0; i < duplicatedRoots.length; i++) duplicatedRoots[i].selected = true;
+            }
+
+            app.endUndoGroup();
+            return MotionreisUtils.sendResponse("Deep Duplicate successful: " + duplicatedRoots[0].name);
+        } catch(e) { app.endUndoGroup(); return MotionreisUtils.sendError(e.message); }
+    },
+
+    collectDependencies: function() {
+        try {
+            app.beginUndoGroup("Collect Dependencies");
+            if (!app.project) return MotionreisUtils.sendError("No project open.");
+            
+            var activeItem = app.project.activeItem;
+            if (!activeItem || !(activeItem instanceof CompItem)) {
+                return MotionreisUtils.sendError("Select a Composition to collect dependencies for.");
+            }
+
+            var deps = {};
+            function getDeps(comp) {
+                for (var i = 1; i <= comp.numLayers; i++) {
+                    var layer = comp.layers(i);
+                    if (layer.source) {
+                        if (!deps[layer.source.id]) {
+                            deps[layer.source.id] = layer.source;
+                            if (layer.source instanceof CompItem) {
+                                getDeps(layer.source);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            getDeps(activeItem);
+            
+            var targetFolder = app.project.items.addFolder(activeItem.name + " Dependencies");
+            var count = 0;
+            for (var id in deps) {
+                if (deps.hasOwnProperty(id)) {
+                    if (deps[id] instanceof FootageItem && !(deps[id].mainSource instanceof SolidSource)) {
+                        deps[id].parentFolder = targetFolder;
+                        count++;
+                    }
+                }
+            }
             
             app.endUndoGroup();
-            return MotionreisUtils.sendResponse("Deep Duplicate successful: " + result.name);
+            return MotionreisUtils.sendResponse("Collected " + count + " items into folder: " + targetFolder.name);
+        } catch(e) { app.endUndoGroup(); return MotionreisUtils.sendError(e.message); }
+    },
+    
+    smartRelink: function(folderPath) {
+        try {
+            app.beginUndoGroup("Smart Relinker");
+            if (!app.project) return MotionreisUtils.sendError("No project open.");
+            
+            var missingItems = [];
+            for (var i = 1; i <= app.project.numItems; i++) {
+                var item = app.project.items[i];
+                if (item instanceof FootageItem && item.footageMissing) {
+                    missingItems.push(item);
+                }
+            }
+            
+            if (missingItems.length === 0) {
+                app.endUndoGroup();
+                return MotionreisUtils.sendResponse(JSON.stringify({ count: 0, items: [] }));
+            }
+            
+            var fileMap = {};
+            function scanFolder(folder, depth) {
+                if (depth > 12) return;
+                var files = folder.getFiles();
+                for (var i = 0; i < files.length; i++) {
+                    var f = files[i];
+                    if (f instanceof Folder) {
+                        scanFolder(f, depth + 1);
+                    } else if (f instanceof File) {
+                        var name = decodeURI(f.name).toLowerCase();
+                        if (!fileMap[name]) {
+                            fileMap[name] = f;
+                        }
+                    }
+                }
+            }
+            
+            var rootFolder = new Folder(folderPath);
+            if (!rootFolder.exists) {
+                app.endUndoGroup();
+                return MotionreisUtils.sendError("Selected folder does not exist.");
+            }
+            scanFolder(rootFolder, 0);
+            
+            var relinked = [];
+            var count = 0;
+            for (var i = 0; i < missingItems.length; i++) {
+                var item = missingItems[i];
+                var oldName = decodeURI(item.name).toLowerCase();
+                if (item.mainSource && item.mainSource.file) {
+                    oldName = decodeURI(item.mainSource.file.name).toLowerCase();
+                }
+                
+                if (fileMap[oldName]) {
+                    try {
+                        item.replace(fileMap[oldName]);
+                        relinked.push({ id: item.id, path: fileMap[oldName].fsName, name: item.name });
+                        count++;
+                    } catch(err) {}
+                }
+            }
+            
+            app.endUndoGroup();
+            return MotionreisUtils.sendResponse(JSON.stringify({ count: count, items: relinked }));
+        } catch(e) { app.endUndoGroup(); return MotionreisUtils.sendError(e.message); }
+    },
+    
+    relinkToNewPaths: function(argsStr) {
+        try {
+            app.beginUndoGroup("Move & Relink");
+            var mappings = JSON.parse(argsStr);
+            var count = 0;
+            
+            for (var m = 0; m < mappings.length; m++) {
+                var mapping = mappings[m];
+                var targetItem = null;
+                for (var i = 1; i <= app.project.numItems; i++) {
+                    if (app.project.items[i].id === mapping.id) {
+                        targetItem = app.project.items[i];
+                        break;
+                    }
+                }
+                if (targetItem && targetItem instanceof FootageItem) {
+                    try {
+                        targetItem.replace(new File(mapping.newPath));
+                        count++;
+                    } catch(err) {}
+                }
+            }
+            
+            app.endUndoGroup();
+            return MotionreisUtils.sendResponse(count + " items successfully relinked to organized folders.");
         } catch(e) { app.endUndoGroup(); return MotionreisUtils.sendError(e.message); }
     },
 

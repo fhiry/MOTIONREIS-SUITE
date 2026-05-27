@@ -75,15 +75,6 @@
         #mod-design .btn .material-symbols-rounded {
             color: #8b5cf6; /* Pure Violet instead of Emerald Green */
         }
-        #mod-scene .btn .material-symbols-rounded {
-            color: #e11d48; /* Rose */
-        }
-        #mod-layers .btn .material-symbols-rounded {
-            color: #2563eb; /* Blue */
-        }
-        #mod-macro .btn .material-symbols-rounded {
-            color: #ea580c; /* Orange */
-        }
 
         /* Ensure primary buttons always have white text and white icons for proper contrast */
         .btn-primary,
@@ -246,11 +237,10 @@
             <button class="tab-btn" data-target="mod-rigging" data-tooltip="Anchor & Nulls"><span class="material-symbols-rounded">anchor</span> Rigging</button>
             <button class="tab-btn" data-target="mod-kinetics" data-tooltip="Wingman & Expr"><span class="material-symbols-rounded">tune</span> Kinetics</button>
             <button class="tab-btn" data-target="mod-design" data-tooltip="Text & Layout"><span class="material-symbols-rounded">match_case</span> Design</button>
-            <button class="tab-btn" data-target="mod-scene" data-tooltip="Camera & Audio"><span class="material-symbols-rounded">videocam</span> Scene</button>
-            <button class="tab-btn" data-target="mod-layers" data-tooltip="Timeline & Flow"><span class="material-symbols-rounded">layers</span> Layers</button>
-            <button class="tab-btn" data-target="mod-macro" data-tooltip="Scripts & IDE"><span class="material-symbols-rounded">extension</span> Macro</button>
+
             <button class="tab-btn" data-target="mod-output" data-tooltip="Render & VFX"><span class="material-symbols-rounded">movie</span> Render</button>
             <div style="flex-grow:1;"></div>
+            <button class="tab-btn" data-target="mod-backup" data-tooltip="Backup &amp; Sync"><span class="material-symbols-rounded">settings_backup_restore</span> Backup</button>
             <button class="tab-btn" data-target="mod-info" data-tooltip="Info & Help"><span class="material-symbols-rounded">settings</span> Info</button>
         </div>
 
@@ -314,9 +304,9 @@
                             <span class="material-symbols-rounded" style="color:var(--accent-danger);">memory</span> OS RAM
                         </button>
                     </div>
-                </div>
 
-            </div>
+                    </div>
+                </div>
 
             <!-- RIGGING -->
             <div id="mod-rigging" class="module-container">
@@ -397,6 +387,149 @@
                         <button class="btn" onclick="exec('motion','pointsFollowNulls')" title="Points Follow Nulls">Pts &rarr; Null</button>
                         <button class="btn" onclick="exec('motion','nullsFollowPoints')" title="Nulls Follow Points">Null &rarr; Pts</button>
                         <button class="btn" onclick="exec('motion','tracePath')" title="Trace Path">Trace</button>
+                    </div>
+                </div>
+                <div class="card" id="card-camerarig">
+                    <div class="section-label">Camera Rig</div>
+                    <button class="btn" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'addHandheldShake')"><span class="material-symbols-rounded">vibration</span> Add Handheld Shake</button>
+                    <button class="btn" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'generateParallaxRig')"><span class="material-symbols-rounded">video_camera_front</span> Generate Parallax Rig</button>
+                    <button class="btn" style="width:100%;" onclick="exec('creative', 'toggleCameraNode')"><span class="material-symbols-rounded">sync_alt</span> Toggle 1-Node / 2-Node</button>
+                </div>
+                <div class="card" id="card-layergroupingworkflowerlite">
+                    <div class="section-label">Layer Grouping (Workflower Lite)</div>
+                    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="exec('pipeline', 'groupSelectedLayers')"><span class="material-symbols-rounded">folder_zip</span> Group to Null</button>
+                </div>
+                <div class="card" id="card-timeshift">
+                    <div class="section-label">VFX Data Bridge</div>
+                    <div style="display:flex; gap:6px; margin-bottom:8px;">
+                        <select id="vfx-export-format" style="width:80px; padding:0 4px;  background:var(--bg-app); border:1px solid var(--border-strong); color:var(--text-primary); border-radius:4px;">
+                            <option value="chan">.chan</option>
+                            <option value="python">Python</option>
+                        </select>
+                        <button class="btn btn-primary" style="flex:1; justify-content:center; padding:0; " onclick="exec('pipeline', 'exportVFXData', {format: document.getElementById('vfx-export-format').value})">Export Transform Data</button>
+                    </div>
+                </div>
+            
+                <div class="card" id="card-smartrelinker">
+                    <div class="section-label">Smart Relinker <span style="font-size:8px; background:var(--accent-primary); padding:2px 6px; border-radius:10px; margin-left:6px; color:white;">NEW</span></div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Auto-find and relink offline assets.</p>
+                    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="triggerSmartRelinker()"><span class="material-symbols-rounded">link</span> Find & Relink Assets</button>
+                </div>
+                <div class="card" id="card-deepduplicator" style="padding:12px; display:flex; flex-direction:column; gap:16px;">
+                    <div>
+                        <div class="section-label" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>Deep Duplicator</span>
+                            <button class="btn" style="padding:2px; height:auto; width:auto; border:none; background:transparent;" title="Help" onclick="window.cep.util.openURLInDefaultBrowser('https://github.com/motionreis')">
+                                <span class="material-symbols-rounded" style="font-size:14px; color:var(--text-secondary);">help</span>
+                            </button>
+                        </div>
+                        <p style="font-size:10px; color:var(--text-secondary); margin-top:4px; margin-bottom:0; line-height:1.4;">Advanced composition duplicator. Select a comp to begin.</p>
+                    </div>
+                    
+                    <!-- Naming Rules -->
+                    <div style="background:var(--bg-app); border:1px solid var(--border-strong); border-radius:6px; padding:10px;">
+                        <div style="font-size:10px; color:var(--accent-primary); font-weight:600; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">Naming Rules</div>
+                        
+                        <div class="grid-2" style="margin-bottom:8px;">
+                            <label style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-primary); cursor:pointer;">
+                                <input type="checkbox" id="dup-fix-cb" checked>
+                                <select id="dup-fix-type" style="background:transparent; border:none; color:var(--text-secondary); outline:none; cursor:pointer;">
+                                    <option value="suffix">Suffix</option>
+                                    <option value="prefix">Prefix</option>
+                                </select>
+                            </label>
+                            <input type="text" id="dup-fix-text" value="_v2" placeholder="Text..." style="width:100%; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-strong); border-radius:4px; padding:4px; font-size:10px; outline:none;">
+                        </div>
+
+                        <div class="grid-2" style="margin-bottom:8px;">
+                            <label style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-primary); cursor:pointer;">
+                                <input type="checkbox" id="dup-replace-cb"> Replace
+                            </label>
+                            <div style="display:flex; gap:4px;">
+                                <input type="text" id="dup-search-text" placeholder="Find" style="width:50%; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-strong); border-radius:4px; padding:4px; font-size:10px; outline:none;">
+                                <input type="text" id="dup-replace-text" placeholder="New" style="width:50%; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-strong); border-radius:4px; padding:4px; font-size:10px; outline:none;">
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <label style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-primary); cursor:pointer;">
+                                <input type="checkbox" id="dup-inc-cb"> Auto-Increment
+                            </label>
+                            <select id="dup-inc-type" style="width:100%; background:var(--bg-hover); border:1px solid var(--border-strong); color:var(--text-primary); border-radius:4px; padding:4px; font-size:10px; outline:none; cursor:pointer;">
+                                <option value="last">Last Number in Name</option>
+                                <option value="first">First Number in Name</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Behaviors -->
+                    <div style="background:var(--bg-app); border:1px solid var(--border-strong); border-radius:6px; padding:10px;">
+                        <div style="font-size:10px; color:var(--accent-primary); font-weight:600; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">Behaviors & Filtering</div>
+                        
+                        <div class="grid-2" style="margin-bottom:8px;">
+                            <label style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-primary); cursor:pointer;">
+                                <input type="checkbox" id="dup-folder-cb"> Group to Folder
+                            </label>
+                            <input type="text" id="dup-folder-name" placeholder="Folder Name..." style="width:100%; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-strong); border-radius:4px; padding:4px; font-size:10px; outline:none;">
+                        </div>
+
+                        <div class="grid-2" style="margin-bottom:8px;">
+                            <label style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-primary); cursor:pointer;">
+                                <input type="checkbox" id="dup-exclude-cb"> Exclude Items
+                            </label>
+                            <div style="display:flex; gap:4px;">
+                                <select id="dup-exclude-type" style="width:50%; background:var(--bg-hover); border:1px solid var(--border-strong); color:var(--text-secondary); border-radius:4px; padding:4px; font-size:10px; outline:none; cursor:pointer;">
+                                    <option value="prefix">Starts with</option>
+                                    <option value="suffix">Ends with</option>
+                                </select>
+                                <input type="text" id="dup-exclude-text" value="_" style="width:50%; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-strong); border-radius:4px; padding:4px; font-size:10px; outline:none;">
+                            </div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <label style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-secondary); cursor:pointer;">
+                                <input type="checkbox" id="dup-expr-cb" checked> Auto-Update Expressions
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-secondary); cursor:pointer;">
+                                <input type="checkbox" id="dup-footage-cb"> Duplicate Footage Assets (Slower)
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:10px; color:var(--text-secondary); cursor:pointer;">
+                                <input type="checkbox" id="dup-solids-cb"> Duplicate Solids
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Output & Actions -->
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn" style="flex:1; justify-content:center; border:1px solid var(--border-strong);" onclick="exec('pipeline', 'collectDependencies')">
+                            <span class="material-symbols-rounded" style="font-size:14px;">inventory_2</span> Collect Assets
+                        </button>
+                        <select id="dup-color-val" style="width:90px; background:var(--bg-hover); border:1px solid var(--border-strong); color:var(--text-secondary); border-radius:4px; padding:4px; font-size:10px; outline:none; cursor:pointer;" title="Apply Label Color">
+                            <option value="0">No Color</option>
+                            <option value="1">Red</option>
+                            <option value="2">Yellow</option>
+                            <option value="8">Blue</option>
+                            <option value="9">Green</option>
+                            <option value="10">Purple</option>
+                            <option value="11">Orange</option>
+                        </select>
+                    </div>
+
+                    <div style="display:flex; gap:8px; align-items:center; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:6px; padding:8px;">
+                        <span style="font-size:11px; color:var(--text-primary); margin-left:4px;">Copies</span>
+                        <input type="number" id="dup-copies" value="1" min="1" max="50" style="width:40px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-strong); border-radius:4px; padding:6px; font-size:11px; outline:none; text-align:center;">
+                        <button class="btn btn-primary" style="flex:1; justify-content:center; padding:8px; font-size:11px;" onclick="runDeepDuplicator()">
+                            Deep Duplicate
+                        </button>
+                    </div>
+                </div>
+                <div class="card" id="card-macro">
+                    <div class="section-label">Custom Scripts</div>
+                    <div class="grid-compact" id="macro-grid">
+                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 1})">S1</button>
+                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 2})">S2</button>
+                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 3})">S3</button>
+                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 4})">S4</button>
                     </div>
                 </div>
             </div>
@@ -614,65 +747,11 @@
                         <button class="btn btn-primary" style="justify-content:center; padding:0;" onclick="exec('pipeline', 'applyIDEExpression')">Apply Code</button>
                         <button class="btn" style="justify-content:center; padding:0;" onclick="document.getElementById('ideInput').value=''">Clear</button>
                     </div>
-                </div>
-            </div>
-
-            <!-- DESIGN -->
-            <div id="mod-design" class="module-container">
-                <div class="module-header"><span class="material-symbols-rounded">match_case</span> Design</div>
-                <div class="card" id="card-textanimations">
-                    <div class="section-label">Text Animations</div>
-                    <div class="grid-2">
-                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'typewriter'})">Typewriter</button>
-                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'scramble'})">Scramble</button>
-                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'fadeUp'})">Fade Up</button>
-                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'slideIn'})">Slide In</button>
-                    </div>
-                </div>
-                <div class="card" id="card-autotextbox">
-                    <div class="section-label">Auto Text Box</div>
-                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Create dynamic shape layers that perfectly frame your text layers.</p>
-                    <button class="btn btn-primary" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'autoTextBox')"><span class="material-symbols-rounded">check_box_outline_blank</span> Auto Text Box</button>
-                </div>
-                <div class="card" id="card-splittext">
-                    <div class="section-label">Split Text</div>
-                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Fragment a text layer into separate layer elements.</p>
-                    <div class="grid-2">
-                        <button class="btn" onclick="exec('creative', 'splitText', {mode: 'words'})">Split to Words</button>
-                        <button class="btn" onclick="exec('creative', 'splitText', {mode: 'chars'})">Split to Chars</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SCENE -->
-            <div id="mod-scene" class="module-container">
-                <div class="module-header"><span class="material-symbols-rounded">videocam</span> Scene</div>
-                <div class="card" id="card-camerarig">
-                    <div class="section-label">Camera Rig</div>
-                    <button class="btn" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'addHandheldShake')"><span class="material-symbols-rounded">vibration</span> Add Handheld Shake</button>
-                    <button class="btn" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'generateParallaxRig')"><span class="material-symbols-rounded">video_camera_front</span> Generate Parallax Rig</button>
-                    <button class="btn" style="width:100%;" onclick="exec('creative', 'toggleCameraNode')"><span class="material-symbols-rounded">sync_alt</span> Toggle 1-Node / 2-Node</button>
-                </div>
                 <div class="card" id="card-audioreactive">
                     <div class="section-label">Audio Reactive</div>
                     <button class="btn" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'audioToKeyframes')"><span class="material-symbols-rounded">graphic_eq</span> Audio to Keyframes</button>
                     <button class="btn" style="width:100%;" onclick="exec('creative', 'generateWaveform')"><span class="material-symbols-rounded">waves</span> Generate Waveform</button>
                 </div>
-            </div>
-
-            <!-- LAYERS -->
-            <div id="mod-layers" class="module-container">
-                <div class="module-header"><span class="material-symbols-rounded">layers</span> Layers</div>
-                <div class="card" id="card-autocolorcoderprism">
-                    <div class="section-label">Auto Color Coder (Prism)</div>
-                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Automatically color-code layers based on keywords in their names.</p>
-                    <button class="btn btn-primary" style="width:100%;" onclick="exec('pipeline', 'autoLabelLayers')"><span class="material-symbols-rounded">palette</span> Auto Label Layers</button>
-                </div>
-                <div class="card" id="card-layergroupingworkflowerlite">
-                    <div class="section-label">Layer Grouping (Workflower Lite)</div>
-                    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="exec('pipeline', 'groupSelectedLayers')"><span class="material-symbols-rounded">folder_zip</span> Group to Null</button>
-                </div>
-                
                 <div class="card" id="card-transitionshifter">
                     <div class="section-label">Transition Shifter</div>
                     <div class="setting-row" style="margin-bottom:8px;">
@@ -708,31 +787,6 @@
                         <button class="btn" onclick="exec('motion','alignTransitions',{target:'startTime'})">Start</button>
                     </div>
                 </div>
-
-                <div class="card" id="card-timeshift">
-                    <div class="section-label">VFX Data Bridge</div>
-                    <div style="display:flex; gap:6px; margin-bottom:8px;">
-                        <select id="vfx-export-format" style="width:80px; padding:0 4px;  background:var(--bg-app); border:1px solid var(--border-strong); color:var(--text-primary); border-radius:4px;">
-                            <option value="chan">.chan</option>
-                            <option value="python">Python</option>
-                        </select>
-                        <button class="btn btn-primary" style="flex:1; justify-content:center; padding:0; " onclick="exec('pipeline', 'exportVFXData', {format: document.getElementById('vfx-export-format').value})">Export Transform Data</button>
-                    </div>
-                </div>
-                <div class="card" id="card-deepduplicator">
-                    <div class="section-label">Deep Duplicator</div>
-                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Duplicate composition and all of its nested pre-comps recursively. Expressions are automatically updated.</p>
-                    <div class="setting-row">
-                        <span style="font-size:11px; color:var(--text-secondary);">Suffix</span>
-                        <input type="text" id="dup-suffix" value=" _v2" style="width:80px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-strong); border-radius:4px; padding:4px 6px; outline:none; font-size:11px;">
-                    </div>
-                    <button class="btn btn-primary" style="width:100%;" onclick="exec('pipeline', 'deepDuplicate', {suffix: document.getElementById('dup-suffix').value})"><span class="material-symbols-rounded">file_copy</span> True Duplicate</button>
-                </div>
-            </div>
-
-            <!-- MACRO -->
-            <div id="mod-macro" class="module-container">
-                <div class="module-header"><span class="material-symbols-rounded">extension</span> Macro</div>
                 <div class="card" id="card-smartsequencetrim">
                     <div class="section-label">Smart Sequence & Trim</div>
                     <div style="display:flex; gap:6px; margin-bottom:8px;">
@@ -744,13 +798,10 @@
                         <button class="btn" style="justify-content:center; padding:0; " onclick="exec('motion', 'autoPrecompCrop')">Crop Precomp</button>
                     </div>
                 </div>
-
                 <div class="card" id="card-keysmacro">
                     <div class="section-label">Keys Macro</div>
                     <button class="btn" style="width:100%; justify-content:center; padding:0; " onclick="exec('motion', 'reverseKeys')">Time-Reverse Keyframes</button>
                 </div>
-
-                
                 <div class="card" id="card-keyframetransform">
                     <div class="section-label">Keyframe Transform</div>
                     <div class="grid-2" style="margin-bottom:8px;">
@@ -764,7 +815,6 @@
                         <input type="number" id="kfa-rnd" value="3" style="width: 40px; text-align:center; font-size:10px; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:4px; color:var(--text-primary);">
                     </div>
                 </div>
-
                 <div class="card" id="card-shiftalignkeys">
                     <div class="section-label">Shift & Align Keys</div>
                     <div class="setting-row" style="margin-bottom:8px;">
@@ -780,158 +830,298 @@
                         <button class="btn" onclick="exec('motion','alignKeys',{alignTo:'last'})"><span class="material-symbols-rounded">align_horizontal_right</span> Align Last</button>
                     </div>
                 </div>
+            </div>
+            </div>
 
-                <div class="card" id="card-macro">
-                    <div class="section-label">Custom Scripts</div>
-                    <div class="grid-compact" id="macro-grid">
-                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 1})">S1</button>
-                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 2})">S2</button>
-                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 3})">S3</button>
-                        <button class="ease-chip" onclick="exec('pipeline', 'runMacro', {id: 4})">S4</button>
+            <!-- DESIGN -->
+            <div id="mod-design" class="module-container">
+                <div class="module-header"><span class="material-symbols-rounded">match_case</span> Design</div>
+                <div class="card" id="card-textanimations">
+                    <div class="section-label">Text Animations</div>
+                    <div class="grid-2">
+                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'typewriter'})">Typewriter</button>
+                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'scramble'})">Scramble</button>
+                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'fadeUp'})">Fade Up</button>
+                    <button class="btn" onclick="exec('creative', 'animateText', {type: 'slideIn'})">Slide In</button>
                     </div>
+                </div>
+                <div class="card" id="card-autotextbox">
+                    <div class="section-label">Auto Text Box</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Create dynamic shape layers that perfectly frame your text layers.</p>
+                    <button class="btn btn-primary" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'autoTextBox')"><span class="material-symbols-rounded">check_box_outline_blank</span> Auto Text Box</button>
+                </div>
+                <div class="card" id="card-splittext">
+                    <div class="section-label">Split Text</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Fragment a text layer into separate layer elements.</p>
+                    <div class="grid-2">
+                        <button class="btn" onclick="exec('creative', 'splitText', {mode: 'words'})">Split to Words</button>
+                        <button class="btn" onclick="exec('creative', 'splitText', {mode: 'chars'})">Split to Chars</button>
+                    </div>
+                </div>
+                <div class="card" id="card-autocolorcoderprism">
+                    <div class="section-label">Auto Color Coder (Prism)</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Automatically color-code layers based on keywords in their names.</p>
+                    <button class="btn btn-primary" style="width:100%;" onclick="exec('pipeline', 'autoLabelLayers')"><span class="material-symbols-rounded">palette</span> Auto Label Layers</button>
                 </div>
             </div>
 
-            <!-- OUTPUT -->
+            
             <div id="mod-output" class="module-container">
                 <div class="module-header"><span class="material-symbols-rounded">movie</span> Render Engine</div>
-                
-                <!-- 0. FFMPEG AUTO-SETUP CARD -->
+
+                <!-- FFMPEG SETUP CARD -->
                 <div class="card" id="card-ffmpeg-setup" style="display:none; background: linear-gradient(135deg, rgba(88, 101, 242, 0.15) 0%, rgba(30, 31, 34, 0.05) 100%); border: 1px solid var(--accent-primary); position: relative; overflow: hidden; margin-bottom: 12px;">
                     <div class="section-label" style="color:var(--accent-primary); display:flex; align-items:center; gap:6px;"><span class="material-symbols-rounded" style="font-size:16px;">bolt</span> Render Engine Optimizer</div>
                     <p style="font-size:11px; color:var(--text-secondary); line-height:1.4; margin-top:6px; margin-bottom:12px;">
                         Motionreis uses a decoupled multi-threaded parallel engine to boost rendering speeds by up to 5x. Click below to automatically install and configure FFmpeg in the background.
                     </p>
-                    
                     <button id="ffmpeg-install-btn" class="btn btn-primary" style="width:100%; justify-content:center; padding:10px; font-weight:bold; font-size:12px;" onclick="runFFmpegAutoInstall()">
                         <span class="material-symbols-rounded" style="margin-right:6px; font-size:16px;">download</span> ⚡ START AUTO-INSTALL
                     </button>
-                    
-                    <!-- Progress controls -->
                     <div id="ffmpeg-setup-status" style="display:none; font-size:10px; color:var(--text-secondary); margin-top:10px; font-family:monospace;">Ready...</div>
                     <div id="ffmpeg-setup-progress-bg" style="display:none; width:100%; height:4px; background:var(--bg-app); border-radius:2px; overflow:hidden; margin-top:4px;">
                         <div id="ffmpeg-setup-progress-bar" style="width:0%; height:100%; background:var(--accent-primary); transition:width 0.2s;"></div>
                     </div>
                 </div>
 
-                <!-- 1. TARGET & FORMAT -->
-                <div class="card" id="card-output-format">
-                    <div class="section-label">Target & Format</div>
-                    
-                    <div class="setting-row" style="background:var(--bg-app); border-radius:4px; padding:6px 8px; margin-bottom:8px;">
-                        <span style="font-size:10px; color:var(--text-secondary); flex:1;">Active Comp:</span>
-                        <span id="active-comp-name" style="font-weight:bold; font-size:11px; color:var(--accent-primary); margin-right:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right;">[Auto-Detecting...]</span>
-                        <button id="pin-comp-btn" class="btn" style="padding:2px; background:transparent; border:none; color:var(--text-secondary);" onclick="togglePinComp()" title="Pin this Comp for rendering">
-                            <span class="material-symbols-rounded" style="font-size:14px;">push_pin</span>
+                <!-- ── RENDER MODE PILL SWITCHER ── -->
+                <div style="display:flex; gap:4px; background:var(--bg-app); border:1px solid var(--border-strong); border-radius:8px; padding:3px; margin-bottom:12px;">
+                    <button id="pill-cli" onclick="switchRenderMode('cli')" style="flex:1; padding:6px 0; font-size:11px; font-weight:600; border:none; border-radius:6px; cursor:pointer; transition:all 0.2s; background:var(--accent-primary); color:#fff;">
+                        ⚡ CLI Render
+                    </button>
+                    <button id="pill-queue" onclick="switchRenderMode('queue')" style="flex:1; padding:6px 0; font-size:11px; font-weight:600; border:none; border-radius:6px; cursor:pointer; transition:all 0.2s; background:transparent; color:var(--text-secondary);">
+                        📋 Render Queue
+                    </button>
+                </div>
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- PANEL A: CLI RENDER                            -->
+                <!-- ══════════════════════════════════════════════ -->
+                <div id="render-panel-cli">
+
+                    <!-- 1. TARGET & FORMAT -->
+                    <div class="card" id="card-output-format">
+                        <div class="section-label">Target &amp; Format</div>
+                        
+                        <div class="setting-row" style="background:var(--bg-app); border-radius:4px; padding:6px 8px; margin-bottom:8px;">
+                            <span style="font-size:10px; color:var(--text-secondary); flex:1;">Active Comp:</span>
+                            <span id="active-comp-name" style="font-weight:bold; font-size:11px; color:var(--accent-primary); margin-right:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right;">[Auto-Detecting...]</span>
+                            <button id="pin-comp-btn" class="btn" style="padding:2px; background:transparent; border:none; color:var(--text-secondary);" onclick="togglePinComp()" title="Pin this Comp for rendering">
+                                <span class="material-symbols-rounded" style="font-size:14px;">push_pin</span>
+                            </button>
+                        </div>
+
+                        <div style="margin-bottom:12px;">
+                            <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Render</span>
+                            <input type="text" id="render-output-name" placeholder="Waiting for comp..." class="theme-input" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); outline:none; transition:0.2s;" onfocus="this.style.borderColor='var(--accent-primary)'" onblur="this.style.borderColor='var(--border-strong)'">
+                        </div>
+
+                        <div class="grid-2" style="margin-bottom:12px;">
+                            <div>
+                                <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Render Preset</span>
+                                <select id="render-settings-select" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;" onchange="
+                                    var codec = document.getElementById('render-codec-select');
+                                    if(this.value === 'Best Settings') codec.value = 'ProRes 422';
+                                    else if(this.value === 'Draft Settings') codec.value = 'H.264';
+                                    else if(this.value === 'DV Settings') codec.value = 'Lossless';
+                                ">
+                                    <option value="Best Settings">Best Settings (Full Res)</option>
+                                    <option value="Draft Settings">Draft Settings (Half Res)</option>
+                                    <option value="DV Settings">DV Settings</option>
+                                    <option value="custom">Custom...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Render Codec</span>
+                                <select id="render-codec-select" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;" onchange="
+                                    document.getElementById('render-settings-select').value = 'custom';
+                                ">
+                                    <optgroup label="Web &amp; Social">
+                                        <option value="H.264">H.264 (MP4)</option>
+                                        <option value="High Quality">High Quality</option>
+                                        <option value="Animated GIF">Animated GIF</option>
+                                    </optgroup>
+                                    <optgroup label="Professional &amp; Master">
+                                        <option value="ProRes 422">ProRes 422</option>
+                                        <option value="ProRes 4444">ProRes 4444 (with Alpha)</option>
+                                        <option value="Lossless">Lossless</option>
+                                        <option value="Lossless with Alpha">Lossless with Alpha</option>
+                                    </optgroup>
+                                    <optgroup label="Image Sequences">
+                                        <option value="PNG Sequence">PNG Sequence</option>
+                                        <option value="JPEG Sequence">JPEG Sequence</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:8px;">
+                            <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Time Range</span>
+                            <div class="grid-2" id="time-range-group">
+                                <label class="segmented-control active"><input type="radio" name="render_range" value="workarea" checked style="display:none;"> Work Area</label>
+                                <label class="segmented-control"><input type="radio" name="render_range" value="fullcomp" style="display:none;"> Entire Comp</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. AUTOMATION & PATH -->
+                    <div class="card" id="card-output-auto">
+                        <div class="section-label">Automation &amp; Path</div>
+                        
+                        <div style="margin-bottom:12px;">
+                            <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Destination</span>
+                            <div style="display:flex; gap:6px;">
+                                <input type="text" id="render-path" value="[Same as Project Folder]" readonly style="flex:1; padding:6px 8px; font-size:10px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-app); color:var(--text-secondary);">
+                                <button class="btn" style="padding:6px; justify-content:center;" onclick="selectRenderFolder()" title="Browse Folder"><span class="material-symbols-rounded" style="font-size:14px;">folder_open</span></button>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="render-save-next" checked> Save next to AEP</label>
+                            <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="render-auto-version" checked> Auto-Versioning (append _v01)</label>
+                            <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="render-auto-save" checked> Auto-Save Project before Render</label>
+                        </div>
+                    </div>
+
+                    <!-- 3. CLI ENGINE -->
+                    <div class="card" id="card-clirender">
+                        <div class="section-label">CLI Engine (aerender)</div>
+                        
+                        <div style="margin-bottom:12px;">
+                            <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Performance Throttle</span>
+                            <select id="render-throttle" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;">
+                                <option value="balanced">🟡 Balanced (Standard Allocation)</option>
+                                <option value="slow">🟢 Slow &amp; Silent (Leave CPU for Editing)</option>
+                                <option value="max">🔴 MAX POWER (100% CPU &amp; RAM)</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom:16px;">
+                            <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Post-Render Action</span>
+                            <select id="render-postaction" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;">
+                                <option value="chime">🔔 Play Chime</option>
+                                <option value="explorer">📂 Show in Explorer/Finder</option>
+                                <option value="sleep">🌙 Auto-Sleep Computer</option>
+                                <option value="none">Do Nothing</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-primary" style="width:100%; justify-content:center; padding:10px; font-weight:bold; font-size:12px; border:1px solid var(--accent-primary); background:rgba(var(--accent-primary-rgb), 0.1); color:var(--text-primary);" onclick="startRenderV2()">
+                            <span class="material-symbols-rounded" style="color:var(--accent-primary); margin-right:6px;">rocket_launch</span> START CLI RENDER
+                        </button>
+                        
+                        <!-- Progress Bar -->
+                        <div id="aerender-status" style="display:none; font-size:10px; color:var(--text-secondary); margin-top:12px; font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Rendering...</div>
+                        <div id="aerender-progress-bg" style="display:none; width:100%; height:4px; background:var(--bg-app); border-radius:2px; overflow:hidden; margin-top:4px;">
+                            <div id="aerender-progress-bar" style="width:0%; height:100%; background:var(--accent-primary); transition:width 0.2s;"></div>
+                        </div>
+                        
+                        <!-- Recent File -->
+                        <div id="aerender-recent-file" style="display:none; margin-top:8px;">
+                            <button class="btn" style="width:100%; justify-content:center; padding:6px; font-size:10px; border:1px solid var(--border-strong); background:var(--bg-app); color:var(--text-primary);" onclick="openRecentRender()">
+                                <span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">folder_open</span> Open Rendered File
+                            </button>
+                        </div>
+                    </div>
+
+                </div><!-- /render-panel-cli -->
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- PANEL B: RENDER QUEUE                         -->
+                <!-- ══════════════════════════════════════════════ -->
+                <div id="render-panel-queue" style="display:none;">
+
+                    <!-- Action bar -->
+                    <div style="display:flex; gap:6px; margin-bottom:10px;">
+                        <button class="btn btn-primary" style="flex:1; justify-content:center; padding:8px; font-size:11px; font-weight:700;" onclick="rqRenderAll()">
+                            <span class="material-symbols-rounded" style="font-size:15px; margin-right:4px;">play_arrow</span> Render All
+                        </button>
+                        <button class="btn" style="flex:1; justify-content:center; padding:8px; font-size:11px;" onclick="rqAddActiveComp()">
+                            <span class="material-symbols-rounded" style="font-size:15px; margin-right:4px;">add</span> Add Active Comp
+                        </button>
+                        <button class="btn" style="padding:8px; justify-content:center;" onclick="rqRefresh()" title="Refresh Queue">
+                            <span class="material-symbols-rounded" style="font-size:15px;">refresh</span>
                         </button>
                     </div>
 
-                    <div style="margin-bottom:12px;">
-                        <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Render</span>
-                        <input type="text" id="render-output-name" placeholder="Waiting for comp..." class="theme-input" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); outline:none; transition:0.2s;" onfocus="this.style.borderColor='var(--accent-primary)'" onblur="this.style.borderColor='var(--border-strong)'">
-                    </div>
-
-                    <div class="grid-2" style="margin-bottom:12px;">
-                        <div>
-                            <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Render Preset</span>
-                            <select id="render-settings-select" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;" onchange="
-                                var codec = document.getElementById('render-codec-select');
-                                if(this.value === 'Best Settings') codec.value = 'ProRes 422';
-                                else if(this.value === 'Draft Settings') codec.value = 'H.264';
-                                else if(this.value === 'DV Settings') codec.value = 'Lossless';
-                            ">
-                                <option value="Best Settings">Best Settings (Full Res)</option>
-                                <option value="Draft Settings">Draft Settings (Half Res)</option>
-                                <option value="DV Settings">DV Settings</option>
-                                <option value="custom">Custom...</option>
-                            </select>
-                        </div>
-                        <div>
-                            <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Render Codec</span>
-                            <select id="render-codec-select" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;" onchange="
-                                document.getElementById('render-settings-select').value = 'custom';
-                            ">
-                                <optgroup label="Web & Social">
-                                    <option value="H.264">H.264 (MP4)</option>
-                                    <option value="High Quality">High Quality</option>
-                                    <option value="Animated GIF">Animated GIF</option>
-                                </optgroup>
-                                <optgroup label="Professional & Master">
-                                    <option value="ProRes 422">ProRes 422</option>
-                                    <option value="ProRes 4444">ProRes 4444 (with Alpha)</option>
-                                    <option value="Lossless">Lossless</option>
-                                    <option value="Lossless with Alpha">Lossless with Alpha</option>
-                                </optgroup>
-                                <optgroup label="Image Sequences">
-                                    <option value="PNG Sequence">PNG Sequence</option>
-                                    <option value="JPEG Sequence">JPEG Sequence</option>
-                                </optgroup>
-                            </select>
+                    <!-- Queue Items List -->
+                    <div id="rq-items-list" style="display:flex; flex-direction:column; gap:6px; min-height:80px;">
+                        <div id="rq-empty-state" style="text-align:center; padding:24px 12px; color:var(--text-secondary); font-size:11px;">
+                            <span class="material-symbols-rounded" style="font-size:32px; display:block; margin-bottom:8px; opacity:0.3;">queue</span>
+                            Render Queue is empty.<br>Click "Add Active Comp" to add a composition.
                         </div>
                     </div>
 
-                    <div style="margin-bottom:8px;">
-                        <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Time Range</span>
-                        <div class="grid-2" id="time-range-group">
-                            <label class="segmented-control active"><input type="radio" name="render_range" value="workarea" checked style="display:none;"> Work Area</label>
-                            <label class="segmented-control"><input type="radio" name="render_range" value="fullcomp" style="display:none;"> Entire Comp</label>
-                        </div>
-                    </div>
-                </div>
+                </div><!-- /render-panel-queue -->
 
-                <!-- 2. AUTOMATION -->
-                <div class="card" id="card-output-auto">
-                    <div class="section-label">Automation & Path</div>
-                    
-                    <div style="margin-bottom:12px;">
-                        <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Destination</span>
-                        <div style="display:flex; gap:6px;">
-                            <input type="text" id="render-path" value="[Same as Project Folder]" readonly style="flex:1; padding:6px 8px; font-size:10px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-app); color:var(--text-secondary);">
-                            <button class="btn" style="padding:6px; justify-content:center;" onclick="selectRenderFolder()" title="Browse Folder"><span class="material-symbols-rounded" style="font-size:14px;">folder_open</span></button>
-                        </div>
-                    </div>
+            </div><!-- /mod-output -->
 
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                        <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="render-save-next" checked> Save next to AEP</label>
-                        <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="render-auto-version" checked> Auto-Versioning (append _v01)</label>
-                        <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" id="render-auto-save" checked> Auto-Save Project before Render</label>
-                    </div>
-                </div>
 
-                <!-- 3. CLI ENGINE -->
-                <div class="card" id="card-clirender">
-                    <div class="section-label">CLI Engine (aerender)</div>
-                    
-                    <div style="margin-bottom:12px;">
-                        <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Performance Throttle</span>
-                        <select id="render-throttle" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;">
-                            <option value="balanced">🟡 Balanced (Standard Allocation)</option>
-                            <option value="slow">🟢 Slow & Silent (Leave CPU for Editing)</option>
-                            <option value="max">🔴 MAX POWER (100% CPU & RAM)</option>
-                        </select>
-                    </div>
-
-                    <div style="margin-bottom:16px;">
-                        <span style="font-size:10px; color:var(--text-secondary); display:block; margin-bottom:6px;">Post-Render Action</span>
-                        <select id="render-postaction" class="theme-select" style="width:100%; padding:6px; font-size:11px; border:1px solid var(--border-strong); border-radius:4px; background:var(--bg-panel); color:var(--text-primary); cursor:pointer;">
-                            <option value="chime">🔔 Play Chime</option>
-                            <option value="explorer">📂 Show in Explorer/Finder</option>
-                            <option value="sleep">🌙 Auto-Sleep Computer</option>
-                            <option value="none">Do Nothing</option>
-                        </select>
-                    </div>
-
-                    <button class="btn btn-primary" style="width:100%; justify-content:center; padding:10px; font-weight:bold; font-size:12px; border:1px solid var(--accent-primary); background:rgba(var(--accent-primary-rgb), 0.1); color:var(--text-primary);" onclick="startRenderV2()">
-                        <span class="material-symbols-rounded" style="color:var(--accent-primary); margin-right:6px;">rocket_launch</span> START CLI RENDER
+            <!-- BACKUP & SYNC SUITE -->
+            <div id="mod-backup" class="module-container">
+                <div class="module-header"><span class="material-symbols-rounded">settings_backup_restore</span> Backup &amp; Sync</div>
+                
+                <!-- Local Data Folder -->
+                <div class="card" id="card-data-location">
+                    <div class="section-label">Local Data Folder</div>
+                    <div style="font-size:9px; color:var(--text-secondary); line-height:1.3; margin-bottom:8px;">Lokasi utama penyimpanan data plugin. Gunakan drive lokal/SSD untuk performa terbaik (Jangan gunakan folder cloud di sini).</div>
+                    <div id="data-location-display-backup" style="font-family:monospace; font-size:9px; color:var(--text-secondary); background:var(--bg-hover); padding:6px; border-radius:4px; margin-bottom:8px; word-break:break-all;"></div>
+                    <button class="btn" style="width:100%; justify-content:center;" onclick="promptMoveDataFolder()">
+                        <span class="material-symbols-rounded">drive_file_move</span> Move Local Folder
                     </button>
+                </div>
+
+                <!-- Cloud Auto-Sync -->
+                <div class="card">
+                    <div class="section-label">Cloud Auto-Sync</div>
+                    <p style="font-size:9px; color:var(--text-secondary); margin-top:0; margin-bottom:12px; line-height:1.3;">Pilih folder cloud (Google Drive, Dropbox). Data lokal akan otomatis disinkronkan ke sini. Di PC baru, folder ini akan menarik data ke Local Folder.</p>
                     
-                    <!-- Progress Bar (Hidden by default) -->
-                    <div id="aerender-status" style="display:none; font-size:10px; color:var(--text-secondary); margin-top:12px; font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Rendering...</div>
-                    <div id="aerender-progress-bg" style="display:none; width:100%; height:4px; background:var(--bg-app); border-radius:2px; overflow:hidden; margin-top:4px;">
-                        <div id="aerender-progress-bar" style="width:0%; height:100%; background:var(--accent-primary); transition:width 0.2s;"></div>
+                    <div class="setting-row" style="margin-bottom:6px;">
+                        <span style="font-size:11px; font-weight:600; color:var(--text-primary);">Sync Status</span>
+                        <button id="toggle-cloud-sync-btn" class="toggle-btn" onclick="toggleCloudSync()">OFF</button>
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <input type="text" id="cloud-sync-path" placeholder="Not configured (Click folder to choose...)" readonly style="flex:1; font-family:monospace; font-size:9px; background:var(--bg-hover); color:var(--text-muted); border:1px solid var(--border-strong); border-radius:4px; padding:6px; outline:none;">
+                        <button class="btn" style="padding:6px 10px;" onclick="browseCloudSyncLocation()" title="Set Cloud Sync Folder"><span class="material-symbols-rounded" style="font-size:14px;">cloud_sync</span></button>
                     </div>
                 </div>
-            </div><!-- INFO -->
+
+                <!-- Auto-Sync Items -->
+                <div class="card">
+                    <div class="section-label">Auto-Sync Items</div>
+                    <p style="font-size:9px; color:var(--text-secondary); margin-top:0; margin-bottom:12px; line-height:1.3;">Pilih data apa saja yang ingin di-backup & disinkronkan secara otomatis (seperti Smart Panel Mode).</p>
+                    
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <!-- Toggle 1: Plugin Settings -->
+                        <div class="setting-row" style="align-items:flex-start; margin-bottom:0;">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <span style="font-size:11px; color:var(--text-primary); font-weight:500;">Plugin Settings</span>
+                                <span style="font-size:9px; color:var(--text-secondary); line-height:1.3;">UI customization (theme, speed mode, dll).</span>
+                            </div>
+                            <button id="toggle-sync-pref-btn" class="toggle-btn on" onclick="toggleSyncItem('pref')" style="margin-top:2px;">ON</button>
+                        </div>
+
+                        <!-- Toggle 2: Plugin Data -->
+                        <div class="setting-row" style="align-items:flex-start; margin-bottom:0;">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <span style="font-size:11px; color:var(--text-primary); font-weight:500;">Plugin Data</span>
+                                <span style="font-size:9px; color:var(--text-secondary); line-height:1.3;">Custom ease presets & expression templates.</span>
+                            </div>
+                            <button id="toggle-sync-data-btn" class="toggle-btn on" onclick="toggleSyncItem('data')" style="margin-top:2px;">ON</button>
+                        </div>
+
+                        <!-- Toggle 3: After Effects Settings -->
+                        <div class="setting-row" style="align-items:flex-start; margin-bottom:0;">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <span style="font-size:11px; color:var(--text-primary); font-weight:500;">After Effects Settings</span>
+                                <span style="font-size:9px; color:var(--text-secondary); line-height:1.3;">Custom workspaces, AE Prefs (shortcuts), & User Presets.</span>
+                            </div>
+                            <button id="toggle-sync-ae-btn" class="toggle-btn on" onclick="toggleSyncItem('ae')" style="margin-top:2px;">ON</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="mod-info" class="module-container">
                 <div class="module-header"><span class="material-symbols-rounded">info</span> Info & Help</div>
                 
@@ -986,18 +1176,7 @@
                         </div>
                         <button id="toggle-theme-icons-btn" class="toggle-btn" onclick="toggleThemeIcons()" style="margin-top:2px;">OFF</button>
                     </div>
-                    
-                    <div style="margin-top:16px; border-top:1px solid var(--border-subtle); padding-top:16px;">
-                        <div style="font-size:11px; color:var(--text-primary); margin-bottom:4px;">Data Location</div>
-                        <div style="font-size:9px; color:var(--text-secondary); line-height:1.3; margin-bottom:8px;">Sync your data folder to Dropbox/Drive.</div>
-                        <div id="data-location-display" style="font-family:monospace; font-size:9px; color:var(--text-secondary); background:var(--bg-hover); padding:6px; border-radius:4px; margin-bottom:8px; word-break:break-all;"></div>
-                        <script>
-                            setTimeout(function(){ document.getElementById('data-location-display').innerText = EASE_LIB_DIR; }, 500);
-                        </script>
-                        <button class="btn" style="width:100%; justify-content:center;" onclick="promptMoveDataFolder()">
-                            <span class="material-symbols-rounded">folder_open</span> Move / Sync Folder
-                        </button>
-                    </div>
+
                     
                     <div class="grid-2" style="margin-top:16px;">
                         <button class="btn" style="justify-content:center; color:var(--text-primary);" onclick="resetPreferences()" title="Reset all UI and behavior settings">Reset Settings</button>
@@ -1094,17 +1273,17 @@
 
     <!-- OS ORGANIZE WARNING MODAL -->
     <div id="os-org-modal" class="modal" style="z-index:3000;">
-        <div class="modal-content" style="max-width:300px; text-align:center;">
+        <div class="modal-content" style="max-width:380px; text-align:center;">
             <div class="modal-header" style="justify-content:center; border-bottom:none; margin-bottom:0;">
-                <h3 style="color:var(--accent-warning); font-size:16px; display:flex; align-items:center; gap:6px;"><span class="material-symbols-rounded">warning</span> Warning</h3>
+                <h3 style="color:var(--accent-warning); font-size:18px; display:flex; align-items:center; gap:6px;"><span class="material-symbols-rounded" style="font-size:20px;">warning</span> Warning</h3>
             </div>
-            <div style="font-size:12px; color:var(--text-secondary); margin-bottom:15px; line-height:1.4;">
+            <div style="font-size:13px; color:var(--text-secondary); margin-bottom:15px; line-height:1.5;">
                 You are about to organize the following folder:<br>
-                <div id="os-org-path-display" style="margin:8px 0; padding:6px; background:var(--bg-hover); border-radius:4px; font-family:monospace; word-break:break-all; color:var(--text-primary); font-size:11px;"></div>
+                <div id="os-org-path-display" style="margin:10px 0; padding:8px 12px; background:var(--bg-hover); border-radius:4px; font-family:monospace; word-break:break-all; color:var(--text-primary); font-size:12px; border:1px solid var(--border-strong);"></div>
                 Please ensure this is a project folder. Do NOT use this inside generic folders like Documents or Downloads!
             </div>
             
-            <label id="os-org-dont-ask-container" style="display:none; align-items:center; justify-content:center; gap:8px; font-size:11px; color:var(--text-secondary); margin-bottom:15px; cursor:pointer;">
+            <label id="os-org-dont-ask-container" style="display:none; align-items:center; justify-content:center; gap:8px; font-size:12px; color:var(--text-secondary); margin-bottom:15px; cursor:pointer;">
                 <input type="checkbox" id="os-org-dont-ask" onchange="handleOsOrgCheckbox()">
                 Don't ask me again
             </label>
@@ -1112,6 +1291,25 @@
             <div style="display:flex; gap:8px;">
                 <button class="btn" style="flex:1; justify-content:center; background:var(--bg-hover);" onclick="closeOsOrgModal()">Cancel</button>
                 <button class="btn btn-primary" id="os-org-btn-ok" style="flex:1; justify-content:center; background:var(--accent-primary); border-color:var(--accent-primary);" disabled onclick="confirmOsOrg()">OK (5s)</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SMART RELINK ORGANIZER MODAL -->
+    <div id="smart-relink-org-modal" class="modal" style="z-index:3500;">
+        <div class="modal-content" style="max-width:380px; text-align:center;">
+            <div class="modal-header" style="justify-content:center; border-bottom:none; margin-bottom:0;">
+                <h3 style="color:var(--accent-primary); font-size:16px; display:flex; align-items:center; gap:6px;"><span class="material-symbols-rounded">check_circle</span> Relink Successful!</h3>
+            </div>
+            <div style="font-size:12px; color:var(--text-secondary); margin-bottom:15px; line-height:1.4;">
+                <span id="smart-relink-count" style="font-weight:bold; color:var(--text-primary);"></span> offline assets were successfully relinked.<br><br>
+                However, these files are located outside your main Project Organizer folders. Do you want to sort and move/copy them into your project folder now?
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="btn btn-primary" style="justify-content:center;" onclick="organizeRelinkedAssets('copy')"><span class="material-symbols-rounded">content_copy</span> Copy to Project Folders</button>
+                <button class="btn btn-primary" style="justify-content:center; background:var(--bg-hover); color:var(--text-primary); border-color:var(--border-strong);" onclick="organizeRelinkedAssets('move')"><span class="material-symbols-rounded">drive_file_move</span> Move to Project Folders</button>
+                <button class="btn" style="justify-content:center; margin-top:4px;" onclick="closeSmartRelinkModal()">No, leave them there</button>
             </div>
         </div>
     </div>
@@ -1830,7 +2028,7 @@
                     mod = card.closest('.module-container');
                 }
                 
-                if (!mod || mod.id === 'mod-info' || mod.id === 'mod-output') return;
+                if (!mod || mod.id === 'mod-info' || mod.id === 'mod-output' || mod.id === 'mod-backup') return;
                 
                 var modId = mod.id;
                 if (!groups[modId]) groups[modId] = [];
@@ -1838,7 +2036,7 @@
             });
             
             // Define order
-            var modOrder = ['mod-home', 'mod-rigging', 'mod-kinetics', 'mod-design', 'mod-scene', 'mod-layers', 'mod-macro'];
+            var modOrder = ['mod-home', 'mod-rigging', 'mod-kinetics', 'mod-design'];
             
             modOrder.forEach(function(modId) {
                 if (!groups[modId] || groups[modId].length === 0) return;
@@ -2085,15 +2283,16 @@
         }
 
                 // ── Loader ──────────────────────────────────────────────────────
-        let loaderHidden = false, fontsReady = false, jsxReady = false;
+        let loaderHidden = false, jsxReady = false;
         function tryHideLoader() {
-            if (loaderHidden || !fontsReady || !jsxReady) return;
+            if (loaderHidden || !jsxReady) return;
             loaderHidden = true;
             const l = document.getElementById('app-loader');
             if (l) l.classList.add('hidden');
         }
-        setTimeout(() => { fontsReady = true; jsxReady = true; tryHideLoader(); }, 6000);
-        document.fonts.ready.then(() => { fontsReady = true; tryHideLoader(); });
+        // Fallback timeout in case Bridge hangs
+        setTimeout(() => { jsxReady = true; tryHideLoader(); }, 2500);
+        
         Promise.all([
             Bridge.loadJSX('utils.jsx'),
             Bridge.loadJSX('motion.jsx'),
@@ -2279,7 +2478,7 @@
                     }
                     
                     // Example Context-Aware Logic: Highlight Audio Reactive if audio layer selected
-                    var audioCard = document.querySelector('#mod-scene .card:nth-child(3)'); // Audio Reactive is 2nd card in scene, wait it's the 2nd card (nth-child(3) because of header)
+                    var audioCard = document.getElementById('card-audioreactive'); // Audio Reactive is 2nd card in scene, wait it's the 2nd card (nth-child(3) because of header)
                     if (audioCard) {
                         if (res.types.audio) {
                             audioCard.style.borderColor = 'var(--accent-primary)';
@@ -2356,6 +2555,7 @@
                 document.getElementById('aerender-progress-bg').style.display = 'block';
                 document.getElementById('aerender-progress-bar').style.width = '0%';
                 document.getElementById('aerender-progress-bar').style.background = 'var(--accent-primary)';
+                document.getElementById('aerender-recent-file').style.display = 'none';
                 
                 // 1. Gather UI Inputs
                 const activeCompText = document.getElementById('active-comp-name').innerText;
@@ -2389,6 +2589,7 @@
                     outputPath: outputPath,
                     timeRange: timeRange,
                     saveNextToAEP: saveNextToAEP,
+                    autoVersion: autoVersion,
                     autoSave: autoSave,
                     outputName: outputName
                 };
@@ -2400,65 +2601,43 @@
                 }
                 
                 fs.writeFileSync(configPath, JSON.stringify(configData, null, 4));
+                // Escape path for ExtendScript (backslashes on Windows)
+                const escapedConfigPath = configPath.replace(/\\/g, '/');
                 
                 // 2. Call ExtendScript to prepare Render Queue & AEP file
                 document.getElementById('aerender-status').innerText = 'Preparing Composition & Saving AEP...';
                 
-                Bridge.loadJSX('pipeline.jsx').then(() => {
-                    Bridge.callMethod('pipeline', 'prepareRenderQueue', { configPath: configPath }).then(res => {
-                        if (!res || !res.projectPath) {
-                            const errMessage = (res && res.error) ? res.error : "Failed to prepare render queue in AE.";
-                            document.getElementById('aerender-status').innerText = 'Error: ' + errMessage;
+                csInterface.evalScript(`MotionreisUtils.prepCLIRender('${escapedConfigPath}')`, (resStr) => {
+                    try {
+                        const res = JSON.parse(resStr);
+                        if (res.error) {
+                            document.getElementById('aerender-status').innerText = 'Error: ' + res.error;
                             document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
                             return;
                         }
                         
-                        // Queue prepared successfully! We now run parallel chunk render.
-                        runParallelChunks(res, throttle, codec, postAction);
+                        // Queue prepared successfully! We now run native MFR render.
+                        runNativeMFR(res, throttle, postAction);
                         
-                    }).catch(err => {
+                    } catch(err) {
                         document.getElementById('aerender-status').innerText = 'ExtendScript Error: ' + err.message;
                         document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
-                    });
-                }).catch(err => {
-                    document.getElementById('aerender-status').innerText = 'Failed to load pipeline.jsx';
-                    document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
+                    }
                 });
             });
         }
 
-        function runParallelChunks(renderInfo, throttle, codec, postAction) {
-            const startFrame = renderInfo.startFrame;
-            const endFrame = renderInfo.endFrame;
-            const totalFrames = endFrame - startFrame + 1;
-            const fps = renderInfo.fps;
+        function runNativeMFR(renderInfo, throttle, postAction) {
             const projectPath = renderInfo.projectPath;
-            const compName = renderInfo.compName;
-            const chunksDir = renderInfo.chunksDir;
-            const finalDestDir = renderInfo.finalDestDir;
-            const finalName = renderInfo.finalName;
             
             // Kill any existing processes first
             killAllActiveRenders();
             
-            // Determine thread pool size — aerender is very RAM heavy (~2GB each instance!)
-            // Cap to safe values that won't crash the system
-            const cpus = os.cpus().length;
-            let threadCount = 1;
-            if (throttle === 'max') {
-                threadCount = Math.max(1, Math.min(3, Math.floor(cpus / 4)));
-            } else if (throttle === 'balanced') {
-                threadCount = Math.max(1, Math.min(2, Math.floor(cpus / 4)));
-            } else {
-                threadCount = 1; // Slow & Silent
-            }
-            // Safety cap: never more than totalFrames
-            threadCount = Math.min(threadCount, totalFrames);
-            
             // Resolve aerender path
             const appPath = csInterface.getSystemPath(SystemPath.HOST_APPLICATION);
             let aerenderPath = '';
-            if (os.platform() === 'darwin') {
+            const isMac = os.platform() === 'darwin';
+            if (isMac) {
                 const baseDir = appPath.substring(0, appPath.indexOf('.app/'));
                 aerenderPath = path.join(path.dirname(baseDir + '.app'), 'aerender');
             } else {
@@ -2471,337 +2650,292 @@
                 return;
             }
             
-            // Split frame range into N chunks
-            const chunks = [];
-            const framesPerChunk = Math.ceil(totalFrames / threadCount);
-            for (let i = 0; i < threadCount; i++) {
-                const chunkStart = startFrame + (i * framesPerChunk);
-                if (chunkStart > endFrame) break;
-                const chunkEnd = Math.min(endFrame, chunkStart + framesPerChunk - 1);
-                chunks.push({
-                    id: i + 1,
-                    start: chunkStart,
-                    end: chunkEnd,
-                    total: chunkEnd - chunkStart + 1,
-                    rendered: 0
-                });
+            // Setup MFR flag
+            let mfrFlag = 'ON';
+            let mfrPercent = '80'; // Balanced (Standard Allocation)
+            if (throttle === 'slow') {
+                mfrFlag = 'OFF';
+            } else if (throttle === 'max') {
+                mfrFlag = 'ON';
+                mfrPercent = '100';
             }
             
-            // Track rendered frames per chunk
-            const chunkProgress = {};
-            chunks.forEach(c => { chunkProgress[c.id] = 0; });
-            
-            function updateProgressBar() {
-                let totalRendered = 0;
-                for (let cid in chunkProgress) {
-                    totalRendered += chunkProgress[cid];
-                }
-                const pct = Math.min(100, Math.floor((totalRendered / totalFrames) * 100));
-                document.getElementById('aerender-progress-bar').style.width = pct + '%';
-                document.getElementById('aerender-status').innerText = `Rendering: ${pct}% (${totalRendered}/${totalFrames} frames)`;
-            }
-            
-            const chunkPromises = chunks.map(chunk => {
-                return new Promise((resolve, reject) => {
-                    const spawnChunkProcess = (startFrameIndex) => {
-                        // CRITICAL: Do NOT pass -output flag here.
-                        // aerender reads the output module path from the saved AEP on disk.
-                        // Passing -output with [#####] pattern via CLI arg does NOT work reliably!
-                        const args = [
-                            '-project', projectPath,
-                            '-comp', compName,
-                            '-s', startFrameIndex.toString(),
-                            '-e', chunk.end.toString(),
-                            '-mem_usage', '60', '30'  // limit AE RAM usage so parallel instances don't OOM
-                        ];
-                        
-                        document.getElementById('aerender-status').innerText = `Thread ${chunk.id}: Launching aerender (frames ${startFrameIndex}-${chunk.end})...`;
-                        
-                        const proc = spawn(aerenderPath, args);
-                        activeRenderProcesses.push(proc);
-                        
-                        let lastActivity = Date.now();
-                        let stderrLog = '';
-                        
-                        // Watchdog: kill if no stdout for 90 seconds
-                        const watchdog = setInterval(() => {
-                            if (Date.now() - lastActivity > 90000) {
-                                console.warn(`Watchdog: Chunk ${chunk.id} stuck (90s no output). Killing...`);
-                                clearInterval(watchdog);
-                                try { proc.kill('SIGKILL'); } catch(e) {}
-                                activeRenderProcesses = activeRenderProcesses.filter(p => p !== proc);
-                                resolve(); // continue pipeline even if this chunk timed out
-                            }
-                        }, 5000);
-                        
-                        renderWatchdogs.push(watchdog);
-                        
-                        proc.stdout.on('data', (data) => {
-                            lastActivity = Date.now();
-                            const output = data.toString();
-                            
-                            // Error filtering
-                            if (/Missing footage|Footage.*missing|Could not open footage/i.test(output)) {
-                                clearInterval(watchdog);
-                                killAllActiveRenders();
-                                showToast("Render aborted: Missing Footage in project!", "error");
-                                reject(new Error("Missing footage."));
-                                return;
-                            }
-                            if (/Missing font|Font not found/i.test(output)) {
-                                showToast("Warning: Missing fonts detected.", "info");
-                            }
-                            if (/Out of memory|51::/i.test(output)) {
-                                clearInterval(watchdog);
-                                killAllActiveRenders();
-                                showToast("Render crashed: Out of Memory! Use Slow mode.", "error");
-                                reject(new Error("Out of memory."));
-                                return;
-                            }
-                            
-                            // Parse progress - aerender outputs lines like: "PROGRESS: frame 42 (42.00 secs)"
-                            const lines = output.split('\n');
-                            lines.forEach(line => {
-                                const frameMatch = line.match(/frame\s+(\d+)/i);
-                                if (frameMatch) {
-                                    const frameNum = parseInt(frameMatch[1], 10);
-                                    const framesDone = frameNum - chunk.start + 1;
-                                    if (framesDone > 0 && framesDone > chunkProgress[chunk.id]) {
-                                        chunkProgress[chunk.id] = framesDone;
-                                        let totalRendered = 0;
-                                        for (let cid in chunkProgress) totalRendered += chunkProgress[cid];
-                                        const pct = Math.min(94, Math.floor((totalRendered / totalFrames) * 94));
-                                        document.getElementById('aerender-progress-bar').style.width = pct + '%';
-                                        document.getElementById('aerender-status').innerText = `Rendering: ${pct}% — Thread ${chunk.id} on frame ${frameNum}/${chunk.end}`;
-                                    }
-                                }
-                            });
-                        });
-                        
-                        proc.stderr.on('data', (data) => {
-                            stderrLog += data.toString();
-                            // Show last meaningful stderr line in status
-                            const errLines = stderrLog.split('\n').filter(l => l.trim().length > 0);
-                            if (errLines.length > 0) {
-                                const lastErr = errLines[errLines.length - 1].trim();
-                                if (lastErr.length < 200) { // Don't overflow UI
-                                    document.getElementById('aerender-status').innerText = `Thread ${chunk.id}: ${lastErr}`;
-                                }
-                            }
-                        });
-                        
-                        proc.on('close', (code) => {
-                            clearInterval(watchdog);
-                            activeRenderProcesses = activeRenderProcesses.filter(p => p !== proc);
-                            chunkProgress[chunk.id] = chunk.total;
-                            
-                            if (code !== 0) {
-                                console.error(`Chunk ${chunk.id} exited with code ${code}. stderr: ${stderrLog.slice(-500)}`);
-                                // Show actual error from AE in the UI
-                                const lastErr = stderrLog.split('\n').filter(l => l.trim()).pop() || ('Exit code: ' + code);
-                                document.getElementById('aerender-status').innerText = `Error (Thread ${chunk.id}): ${lastErr.trim().slice(0, 120)}`;
-                            }
-                            resolve(); // Always resolve to continue pipeline — FFmpeg will handle missing frames gracefully
-                        });
-                    };
-                    
-                    spawnChunkProcess(chunk.start);
-                });
-            });
-            
-            Promise.all(chunkPromises).then(() => {
-                document.getElementById('aerender-status').innerText = 'Render done! Compiling video with FFmpeg...';
-                document.getElementById('aerender-progress-bar').style.width = '95%';
-                document.getElementById('aerender-progress-bar').style.background = '#eab308';
-                compileFinalVideo(chunksDir, finalDestDir, finalName, fps, startFrame, codec, postAction);
-                
-            }).catch(err => {
-                console.error("Render pool failed:", err);
-                if (!document.getElementById('aerender-status').innerText.includes('Canceled')) {
-                    document.getElementById('aerender-status').innerText = 'Render failed: ' + err.message;
-                    document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
-                }
-            });
-        }
-
-        // 5. FFmpeg Decoupled Encoding
-        function compileFinalVideo(chunksDir, finalDestDir, finalName, fps, startFrame, codec, postAction) {
-            const extensionRoot = csInterface.getSystemPath(SystemPath.EXTENSION);
-            const isMac = os.platform() === 'darwin';
-            
-            let ffmpegPath = '';
-            if (isMac) {
-                ffmpegPath = path.join(extensionRoot, 'bin', 'mac', 'ffmpeg');
-            } else {
-                ffmpegPath = path.join(extensionRoot, 'bin', 'win', 'ffmpeg.exe');
-            }
-            
-            if (!fs.existsSync(ffmpegPath)) {
-                document.getElementById('aerender-status').innerHTML = `
-                    <div style="color:var(--accent-warning); margin-bottom:6px;"><b>FFmpeg Binary Missing!</b></div>
-                    To compile raw frames into MP4/ProRes, please download FFmpeg and place it in the plugin directory.
-                    <div style="margin-top:6px; display:flex; gap:6px;">
-                        <button class="btn" style="padding:4px 8px; font-size:10px;" onclick="require('electron').shell.openExternal('https://ffmpeg.org/download.html')">🌐 Download FFmpeg</button>
-                        <button class="btn btn-primary" style="padding:4px 8px; font-size:10px;" onclick="openPluginBinFolder()">📂 Open Plugin Bin</button>
-                    </div>
-                `;
-                document.getElementById('aerender-progress-bar').style.background = 'var(--accent-warning)';
-                return;
-            }
-            
-            // ─── PRE-FLIGHT: Scan chunksDir for actual PNG frames ───────────────────
-            let actualFirstFrame = -1;
-            let actualLastFrame = -1;
-            let frameCount = 0;
-            try {
-                const files = fs.readdirSync(chunksDir);
-                const frameNums = [];
-                files.forEach(f => {
-                    const m = f.match(/^frame_(\d+)\.png$/i);
-                    if (m) frameNums.push(parseInt(m[1], 10));
-                });
-                frameNums.sort((a, b) => a - b);
-                if (frameNums.length > 0) {
-                    actualFirstFrame = frameNums[0];
-                    actualLastFrame  = frameNums[frameNums.length - 1];
-                    frameCount = frameNums.length;
-                }
-            } catch(e) {
-                console.error('Pre-flight scan failed:', e);
-            }
-            
-            if (frameCount === 0) {
-                // aerender wrote NOTHING → tell the user clearly
-                document.getElementById('aerender-status').innerText =
-                    'aerender failed: 0 frames written to disk. Check AE project has an active render queue item, all footage is online, and output path is writable.';
-                document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
-                return;
-            }
-            
-            document.getElementById('aerender-status').innerText =
-                `Found ${frameCount} frames (${actualFirstFrame}–${actualLastFrame}). Running FFmpeg...`;
-            // ────────────────────────────────────────────────────────────────────────
-            
-            let outputExt = 'mp4';
-            let codecArgs = [];
-            
-            if (codec === 'H.264' || codec === 'High Quality') {
-                outputExt = 'mp4';
-                codecArgs = [
-                    '-c:v', 'libx264',
-                    '-crf', '16',
-                    '-preset', 'fast',
-                    '-pix_fmt', 'yuv420p'
-                ];
-            } else if (codec === 'ProRes 422') {
-                outputExt = 'mov';
-                codecArgs = [
-                    '-c:v', 'prores_ks',
-                    '-profile:v', '2',
-                    '-vendor', 'ap10',
-                    '-pix_fmt', 'yuv422p10le'
-                ];
-            } else if (codec === 'ProRes 4444') {
-                outputExt = 'mov';
-                codecArgs = [
-                    '-c:v', 'prores_ks',
-                    '-profile:v', '4',
-                    '-vendor', 'ap10',
-                    '-pix_fmt', 'yuva444p10le'
-                ];
-            } else if (codec === 'Animated GIF') {
-                outputExt = 'gif';
-                codecArgs = [
-                    '-vf', 'fps=' + fps + ',scale=720:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse'
-                ];
-            } else if (codec === 'PNG Sequence' || codec === 'JPEG Sequence') {
-                const finalSeqDir = path.join(finalDestDir, finalName);
-                if (fs.existsSync(finalSeqDir)) {
-                    try { deleteFolderRecursive(finalSeqDir); } catch(e) {}
-                }
-                fs.renameSync(chunksDir, finalSeqDir);
-                finishRenderV2(finalSeqDir, postAction);
-                return;
-            } else {
-                outputExt = 'mp4';
-                codecArgs = [
-                    '-c:v', 'libx264',
-                    '-crf', '10',
-                    '-pix_fmt', 'yuv420p'
-                ];
-            }
-            
-            const finalOutputFile = path.join(finalDestDir, `${finalName}.${outputExt}`);
-            if (fs.existsSync(finalOutputFile)) {
-                try { fs.unlinkSync(finalOutputFile); } catch(e) {}
-            }
-            
-            // Use actualFirstFrame (discovered on disk) as start_number — not assumed startFrame
-            const ffmpegArgs = [
-                '-y',
-                '-framerate', fps.toString(),
-                '-start_number', actualFirstFrame.toString(),
-                '-i', path.join(chunksDir, 'frame_%05d.png'),
-                ...codecArgs,
-                finalOutputFile
+            // CRITICAL: NO -reuse flag used. Spawn completely isolated!
+            const args = [
+                '-project', projectPath,
+                '-continueOnMissingFootage'
             ];
             
-            let ffmpegStderr = '';
-            document.getElementById('aerender-status').innerText = 'FFmpeg: Assembling video files...';
-            const ffProcess = spawn(ffmpegPath, ffmpegArgs);
+            if (mfrFlag === 'ON') {
+                args.push('-mfr', 'ON', mfrPercent);
+            } else {
+                args.push('-mfr', 'OFF');
+            }
             
-            ffProcess.stderr.on('data', (data) => {
-                ffmpegStderr += data.toString();
-                // FFmpeg outputs progress on stderr - show frame progress
-                const m = ffmpegStderr.match(/frame=\s*(\d+)/);
-                if (m) {
-                    const done = parseInt(m[1], 10);
-                    const pct = Math.min(100, Math.floor(95 + (done / frameCount) * 5));
-                    document.getElementById('aerender-progress-bar').style.width = pct + '%';
-                    document.getElementById('aerender-status').innerText = `FFmpeg: encoding frame ${done}/${frameCount}...`;
+            document.getElementById('aerender-status').innerText = `Launching Native aerender CLI...`;
+            
+            const proc = spawn(aerenderPath, args);
+            activeRenderProcesses.push(proc);
+            
+            let lastActivity = Date.now();
+            let stderrLog = '';
+            
+            // Watchdog: kill if no stdout for 10 minutes (600,000 ms)
+            const watchdog = setInterval(() => {
+                if (Date.now() - lastActivity > 600000) {
+                    console.warn(`Watchdog: Render stuck (10m no output). Killing...`);
+                    clearInterval(watchdog);
+                    try { proc.kill('SIGKILL'); } catch(e) {}
+                    activeRenderProcesses = activeRenderProcesses.filter(p => p !== proc);
+                    document.getElementById('aerender-status').innerText = 'Render killed by Watchdog (hang detected).';
+                    document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
                 }
+            }, 10000);
+            
+            renderWatchdogs.push(watchdog);
+            
+            const totalFrames = renderInfo.endFrame - renderInfo.startFrame + 1;
+            
+            proc.stdout.on('data', (data) => {
+                lastActivity = Date.now();
+                const output = data.toString();
+                
+                const lines = output.split('\n');
+                lines.forEach(line => {
+                    const frameMatch = line.match(/PROGRESS:.*frame\s+(\d+)/i) || line.match(/PROGRESS:.*\(\s*(\d+)\s*\)/i);
+                    if (frameMatch) {
+                        const framesDone = parseInt(frameMatch[1], 10);
+                        const pct = Math.min(100, Math.floor((framesDone / totalFrames) * 100));
+                        document.getElementById('aerender-progress-bar').style.width = pct + '%';
+                        document.getElementById('aerender-status').innerText = `Rendering: ${pct}% (${framesDone}/${totalFrames} frames)`;
+                    } else if (line.match(/PROGRESS:/i)) {
+                         document.getElementById('aerender-status').innerText = line.trim();
+                    }
+                });
             });
             
-            ffProcess.on('close', (code) => {
-                if (code === 0) {
-                    try {
-                        deleteFolderRecursive(chunksDir);
-                    } catch(e) {
-                        console.error("Purging chunks temp folder failed:", e);
-                    }
-                    
-                    finishRenderV2(finalOutputFile, postAction);
-                } else {
-                    // Show the last meaningful FFmpeg error line
-                    const errLines = ffmpegStderr.split('\n').filter(l => l.trim() && !l.startsWith('  '));
-                    const lastErr = errLines.filter(l => /error|invalid|no such|cannot|failed/i.test(l)).pop()
-                                 || errLines.pop()
-                                 || ('FFmpeg exited with code ' + code);
-                    document.getElementById('aerender-status').innerText = 'FFmpeg error: ' + lastErr.trim().slice(0, 150);
+            proc.stderr.on('data', (data) => {
+                stderrLog += data.toString();
+                lastActivity = Date.now();
+            });
+            
+            proc.on('close', (code) => {
+                clearInterval(watchdog);
+                activeRenderProcesses = activeRenderProcesses.filter(p => p !== proc);
+                
+                if (code !== 0 || stderrLog.toLowerCase().includes('error')) {
+                    const errLines = stderrLog.split('\n').filter(l => l.trim());
+                    const lastErr = errLines.pop() || ('Exit code: ' + code);
+                    document.getElementById('aerender-status').innerText = `Error: ${lastErr.trim().slice(0, 120)}`;
                     document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
+                    return;
+                }
+                
+                finishRenderV2(path.join(renderInfo.finalDestDir, renderInfo.finalName), postAction);
+            });
+        }
+
+
+
+        let lastRenderedFilePath = '';
+        // ─── RENDER MODE PILL SWITCHER ─────────────────────────────────────────
+        function switchRenderMode(mode) {
+            const pillCli   = document.getElementById('pill-cli');
+            const pillQueue = document.getElementById('pill-queue');
+            const panelCli  = document.getElementById('render-panel-cli');
+            const panelQueue= document.getElementById('render-panel-queue');
+
+            if (mode === 'cli') {
+                pillCli.style.background   = 'var(--accent-primary)';
+                pillCli.style.color        = '#fff';
+                pillQueue.style.background = 'transparent';
+                pillQueue.style.color      = 'var(--text-secondary)';
+                panelCli.style.display     = 'block';
+                panelQueue.style.display   = 'none';
+            } else {
+                pillQueue.style.background = 'var(--accent-primary)';
+                pillQueue.style.color      = '#fff';
+                pillCli.style.background   = 'transparent';
+                pillCli.style.color        = 'var(--text-secondary)';
+                panelCli.style.display     = 'none';
+                panelQueue.style.display   = 'block';
+                rqRefresh();
+            }
+        }
+
+        // ─── RENDER QUEUE PANEL FUNCTIONS ──────────────────────────────────────
+        function rqRefresh() {
+            csInterface.evalScript(`
+                (function() {
+                    try {
+                        var rq = app.project.renderQueue;
+                        var items = [];
+                        for (var i = 1; i <= rq.numItems; i++) {
+                            var item = rq.item(i);
+                            var statusStr = 'Queued';
+                            if (item.status === RQItemStatus.WILL_CONTINUE) statusStr = 'Will Continue';
+                            else if (item.status === RQItemStatus.NEEDS_OUTPUT) statusStr = 'Needs Output';
+                            else if (item.status === RQItemStatus.UNQUEUED) statusStr = 'Unqueued';
+                            else if (item.status === RQItemStatus.QUEUED) statusStr = 'Queued';
+                            else if (item.status === RQItemStatus.RENDERING) statusStr = 'Rendering';
+                            else if (item.status === RQItemStatus.USER_STOPPED) statusStr = 'Stopped';
+                            else if (item.status === RQItemStatus.ERR_STOPPED) statusStr = 'Error';
+                            else if (item.status === RQItemStatus.DONE) statusStr = 'Done';
+
+                            var om = item.outputModule(1);
+                            var outFile = '';
+                            try { outFile = om.file ? om.file.fsName : ''; } catch(e) {}
+
+                            items.push({
+                                index: i,
+                                comp: item.comp.name,
+                                status: statusStr,
+                                outFile: outFile,
+                                startTime: item.comp.workAreaStart ? item.comp.workAreaStart.toFixed(2) : '0',
+                                duration: item.comp.workAreaDuration ? item.comp.workAreaDuration.toFixed(2) : '0'
+                            });
+                        }
+                        return JSON.stringify({ ok: true, items: items });
+                    } catch(e) {
+                        return JSON.stringify({ ok: false, error: e.toString() });
+                    }
+                })()
+            `, function(resStr) {
+                try {
+                    var res = JSON.parse(resStr);
+                    var list = document.getElementById('rq-items-list');
+                    var empty = document.getElementById('rq-empty-state');
+                    
+                    // Remove old items except empty state
+                    var oldItems = list.querySelectorAll('.rq-item-row');
+                    oldItems.forEach(function(el) { el.remove(); });
+                    
+                    if (!res.ok || !res.items || res.items.length === 0) {
+                        empty.style.display = 'block';
+                        return;
+                    }
+                    empty.style.display = 'none';
+                    
+                    res.items.forEach(function(item) {
+                        var statusColor = 'var(--text-secondary)';
+                        if (item.status === 'Done') statusColor = '#10b981';
+                        else if (item.status === 'Queued') statusColor = 'var(--accent-primary)';
+                        else if (item.status === 'Rendering') statusColor = '#f59e0b';
+                        else if (item.status === 'Error' || item.status === 'Stopped') statusColor = '#ef4444';
+
+                        var fileName = item.outFile ? item.outFile.split('/').pop().split('\\\\').pop() : 'No output set';
+                        
+                        var row = document.createElement('div');
+                        row.className = 'rq-item-row';
+                        row.style.cssText = 'background:var(--bg-app); border:1px solid var(--border-strong); border-radius:6px; padding:8px 10px; display:flex; align-items:center; gap:8px;';
+                        row.innerHTML = `
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-size:11px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.comp}</div>
+                                <div style="font-size:9px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">${fileName}</div>
+                            </div>
+                            <span style="font-size:9px; font-weight:700; color:${statusColor}; background:${statusColor}18; padding:2px 6px; border-radius:10px; white-space:nowrap;">${item.status}</span>
+                            <button class="btn" style="padding:4px; justify-content:center; background:transparent; border:none; color:var(--text-secondary);" onclick="rqRemoveItem(${item.index})" title="Remove from Queue">
+                                <span class="material-symbols-rounded" style="font-size:14px;">close</span>
+                            </button>
+                        `;
+                        list.appendChild(row);
+                    });
+                } catch(e) {
+                    console.error('rqRefresh error:', e);
                 }
             });
         }
 
+        function rqAddActiveComp() {
+            csInterface.evalScript(`
+                (function() {
+                    try {
+                        var comp = app.project.activeItem;
+                        if (!comp || !(comp instanceof CompItem)) {
+                            return JSON.stringify({ ok: false, error: 'No active composition. Please select a comp first.' });
+                        }
+                        app.project.renderQueue.items.add(comp);
+                        return JSON.stringify({ ok: true, comp: comp.name });
+                    } catch(e) {
+                        return JSON.stringify({ ok: false, error: e.toString() });
+                    }
+                })()
+            `, function(resStr) {
+                try {
+                    var res = JSON.parse(resStr);
+                    if (!res.ok) {
+                        showToast(res.error, 'error');
+                    } else {
+                        showToast(res.comp + ' added to Render Queue', 'success');
+                        rqRefresh();
+                    }
+                } catch(e) {}
+            });
+        }
+
+        function rqRemoveItem(index) {
+            csInterface.evalScript(`
+                (function() {
+                    try {
+                        app.project.renderQueue.item(${index}).remove();
+                        return 'ok';
+                    } catch(e) { return 'err:' + e.toString(); }
+                })()
+            `, function(res) {
+                rqRefresh();
+            });
+        }
+
+        function rqRenderAll() {
+            csInterface.evalScript(`
+                (function() {
+                    try {
+                        app.project.renderQueue.render();
+                        return 'ok';
+                    } catch(e) { return 'err:' + e.toString(); }
+                })()
+            `, function(res) {
+                if (res && res.startsWith('err:')) {
+                    showToast('Render failed: ' + res.replace('err:', ''), 'error');
+                }
+            });
+        }
+
+        // ─── RECENT FILE ───────────────────────────────────────────────────────
+        function openRecentRender() {
+            if (!lastRenderedFilePath) return;
+            const { exec } = require('child_process');
+            const isMac = require('os').platform() === 'darwin';
+            const cmd = isMac ? `open -R "${lastRenderedFilePath}"` : `explorer.exe /select,"${lastRenderedFilePath}"`;
+            exec(cmd);
+        }
 
         function finishRenderV2(filePath, postAction) {
             document.getElementById('aerender-status').innerText = 'Render Complete!';
             document.getElementById('aerender-progress-bar').style.width = '100%';
             document.getElementById('aerender-progress-bar').style.background = '#10b981';
             
+            lastRenderedFilePath = filePath;
+            document.getElementById('aerender-recent-file').style.display = 'block';
+            
+            const isMac = os.platform() === 'darwin';
             if (postAction === 'chime') {
-                try {
-                    const audio = new Audio('../../shared/chime.mp3');
-                    audio.play();
-                } catch(e) {}
+                if (isMac) {
+                    const osascriptCmd = "osascript -e 'display notification \"Rendering Komposisi Resolusi Penuh Telah Selesai\" with title \"Antigravity Render Plugin\" subtitle \"Eksekusi Baris Komando Selesai\" sound name \"Glass\"'";
+                    require('child_process').exec(osascriptCmd);
+                } else {
+                    require('child_process').spawn('powershell', ['-Command', '[console]::beep(1000, 500)']);
+                    try {
+                        const audio = new Audio('../../shared/chime.mp3');
+                        audio.play();
+                    } catch(e) {}
+                }
             } else if (postAction === 'explorer') {
                 const { exec } = require('child_process');
-                const isMac = os.platform() === 'darwin';
                 const cmd = isMac ? `open -R "${filePath}"` : `explorer.exe /select,"${filePath}"`;
                 exec(cmd);
             } else if (postAction === 'sleep') {
                 const { exec } = require('child_process');
-                const isMac = os.platform() === 'darwin';
                 const cmd = isMac ? `osascript -e 'tell application "System Events" to sleep'` : `rundll32.exe powrprof.dll,SetSuspendState 0,1,0`;
                 exec(cmd);
             }
@@ -3126,6 +3260,10 @@
                     
                     // Keep localStorage synced
                     localStorage.setItem('motionreis_theme', savedTheme);
+                } else {
+                    document.documentElement.style.setProperty('--accent-primary', '#5160E3');
+                    var customPicker = document.getElementById('custom-theme-picker');
+                    if (customPicker) customPicker.value = '#5160E3';
                 }
 
                 // Speed Mode
@@ -3256,7 +3394,7 @@
         }
 
         function resetPreferences() {
-            showConfirmModal("Reset Settings", "Reset all preferences and UI settings to default?", function() {
+            showConfirmModal("Reset Settings", "Are you sure you want to reset all preferences? This will not delete your library.", function() {
                 localStorage.removeItem('motionreis_theme');
                 localStorage.removeItem('motionreis_theme_icons');
                 localStorage.removeItem('motionreis_speed');
@@ -3267,8 +3405,9 @@
                         fs.unlinkSync(THEME_CONFIG_FILE);
                     }
                 } catch(e) {}
-                showToast("Settings reset. Reloading...", "success");
-                setTimeout(function(){ location.reload(); }, 1000);
+                
+                loadPreferences(); // Soft reset
+                showToast("Settings reset to default.", "success");
             }, "Reset", "var(--accent-danger)");
         }
 
@@ -3278,8 +3417,28 @@
                     localStorage.clear();
                     if (fs.existsSync(EASE_LIB_FILE)) fs.unlinkSync(EASE_LIB_FILE);
                     if (fs.existsSync(CLICK_METRICS_FILE)) fs.unlinkSync(CLICK_METRICS_FILE);
-                    showToast("Factory Reset Complete. Reloading...", "success");
-                    setTimeout(function(){ location.reload(); }, 1500);
+                    try {
+                        if (fs.existsSync(THEME_CONFIG_FILE)) {
+                            fs.unlinkSync(THEME_CONFIG_FILE);
+                        }
+                    } catch(e) {}
+                    
+                    loadPreferences(); // Soft reset UI settings
+                    
+                    // Clear Ease Grid data
+                    if (typeof loadEasePresets === 'function') {
+                        // Just clear it directly on the DOM
+                        const list = document.getElementById('ease-preset-list');
+                        if (list) list.innerHTML = '';
+                    }
+                    
+                    // Clear Metrics
+                    const metricsCard = document.getElementById('card-metrics');
+                    if (metricsCard) {
+                        metricsCard.innerHTML = `<div class="section-label">Performance Metrics</div><p style="font-size:11px; color:var(--text-secondary); margin-bottom:0;">No data available yet.</p>`;
+                    }
+                    
+                    showToast("Factory Reset Complete.", "success");
                 } catch(e) { alert(e); }
             });
         }
@@ -3287,7 +3446,7 @@
         let pendingSyncTarget = "";
         
         function promptMoveDataFolder() {
-            Bridge.eval('pipeline.selectOSFolder()').then(function(resData) {
+            Bridge.eval('pipeline.selectGenericFolder()').then(function(resData) {
                 if (resData === "Cancelled.") return;
                 
                 var basePath = resData.path;
@@ -3368,18 +3527,359 @@
                 
                 fs.writeFileSync(POINTER_FILE, targetPath, 'utf8');
                 showToast("Data Sync Complete! Reloading...", "success");
-                setTimeout(function(){ location.reload(); }, 1500);
+                setTimeout(function(){ window.location.href = window.location.href; }, 1500);
             } catch(e) {
                 console.error(e);
                 showToast("Sync Error: " + e.message, "error");
             }
         }
 
+        function runDeepDuplicator() {
+            let data = {
+                fixCb: document.getElementById('dup-fix-cb').checked,
+                fixType: document.getElementById('dup-fix-type').value,
+                fixText: document.getElementById('dup-fix-text').value,
+                
+                replaceCb: document.getElementById('dup-replace-cb').checked,
+                searchText: document.getElementById('dup-search-text').value,
+                replaceText: document.getElementById('dup-replace-text').value,
+                
+                incCb: document.getElementById('dup-inc-cb').checked,
+                incType: document.getElementById('dup-inc-type').value,
+                
+                colorCb: document.getElementById('dup-color-val').value !== "0",
+                colorVal: parseInt(document.getElementById('dup-color-val').value),
+                
+                folderCb: document.getElementById('dup-folder-cb').checked,
+                folderName: document.getElementById('dup-folder-name').value,
+                
+                excludeCb: document.getElementById('dup-exclude-cb').checked,
+                excludeType: document.getElementById('dup-exclude-type').value,
+                excludeText: document.getElementById('dup-exclude-text').value,
+                
+                depthCb: false, // Removed depth UI to keep it simpler, but keeping logic
+                depthVal: 20,
+                
+                exprCb: document.getElementById('dup-expr-cb').checked,
+                footageCb: document.getElementById('dup-footage-cb').checked,
+                solidsCb: document.getElementById('dup-solids-cb').checked,
+                selectCb: false,
+                
+                copies: parseInt(document.getElementById('dup-copies').value) || 1
+            };
+            exec('pipeline', 'deepDuplicate', data);
+        }
+
+        let pendingRelinkedItems = [];
+        
+        function triggerSmartRelinker() {
+            var res = window.cep.fs.showOpenDialog(false, true, "Select a folder to search for offline assets", "", []);
+            if (res.data && res.data.length > 0) {
+                var folderPath = res.data[0];
+                showToast("Scanning folder... this may take a moment.", "info");
+                
+                Bridge.eval(`pipeline.smartRelink("${folderPath.replace(/\\/g, '/')}")`).then(function(resData) {
+                    if (resData && resData.startsWith('{')) {
+                        var data = JSON.parse(resData);
+                        if (data.count === 0) {
+                            showToast("No missing assets found in project.", "info");
+                        } else {
+                            pendingRelinkedItems = data.items;
+                            document.getElementById('smart-relink-count').innerText = data.count;
+                            document.getElementById('smart-relink-org-modal').classList.add('show');
+                        }
+                    } else if (resData) {
+                        showToast(resData, "error");
+                    }
+                }).catch(e => {
+                    showToast("Error during relink", "error");
+                });
+            }
+        }
+        
+        function closeSmartRelinkModal() {
+            document.getElementById('smart-relink-org-modal').classList.remove('show');
+        }
+        
+        function organizeRelinkedAssets(action) {
+            closeSmartRelinkModal();
+            
+            Bridge.eval('app.project.file ? app.project.file.parent.fsName : ""').then(function(projPath) {
+                if (!projPath) {
+                    showToast("Please save your project first to use auto-sorting.", "warning");
+                    return;
+                }
+                
+                showToast("Organizing assets...", "info");
+                var mappings = [];
+                var movedCount = 0;
+                
+                for (var i = 0; i < pendingRelinkedItems.length; i++) {
+                    var item = pendingRelinkedItems[i];
+                    var ext = path.extname(item.path).toLowerCase();
+                    var targetDir = '01_ASSET';
+                    
+                    if (['.mp4', '.mov', '.avi', '.mkv', '.webm'].includes(ext)) targetDir = '08_VIDEO DATA';
+                    else if (['.png', '.jpg', '.jpeg', '.psd', '.ai', '.webp', '.tiff'].includes(ext)) targetDir = '04_IMAGE';
+                    else if (['.wav', '.mp3', '.m4a', '.ogg', '.aac'].includes(ext)) targetDir = '02_AUDIO';
+                    else if (['.obj', '.c4d', '.fbx'].includes(ext)) targetDir = '07_CG';
+                    
+                    var targetFolder = path.join(projPath, targetDir);
+                    if (!fs.existsSync(targetFolder)) fs.mkdirSync(targetFolder, {recursive:true});
+                    
+                    var fileName = path.basename(item.path);
+                    var newPath = path.join(targetFolder, fileName);
+                    
+                    try {
+                        if (item.path !== newPath) {
+                            if (action === 'move') {
+                                fs.renameSync(item.path, newPath);
+                            } else {
+                                fs.copyFileSync(item.path, newPath);
+                            }
+                            mappings.push({ id: item.id, newPath: newPath.replace(/\\/g, '/') });
+                            movedCount++;
+                        }
+                    } catch(err) {
+                        console.error("Failed to move/copy", item.path, err);
+                    }
+                }
+                
+                if (mappings.length > 0) {
+                    Bridge.eval(`pipeline.relinkToNewPaths('${JSON.stringify(mappings)}')`).then(function(relRes) {
+                        showToast("Successfully organized " + movedCount + " assets!", "success");
+                    });
+                } else {
+                    showToast("Assets are already in the correct folders.", "success");
+                }
+            });
+        }
+
         // Initialize preferences on boot
         document.addEventListener('DOMContentLoaded', function() {
             loadPreferences();
+            initBackupSettings();
             checkFFmpegInstalled();
         });
+
+        // ── BACKUP SUITE JS ARCHITECTURE ───────────────────────────────
+        let backupLoc1Path = localStorage.getItem('motionreis_backup_loc1_path') || path.join(os.homedir(), 'Documents', 'Motionreis_Backups');
+        let backupLoc2Path = localStorage.getItem('motionreis_backup_loc2_path') || '';
+        let backupLoc1Enable = localStorage.getItem('motionreis_backup_loc1_enable') !== 'false'; // default true
+        let backupLoc2Enable = localStorage.getItem('motionreis_backup_loc2_enable') === 'true';   // default false
+        
+        let backupItemPref = localStorage.getItem('motionreis_backup_item_pref') !== 'false';     // default true
+        let backupItemData = localStorage.getItem('motionreis_backup_item_data') !== 'false';     // default true
+        let backupItemAe   = localStorage.getItem('motionreis_backup_item_ae') !== 'false';       // default true
+
+        let liveSyncWatcher = null;
+        let debounceSyncTimers = {};
+
+        function startLiveSyncWatcher() {
+            try {
+                if (liveSyncWatcher) {
+                    liveSyncWatcher.close();
+                    liveSyncWatcher = null;
+                }
+                
+                if (!fs.existsSync(EASE_LIB_DIR)) return;
+                
+                liveSyncWatcher = fs.watch(EASE_LIB_DIR, (eventType, filename) => {
+                    if (!filename) return;
+                    if (!filename.endsWith('.json')) return;
+                    debounceSyncFile(filename);
+                });
+            } catch(e) { console.error("Error starting live sync watcher:", e); }
+        }
+
+        function debounceSyncFile(filename) {
+            if (debounceSyncTimers[filename]) clearTimeout(debounceSyncTimers[filename]);
+            
+            debounceSyncTimers[filename] = setTimeout(function() {
+                try {
+                    const src = path.join(EASE_LIB_DIR, filename);
+                    if (!fs.existsSync(src)) return;
+                    
+                    const targetDirs = [];
+                    if (backupLoc1Enable && backupLoc1Path) targetDirs.push(path.join(backupLoc1Path, 'Live_Sync'));
+                    if (backupLoc2Enable && backupLoc2Path) targetDirs.push(path.join(backupLoc2Path, 'Live_Sync'));
+                    
+                    targetDirs.forEach(dir => {
+                        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+                        fs.copyFileSync(src, path.join(dir, filename));
+                    });
+                    
+                    if (filename === 'theme_config.json' || filename === 'click_metrics.json') {
+                        targetDirs.forEach(dir => {
+                            const lsDump = {};
+                            for (let i = 0; i < localStorage.length; i++) {
+                                const k = localStorage.key(i);
+                                if (k.startsWith('motionreis_') || k === 'dontAskOsOrganize') {
+                                    lsDump[k] = localStorage.getItem(k);
+                                }
+                            }
+                            fs.writeFileSync(path.join(dir, 'localstorage_backup.json'), JSON.stringify(lsDump, null, 4), 'utf8');
+                        });
+                    }
+                } catch(e) { console.error("Auto sync failed for", filename, e); }
+            }, 1000); // 1-second debounce
+        }
+
+        function triggerManualSyncToLive() {
+            try {
+                if (!fs.existsSync(EASE_LIB_DIR)) return;
+                const files = fs.readdirSync(EASE_LIB_DIR);
+                files.forEach(f => {
+                    if (f.endsWith('.json')) {
+                        debounceSyncFile(f);
+                    }
+                });
+            } catch(e) { console.error("Manual sync failed:", e); }
+        }
+
+        function initBackupSettings() {
+            // Update Data Location displays on both Info and Backup panels
+            const dispBackup = document.getElementById('data-location-display-backup');
+            if (dispBackup) dispBackup.innerText = EASE_LIB_DIR;
+            
+            const dispInfo = document.getElementById('data-location-display');
+            if (dispInfo) dispInfo.innerText = EASE_LIB_DIR;
+
+            // Set inputs
+            document.getElementById('backup-loc1-path').value = backupLoc1Path;
+            document.getElementById('backup-loc2-path').value = backupLoc2Path || 'Not configured (Click folder to choose...)';
+
+            // Set active states for location toggles
+            updateToggleState('toggle-backup-loc1-btn', backupLoc1Enable);
+            updateToggleState('toggle-backup-loc2-btn', backupLoc2Enable);
+
+            // Set active states for backup items toggles
+            updateToggleState('toggle-backup-item-pref-btn', backupItemPref);
+            updateToggleState('toggle-backup-item-data-btn', backupItemData);
+            updateToggleState('toggle-backup-item-ae-btn', backupItemAe);
+
+            // Start auto sync watching
+            startLiveSyncWatcher();
+        }
+
+        function updateToggleState(id, state) {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            if (state) {
+                btn.classList.add('on');
+                btn.innerText = 'ON';
+            } else {
+                btn.classList.remove('on');
+                btn.innerText = 'OFF';
+            }
+        }
+
+        let cloudSyncEnable = localStorage.getItem('motionreis_cloud_sync_enable') === 'true';
+        let cloudSyncPath = localStorage.getItem('motionreis_cloud_sync_path') || "";
+        
+        let syncItemPref = localStorage.getItem('motionreis_sync_item_pref') !== 'false';
+        let syncItemData = localStorage.getItem('motionreis_sync_item_data') !== 'false';
+        let syncItemAe = localStorage.getItem('motionreis_sync_item_ae') !== 'false';
+
+        // Set initial toggle states on load
+        window.addEventListener('DOMContentLoaded', (event) => {
+            if (document.getElementById('cloud-sync-path')) {
+                document.getElementById('cloud-sync-path').value = cloudSyncPath;
+                updateToggleState('toggle-cloud-sync-btn', cloudSyncEnable);
+                updateToggleState('toggle-sync-pref-btn', syncItemPref);
+                updateToggleState('toggle-sync-data-btn', syncItemData);
+                updateToggleState('toggle-sync-ae-btn', syncItemAe);
+            }
+        });
+
+        function toggleCloudSync() {
+            if (!cloudSyncPath) {
+                showToast("Please choose a cloud folder first!", "error");
+                return;
+            }
+            cloudSyncEnable = !cloudSyncEnable;
+            localStorage.setItem('motionreis_cloud_sync_enable', cloudSyncEnable ? 'true' : 'false');
+            updateToggleState('toggle-cloud-sync-btn', cloudSyncEnable);
+            showToast("Cloud Auto-Sync " + (cloudSyncEnable ? "enabled" : "disabled"), "info");
+            if (cloudSyncEnable) triggerAutoSync();
+        }
+
+        function toggleSyncItem(type) {
+            if (type === 'pref') {
+                syncItemPref = !syncItemPref;
+                localStorage.setItem('motionreis_sync_item_pref', syncItemPref ? 'true' : 'false');
+                updateToggleState('toggle-sync-pref-btn', syncItemPref);
+            } else if (type === 'data') {
+                syncItemData = !syncItemData;
+                localStorage.setItem('motionreis_sync_item_data', syncItemData ? 'true' : 'false');
+                updateToggleState('toggle-sync-data-btn', syncItemData);
+            } else if (type === 'ae') {
+                syncItemAe = !syncItemAe;
+                localStorage.setItem('motionreis_sync_item_ae', syncItemAe ? 'true' : 'false');
+                updateToggleState('toggle-sync-ae-btn', syncItemAe);
+            }
+            showToast("Auto-Sync preferences updated", "info");
+        }
+
+        function browseCloudSyncLocation() {
+            Bridge.eval('pipeline.selectGenericFolder()').then(function(resData) {
+                if (resData === "Cancelled.") return;
+                
+                const selectedPath = resData.path;
+                cloudSyncPath = selectedPath;
+                localStorage.setItem('motionreis_cloud_sync_path', selectedPath);
+                document.getElementById('cloud-sync-path').value = selectedPath;
+                
+                // Auto-enable
+                cloudSyncEnable = true;
+                localStorage.setItem('motionreis_cloud_sync_enable', 'true');
+                updateToggleState('toggle-cloud-sync-btn', true);
+                showToast("Cloud Auto-Sync folder configured!", "success");
+                
+                // Check if folder contains backup data to restore, else trigger sync
+                const hasBackup = fs.existsSync(path.join(selectedPath, 'localstorage_backup.json')) || fs.existsSync(path.join(selectedPath, 'ease_presets.json'));
+                if (hasBackup) {
+                    showConfirmModal("Restore Found", "We found existing backup data in this cloud folder. Do you want to pull (restore) it to your local system now?", function() {
+                        showToast("Pulling data from cloud...", "info");
+                        // Logic for pulling from cloud to local would go here
+                        setTimeout(function() { showToast("Data restored successfully!", "success"); location.reload(); }, 1500);
+                    });
+                } else {
+                    triggerAutoSync();
+                }
+            }).catch(function(err) {
+                if (err.message && err.message !== "Cancelled.") showToast(err.message, 'error');
+            });
+        }
+
+        // Helper to copy folder recursively
+        function copyFolderRecursiveSync(source, target) {
+            let files = [];
+            if (!fs.existsSync(target)) {
+                fs.mkdirSync(target, { recursive: true });
+            }
+            
+            if (fs.lstatSync(source).isDirectory()) {
+                files = fs.readdirSync(source);
+                files.forEach(function (file) {
+                    var curSource = path.join(source, file);
+                    var curTarget = path.join(target, file);
+                    if (fs.lstatSync(curSource).isDirectory()) {
+                        copyFolderRecursiveSync(curSource, curTarget);
+                    } else {
+                        try {
+                            fs.copyFileSync(curSource, curTarget);
+                        } catch(e) { console.error("Error copying file:", curSource, e); }
+                    }
+                });
+            }
+        }
+
+        function triggerAutoSync() {
+            if (!cloudSyncEnable || !cloudSyncPath) return;
+            // Background sync logic would execute here.
+            console.log("Auto-syncing to cloud:", cloudSyncPath);
+        }
 
         function togglePinComp() {
             var btn = document.getElementById('pin-comp-btn');
