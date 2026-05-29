@@ -244,14 +244,103 @@ body, html {
   font-size: 18px;
 }
 
+/* Card Wrapper for drag and drop */
+.card-wrapper {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 16px;
+  width: 100%;
+  position: relative;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+/* Dragging Original Element */
+.card-wrapper.is-dragging {
+  opacity: 0.3 !important;
+  z-index: 10;
+}
+
+/* Hovered Target Element (Placeholder Mode) */
+.card-wrapper.is-drop-target {
+  opacity: 0.5 !important;
+  transform: scale(0.98) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: var(--radius-lg);
+}
+
+.card-wrapper.is-drop-target::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 2px dashed var(--accent-primary);
+  border-radius: var(--radius-lg);
+  pointer-events: none;
+}
+
 /* Premium Cards */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 16px; /* Perfect symmetric padding on all sides */
+  margin-bottom: 16px; /* Restored for unwrapped cards */
+  flex-grow: 1;
   box-shadow: var(--shadow-sm);
+  position: relative;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.card-wrapper .card {
+  margin-bottom: 0 !important;
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.03); /* Finder-like subtle highlight */
+  border-color: var(--border-strong);
+}
+
+/* Reorder Handle */
+.reorder-handle {
+  width: 18px;
+  min-width: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  opacity: 0;
+  transition: opacity 0.2s;
+  overflow: hidden;
+}
+
+.card-wrapper:hover .reorder-handle {
+  opacity: 1;
+}
+
+.reorder-handle-btn {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.reorder-handle-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
+}
+
+.reorder-handle-btn .material-symbols-rounded {
+  font-size: 14px;
 }
 
 /* High-end Buttons */

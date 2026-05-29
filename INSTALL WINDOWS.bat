@@ -32,7 +32,7 @@ echo.
 echo =====================================================
 echo  INSTALLATION COMPLETE! 
 echo =====================================================
-echo Please restart After Effects if it's open.
-echo You can launch the plugin via: Window ^> Extensions ^> Motionreis Master
+echo Please restart After Effects or Premiere Pro if they are open.
+echo You can launch the plugin via: Window ^> Extensions ^> Motionreis SUITE
 echo.
 pause

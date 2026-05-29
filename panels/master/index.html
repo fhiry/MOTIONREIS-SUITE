@@ -234,13 +234,13 @@
             <!-- HOME -->
             <button class="tab-btn active" data-target="mod-home"><span class="material-symbols-rounded">space_dashboard</span> Home</button>
             <hr>
-            <button class="tab-btn" data-target="mod-rigging" data-tooltip="Anchor & Nulls"><span class="material-symbols-rounded">anchor</span> Rigging</button>
-            <button class="tab-btn" data-target="mod-kinetics" data-tooltip="Wingman & Expr"><span class="material-symbols-rounded">tune</span> Kinetics</button>
-            <button class="tab-btn" data-target="mod-design" data-tooltip="Text & Layout"><span class="material-symbols-rounded">match_case</span> Design</button>
+            <button class="tab-btn ae-only" data-target="mod-rigging" data-tooltip="Anchor & Nulls"><span class="material-symbols-rounded">anchor</span> Rigging</button>
+            <button class="tab-btn ae-only" data-target="mod-kinetics" data-tooltip="Wingman & Expr"><span class="material-symbols-rounded">tune</span> Kinetics</button>
+            <button class="tab-btn ae-only" data-target="mod-design" data-tooltip="Text & Layout"><span class="material-symbols-rounded">match_case</span> Design</button>
 
-            <button class="tab-btn" data-target="mod-output" data-tooltip="Render & VFX"><span class="material-symbols-rounded">movie</span> Render</button>
+            <button class="tab-btn ae-only" data-target="mod-output" data-tooltip="Render & VFX"><span class="material-symbols-rounded">movie</span> Render</button>
             <div style="flex-grow:1;"></div>
-            <button class="tab-btn" data-target="mod-backup" data-tooltip="Backup &amp; Sync"><span class="material-symbols-rounded">settings_backup_restore</span> Backup</button>
+            <button class="tab-btn" data-target="mod-backup" data-tooltip="Project &amp; Sync"><span class="material-symbols-rounded">folder_managed</span> Project</button>
             <button class="tab-btn" data-target="mod-info" data-tooltip="Info & Help"><span class="material-symbols-rounded">settings</span> Info</button>
         </div>
 
@@ -274,25 +274,7 @@
                     <p style="font-size:11px; color:var(--text-secondary); margin:0; line-height:1.5;">Welcome to your ultimate pipeline companion. Organize files, rig characters, and automate workflows effortlessly.</p>
                 </div>
                 
-                <div class="card" id="card-organizer" style="display:none;">
-                    <div class="section-label">Master Organizer</div>
-                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Auto-sort your chaotic files into the standard structured folders based on extensions (.psd, .mp4, etc).</p>
-                    
-                    <button class="btn btn-primary" style="width:100%; margin-bottom:8px; justify-content:center;" onclick="promptOsOrganizeProject()">
-                        <span class="material-symbols-rounded">folder_managed</span> Organize Finder (OS)
-                    </button>
-                    <button class="btn" style="width:100%; justify-content:center;" onclick="triggerAeOrganize()">
-                        <span class="material-symbols-rounded">account_tree</span> Organize Project (AE)
-                    </button>
-                    <div id="undo-ae-container" style="display:none; width:100%; margin-top:8px; gap:4px;">
-                        <button class="btn" id="undo-ae-btn" style="flex:1; justify-content:center; opacity:0.8; font-size:10px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-subtle);" onclick="undoLastAction()">
-                            <span class="material-symbols-rounded" style="font-size:12px;">undo</span> Redo Last (20s)
-                        </button>
-                        <button class="btn" style="padding:4px; opacity:0.6; justify-content:center;" onclick="closeUndoAe()">
-                            <span class="material-symbols-rounded" style="font-size:14px;">close</span>
-                        </button>
-                    </div>
-                </div>
+
 
                 <div class="card" id="card-memory" style="display:none;">
                     <div class="section-label">Memory Utilities</div>
@@ -408,12 +390,6 @@
                         </select>
                         <button class="btn btn-primary" style="flex:1; justify-content:center; padding:0; " onclick="exec('pipeline', 'exportVFXData', {format: document.getElementById('vfx-export-format').value})">Export Transform Data</button>
                     </div>
-                </div>
-            
-                <div class="card" id="card-smartrelinker">
-                    <div class="section-label">Smart Relinker <span style="font-size:8px; background:var(--accent-primary); padding:2px 6px; border-radius:10px; margin-left:6px; color:white;">NEW</span></div>
-                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Auto-find and relink offline assets.</p>
-                    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="triggerSmartRelinker()"><span class="material-symbols-rounded">link</span> Find & Relink Assets</button>
                 </div>
                 <div class="card" id="card-deepduplicator" style="padding:12px; display:flex; flex-direction:column; gap:16px;">
                     <div>
@@ -747,6 +723,8 @@
                         <button class="btn btn-primary" style="justify-content:center; padding:0;" onclick="exec('pipeline', 'applyIDEExpression')">Apply Code</button>
                         <button class="btn" style="justify-content:center; padding:0;" onclick="document.getElementById('ideInput').value=''">Clear</button>
                     </div>
+                </div>
+
                 <div class="card" id="card-audioreactive">
                     <div class="section-label">Audio Reactive</div>
                     <button class="btn" style="width:100%; margin-bottom:8px;" onclick="exec('creative', 'audioToKeyframes')"><span class="material-symbols-rounded">graphic_eq</span> Audio to Keyframes</button>
@@ -830,7 +808,6 @@
                         <button class="btn" onclick="exec('motion','alignKeys',{alignTo:'last'})"><span class="material-symbols-rounded">align_horizontal_right</span> Align Last</button>
                     </div>
                 </div>
-            </div>
             </div>
 
             <!-- DESIGN -->
@@ -1057,10 +1034,62 @@
             </div><!-- /mod-output -->
 
 
-            <!-- BACKUP & SYNC SUITE -->
+            <!-- BACKUP & SYNC SUITE (NOW PROJECT) -->
             <div id="mod-backup" class="module-container">
-                <div class="module-header"><span class="material-symbols-rounded">settings_backup_restore</span> Backup &amp; Sync</div>
+                <div class="module-header"><span class="material-symbols-rounded">folder_managed</span> Project Management</div>
                 
+                <div class="card" id="card-organizer">
+                    <div class="section-label">Master Organizer</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Auto-sort your chaotic files into the standard structured folders based on extensions (.psd, .mp4, etc).</p>
+                    
+                    <button class="btn btn-primary" style="width:100%; margin-bottom:8px; justify-content:center;" onclick="promptOsOrganizeProject()">
+                        <span class="material-symbols-rounded">folder_managed</span> Organize Finder (OS)
+                    </button>
+                    <button class="btn" style="width:100%; justify-content:center;" onclick="triggerAeOrganize()">
+                        <span class="material-symbols-rounded">account_tree</span> Organize Project (AE)
+                    </button>
+                    
+                    <div style="margin-top:8px; padding:8px 10px; background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:6px; display:flex; gap:8px; align-items:flex-start;">
+                        <span class="material-symbols-rounded" style="font-size:14px; color:var(--accent-primary); margin-top:2px;">info</span>
+                        <div style="font-size:10px; color:var(--text-secondary); line-height:1.4;">
+                            <span style="color:var(--text-primary); font-weight:600;">Safe Folders:</span> Tambahkan tanda strip <b>(-)</b> di awal nama folder (contoh: <code>-Client Asset</code>) atau gunakan kata <b>export</b> (contoh: <code>03_EXPORT</code>). Folder tersebut beserta isinya tidak akan diganggu oleh Organizer.
+                        </div>
+                    </div>
+                    
+                    <div id="undo-ae-container" style="display:none; width:100%; margin-top:8px; gap:4px;">
+                        <button class="btn" id="undo-ae-btn" style="flex:1; justify-content:center; opacity:0.8; font-size:10px; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-subtle);" onclick="undoLastAction()">
+                            <span class="material-symbols-rounded" style="font-size:12px;">undo</span> Redo Last (20s)
+                        </button>
+                        <button class="btn" style="padding:4px; opacity:0.6; justify-content:center;" onclick="closeUndoAe()">
+                            <span class="material-symbols-rounded" style="font-size:14px;">close</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" id="card-smartrelinker">
+                    <div class="section-label">Smart Relinker <span style="font-size:8px; background:var(--accent-primary); padding:2px 6px; border-radius:10px; margin-left:6px; color:white;">NEW</span></div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Auto-find and relink offline assets.</p>
+                    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="triggerSmartRelinker()"><span class="material-symbols-rounded">link</span> Find & Relink Assets</button>
+                </div>
+
+                <div class="card" id="card-effectscanner">
+                    <div class="section-label">Effect Finder & Scanner</div>
+                    <div style="font-size:10px; color:var(--text-secondary); line-height:1.4; margin-bottom:12px;">
+                        Fitur ini berguna untuk melacak efek apa saja yang dipakai di dalam project. Sangat berguna ketika Anda menghadapi error/bug efek dan ingin mencari tahu comp mana yang menjadi penyebabnya.
+                    </div>
+                    
+                    <div style="display:flex; gap:6px; margin-bottom:8px;">
+                        <input type="text" id="effect-search-input" placeholder="Nama efek (e.g. Drop Shadow)..." style="flex:1; background:var(--bg-hover); color:var(--text-primary); border:1px solid var(--border-strong); border-radius:4px; padding:6px 8px; font-size:11px; outline:none;" onkeypress="if(event.key === 'Enter') scanProjectEffects()">
+                        <button class="btn btn-primary" style="padding:0 12px; height:auto;" onclick="scanProjectEffects()">
+                            <span class="material-symbols-rounded" style="font-size:14px; margin-right:4px;">search</span> Scan
+                        </button>
+                    </div>
+                    
+                    <div id="effect-scan-results" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px; transition:all 0.3s ease;">
+                        <!-- Results will populate here -->
+                    </div>
+                </div>
+
                 <!-- Local Data Folder -->
                 <div class="card" id="card-data-location">
                     <div class="section-label">Local Data Folder</div>
@@ -1083,6 +1112,11 @@
                     <div style="display:flex; gap:6px; align-items:center;">
                         <input type="text" id="cloud-sync-path" placeholder="Not configured (Click folder to choose...)" readonly style="flex:1; font-family:monospace; font-size:9px; background:var(--bg-hover); color:var(--text-muted); border:1px solid var(--border-strong); border-radius:4px; padding:6px; outline:none;">
                         <button class="btn" style="padding:6px 10px;" onclick="browseCloudSyncLocation()" title="Set Cloud Sync Folder"><span class="material-symbols-rounded" style="font-size:14px;">cloud_sync</span></button>
+                    </div>
+                    <div style="margin-top:8px;">
+                        <button class="btn" style="width:100%; justify-content:center;" onclick="forcePushToCloud()">
+                            <span class="material-symbols-rounded" style="font-size:14px;">cloud_upload</span> Force Push Local to Cloud
+                        </button>
                     </div>
                 </div>
 
@@ -1117,6 +1151,14 @@
                                 <span style="font-size:9px; color:var(--text-secondary); line-height:1.3;">Custom workspaces, AE Prefs (shortcuts), & User Presets.</span>
                             </div>
                             <button id="toggle-sync-ae-btn" class="toggle-btn on" onclick="toggleSyncItem('ae')" style="margin-top:2px;">ON</button>
+                        </div>
+                        <!-- Toggle 4: AEP Blueprint -->
+                        <div class="setting-row" style="align-items:flex-start; margin-bottom:0;">
+                            <div style="display:flex; flex-direction:column; gap:4px;">
+                                <span style="font-size:11px; color:var(--text-primary); font-weight:500;">After Effect Project</span>
+                                <span style="font-size:9px; color:var(--text-secondary); line-height:1.3;">Backup file .aep secara otomatis ke Cloud (tanpa footage, hanya struktur) setiap 5 menit.</span>
+                            </div>
+                            <button id="toggle-sync-aep-btn" class="toggle-btn" onclick="toggleSyncItem('aep')" style="margin-top:2px;">OFF</button>
                         </div>
                     </div>
                 </div>
@@ -1789,9 +1831,9 @@
                 if (fs.existsSync(WIDGETS_FILE)) {
                     saved = JSON.parse(fs.readFileSync(WIDGETS_FILE, 'utf8'));
                 } else {
-                    saved = ['card-welcome', 'card-recent-projects', 'card-organizer', 'card-memory'];
+                    saved = ['card-welcome', 'card-recent-projects', 'card-memory'];
                 }
-            } catch(e) { saved = ['card-welcome', 'card-recent-projects', 'card-organizer', 'card-memory']; }
+            } catch(e) { saved = ['card-welcome', 'card-recent-projects', 'card-memory']; }
             
             saved.forEach(function(id) {
                 var original = document.getElementById(id);
@@ -1799,7 +1841,7 @@
                     // Create placeholder in original location
                     var p = originalParents[id];
                     var n = originalNextSiblings[id];
-                    if (p && id !== 'card-welcome' && id !== 'card-recent-projects' && id !== 'card-organizer' && id !== 'card-memory') {
+                    if (p && id !== 'card-welcome' && id !== 'card-recent-projects' && id !== 'card-memory') {
                         var labelName = id.replace('card-', '').replace(/-/g, ' ');
                         labelName = labelName.charAt(0).toUpperCase() + labelName.slice(1);
                         var sectionLabel = original.querySelector('.section-label');
@@ -2005,9 +2047,9 @@
                 if (fs.existsSync(WIDGETS_FILE)) {
                     saved = JSON.parse(fs.readFileSync(WIDGETS_FILE, 'utf8'));
                 } else {
-                    saved = ['card-welcome', 'card-recent-projects', 'card-organizer', 'card-memory'];
+                    saved = ['card-welcome', 'card-recent-projects', 'card-memory'];
                 }
-            } catch(e) { saved = ['card-welcome', 'card-recent-projects', 'card-organizer', 'card-memory']; }
+            } catch(e) { saved = ['card-welcome', 'card-recent-projects', 'card-memory']; }
             
             var listContainer = document.getElementById('customize-list');
             listContainer.innerHTML = '';
@@ -2395,8 +2437,281 @@
             }).join('');
         }
 
+        function setupDragAndDrop() {
+            var cards = document.querySelectorAll('.card');
+            cards.forEach(function(card) {
+                // Assign a generic ID if missing to allow sorting
+                if (!card.id) {
+                    card.id = 'card-auto-' + Math.random().toString(36).substr(2, 9);
+                }
+                
+                if (card.id === 'card-welcome') return;
+                if (card.closest('#mod-info')) return; // Skip cards in the Info tab
+                
+                // Cleanup old drag handle if it was inside the card
+                var oldHandle = card.querySelector(':scope > .drag-handle');
+                if (oldHandle) {
+                    oldHandle.parentNode.removeChild(oldHandle);
+                }
+                
+                var wrapper = card.parentElement;
+                if (!wrapper.classList.contains('card-wrapper')) {
+                    wrapper = document.createElement('div');
+                    wrapper.className = 'card-wrapper';
+                    wrapper.id = 'wrapper-' + card.id;
+                    
+                    // Sync initial inline style display (preserve flex layout for wrapper)
+                    wrapper.style.display = card.style.display === 'none' ? 'none' : 'flex';
+                    card.style.marginBottom = '0';
+                    
+                    // Insert wrapper and move card inside
+                    card.parentNode.insertBefore(wrapper, card);
+                    wrapper.appendChild(card);
+                    
+                    // Sync display style changes (e.g. from tab search filtering)
+                    var observer = new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            if (mutation.attributeName === 'style') {
+                                wrapper.style.display = card.style.display === 'none' ? 'none' : 'flex';
+                            }
+                        });
+                    });
+                    observer.observe(card, { attributes: true, attributeFilter: ['style'] });
+                }
+                
+                if (!wrapper.querySelector('.reorder-handle')) {
+                    var handleGroup = document.createElement('div');
+                    handleGroup.className = 'reorder-handle';
+
+                    var btnUp = document.createElement('button');
+                    btnUp.className = 'reorder-handle-btn';
+                    btnUp.innerHTML = '<span class="material-symbols-rounded">keyboard_arrow_up</span>';
+                    btnUp.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var prev = wrapper.previousElementSibling;
+                        while (prev && !prev.classList.contains('card-wrapper')) prev = prev.previousElementSibling;
+                        if (prev) { wrapper.parentNode.insertBefore(wrapper, prev); saveLayoutOrder(); }
+                    });
+
+                    var btnDown = document.createElement('button');
+                    btnDown.className = 'reorder-handle-btn';
+                    btnDown.innerHTML = '<span class="material-symbols-rounded">keyboard_arrow_down</span>';
+                    btnDown.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var next = wrapper.nextElementSibling;
+                        while (next && !next.classList.contains('card-wrapper')) next = next.nextElementSibling;
+                        if (next) { wrapper.parentNode.insertBefore(next, wrapper); saveLayoutOrder(); }
+                    });
+
+                    handleGroup.appendChild(btnUp);
+                    handleGroup.appendChild(btnDown);
+                    wrapper.insertBefore(handleGroup, card);
+                }
+
+                var emptyImg = new Image();
+                emptyImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+                wrapper.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', wrapper.id);
+                    e.dataTransfer.setDragImage(emptyImg, 0, 0); // Hide native ghost
+                    
+                    var rect = wrapper.getBoundingClientRect();
+                    window._dragOffsetX = e.clientX - rect.left;
+                    window._dragOffsetY = e.clientY - rect.top;
+                    
+                    // Create gorgeous floating clone
+                    var clone = wrapper.cloneNode(true);
+                    clone.id = 'drag-ghost';
+                    clone.style.position = 'fixed';
+                    clone.style.pointerEvents = 'none'; // Pass through clicks/drops
+                    clone.style.zIndex = '99999';
+                    clone.style.width = rect.width + 'px';
+                    clone.style.left = e.clientX - window._dragOffsetX + 'px';
+                    clone.style.top = e.clientY - window._dragOffsetY + 'px';
+                    
+                    // Premium floating styles
+                    clone.style.opacity = '0.95';
+                    clone.style.transform = 'scale(1.02)';
+                    clone.style.transformOrigin = 'center center';
+                    clone.style.transition = 'none';
+                    clone.querySelector('.card').style.boxShadow = '0 16px 32px rgba(0,0,0,0.6)';
+                    clone.querySelector('.card').style.borderColor = 'var(--accent-primary)';
+                    
+                    document.body.appendChild(clone);
+                    
+                    // Apply dragging placeholder state instantly (no setTimeout delay)
+                    wrapper.classList.add('is-dragging');
+                    window._isDragging = true;
+                    
+                    // Store direct reference to container for scroll zones
+                    window._scrollTargetContainer = wrapper.closest('.module-container');
+                    
+                    var cRect = window._scrollTargetContainer.getBoundingClientRect();
+                    var szTop = document.getElementById('drag-scroll-top');
+                    var szBot = document.getElementById('drag-scroll-bot');
+                    if (szTop && szBot) {
+                        szTop.style.left = cRect.left + 'px';
+                        szTop.style.top = cRect.top + 'px';
+                        szTop.style.width = cRect.width + 'px';
+                        szBot.style.left = cRect.left + 'px';
+                        szBot.style.bottom = (window.innerHeight - cRect.bottom) + 'px';
+                        szBot.style.width = cRect.width + 'px';
+                        szTop.style.display = 'block';
+                        szBot.style.display = 'block';
+                    }
+                });
+
+                wrapper.addEventListener('dragend', function() {
+                    window._isDragging = false;
+                    // Hide scroll zones
+                    var szTop = document.getElementById('drag-scroll-top');
+                    var szBot = document.getElementById('drag-scroll-bot');
+                    if (szTop) szTop.style.display = 'none';
+                    if (szBot) szBot.style.display = 'none';
+                    wrapper.classList.remove('is-dragging');
+                    wrapper.setAttribute('draggable', 'false');
+                    
+                    var ghost = document.getElementById('drag-ghost');
+                    if (ghost) ghost.parentNode.removeChild(ghost);
+                    
+                    // Swap on Drop logic
+                    var target = document.querySelector('.is-drop-target');
+                    if (target && target !== wrapper) {
+                        var parent = target.parentNode;
+                        var scrollContainer = target.closest('.module-container') || parent;
+                        
+                        var draggingIndex = Array.prototype.indexOf.call(parent.children, wrapper);
+                        var targetIndex = Array.prototype.indexOf.call(parent.children, target);
+                        
+                        // Record pre-swap geometry to prevent scroll jumps
+                        var rectBefore = target.getBoundingClientRect();
+                        
+                        if (draggingIndex < targetIndex) {
+                            // Dragged downwards: insert AFTER target
+                            parent.insertBefore(wrapper, target.nextSibling);
+                        } else {
+                            // Dragged upwards: insert BEFORE target
+                            parent.insertBefore(wrapper, target);
+                        }
+                        
+                        // Compensate scroll position to keep view absolutely perfectly still
+                        var rectAfter = target.getBoundingClientRect();
+                        scrollContainer.scrollTop += (rectAfter.top - rectBefore.top);
+                    }
+                    
+                    // Cleanup target highlights
+                    document.querySelectorAll('.is-drop-target').forEach(function(el) {
+                        el.classList.remove('is-drop-target');
+                    });
+                    
+                    saveLayoutOrder();
+                });
+            });
+
+            if (!window._hasGlobalDragover) {
+                document.addEventListener('dragover', function(e) {
+                    // Move ghost
+                    var ghost = document.getElementById('drag-ghost');
+                    if (ghost) {
+                        ghost.style.left = (e.clientX - window._dragOffsetX) + 'px';
+                        ghost.style.top = (e.clientY - window._dragOffsetY) + 'px';
+                    }
+
+                    // Auto-scroll: runs here because document dragover is PROVEN to fire in CEP
+                    var c = window._scrollTargetContainer;
+                    if (!c || !window._isDragging) return;
+                    var r = c.getBoundingClientRect();
+                    var zone = 80; // px from edge to trigger scroll
+                    var distTop = e.clientY - r.top;
+                    var distBot = r.bottom - e.clientY;
+                    if (distTop < zone) {
+                        // Closer to top = faster scroll up
+                        c.scrollTop -= Math.round((zone - distTop) / zone * 60);
+                    } else if (distBot < zone) {
+                        // Closer to bottom = faster scroll down
+                        c.scrollTop += Math.round((zone - distBot) / zone * 60);
+                    }
+                });
+                window._hasGlobalDragover = true;
+            }
+
+            var containers = document.querySelectorAll('.module-container');
+            containers.forEach(function(container) {
+
+                container.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    
+                    var draggingWrapper = document.querySelector('.card-wrapper.is-dragging');
+                    if (!draggingWrapper) return;
+                    
+                    var target = e.target.closest('.card-wrapper');
+                    if (target && target !== draggingWrapper) {
+                        document.querySelectorAll('.is-drop-target').forEach(function(el) {
+                            if (el !== target) el.classList.remove('is-drop-target');
+                        });
+                        target.classList.add('is-drop-target');
+                    } else {
+                        document.querySelectorAll('.is-drop-target').forEach(function(el) {
+                            el.classList.remove('is-drop-target');
+                        });
+                    }
+                });
+            });
+        }
+
+        function saveLayoutOrder() {
+            var layout = {};
+            var containers = document.querySelectorAll('.module-container');
+            containers.forEach(function(container) {
+                var cardIds = [];
+                Array.prototype.slice.call(container.children).forEach(function(child) {
+                    if (child.classList.contains('card-wrapper')) {
+                        var card = child.querySelector('.card');
+                        if (card && card.id) cardIds.push(card.id);
+                    } else if (child.classList.contains('card')) {
+                        if (child.id) cardIds.push(child.id);
+                    }
+                });
+                layout[container.id] = cardIds;
+            });
+            localStorage.setItem('motionreis_layout', JSON.stringify(layout));
+        }
+
+        function loadLayoutOrder() {
+            var saved = localStorage.getItem('motionreis_layout');
+            if (!saved) return;
+            try {
+                var layout = JSON.parse(saved);
+                for (var containerId in layout) {
+                    var container = document.getElementById(containerId);
+                    if (!container) continue;
+                    var order = layout[containerId];
+                    order.forEach(function(cardId) {
+                        var card = document.getElementById(cardId);
+                        if (!card) return;
+                        var elementToMove = card.parentElement.classList.contains('card-wrapper') ? card.parentElement : card;
+                        if (elementToMove && elementToMove.parentElement && elementToMove.parentElement.id === containerId) {
+                            container.appendChild(elementToMove);
+                        }
+                    });
+                }
+            } catch(e) {}
+        }
+
         // Init on load
         window.addEventListener('DOMContentLoaded', function() {
+            var csInterface = new CSInterface();
+            if (csInterface.getHostEnvironment().appName === "PPRO") {
+                var aeOnlyEls = document.querySelectorAll('.ae-only');
+                aeOnlyEls.forEach(function(el) { el.style.display = 'none'; });
+                // If the active tab was hidden, fallback to Project tab
+                document.querySelector('.tab-btn[data-target="mod-backup"]').click();
+            }
+
+            setupDragAndDrop();
+            loadLayoutOrder();
+
             updateWingmanPreview();
             updateWigglePreview();
             renderLibrary();
@@ -3478,20 +3793,23 @@
         function closeSyncConflictModal() {
             document.getElementById('sync-conflict-modal').style.display = 'none';
             pendingSyncTarget = "";
+            window.isCloudSyncSetup = false;
         }
         
         function executeDataSync() {
             let settingsChoice = document.querySelector('input[name="sync_settings"]:checked').value;
             let dataChoice = document.querySelector('input[name="sync_data"]:checked').value;
             closeSyncConflictModal();
-            executeDataSyncDirectly(pendingSyncTarget, settingsChoice, dataChoice);
+            if (window.isCloudSyncSetup) {
+                executeCloudSyncDirectly(pendingSyncTarget, settingsChoice, dataChoice);
+            } else {
+                executeDataSyncDirectly(pendingSyncTarget, settingsChoice, dataChoice);
+            }
         }
         
         function executeDataSyncDirectly(targetPath, settingsChoice, dataChoice) {
             try {
-                if (!fs.existsSync(targetPath)) {
-                    fs.mkdirSync(targetPath, { recursive: true });
-                }
+                if (!fs.existsSync(targetPath)) safeMkdirSync(targetPath);
                 
                 let dataFiles = ['ease_presets.json', 'expr_presets.json', 'home_widgets.json'];
                 dataFiles.forEach(function(f) {
@@ -3521,13 +3839,19 @@
                     let targetF = path.join(targetPath, f);
                     
                     if (settingsChoice === "local") {
-                        if (fs.existsSync(localF)) fs.copyFileSync(localF, targetF);
+                        if (fs.existsSync(localF)) safeCopyFileSync(localF, targetF);
                     }
                 });
                 
                 fs.writeFileSync(POINTER_FILE, targetPath, 'utf8');
-                showToast("Data Sync Complete! Reloading...", "success");
-                setTimeout(function(){ window.location.href = window.location.href; }, 1500);
+                
+                if (syncItemAe) {
+                    syncAESettings(targetPath, settingsChoice, function() {
+                        showToast("Data Sync Complete!", "success");
+                    });
+                } else {
+                    showToast("Data Sync Complete!", "success");
+                }
             } catch(e) {
                 console.error(e);
                 showToast("Sync Error: " + e.message, "error");
@@ -3774,23 +4098,51 @@
             }
         }
 
-        let cloudSyncEnable = localStorage.getItem('motionreis_cloud_sync_enable') === 'true';
-        let cloudSyncPath = localStorage.getItem('motionreis_cloud_sync_path') || "";
+        const CLOUD_PREFS_FILE = path.join(EASE_LIB_DIR, 'cloud_sync_prefs.json');
         
-        let syncItemPref = localStorage.getItem('motionreis_sync_item_pref') !== 'false';
-        let syncItemData = localStorage.getItem('motionreis_sync_item_data') !== 'false';
-        let syncItemAe = localStorage.getItem('motionreis_sync_item_ae') !== 'false';
+        let cloudSyncEnable = false;
+        let cloudSyncPath = "";
+        let syncItemPref = true;
+        let syncItemData = true;
+        let syncItemAe = true;
+        let syncItemAep = true;
+
+        try {
+            if (fs.existsSync(CLOUD_PREFS_FILE)) {
+                let prefs = JSON.parse(fs.readFileSync(CLOUD_PREFS_FILE, 'utf8'));
+                if (prefs.cloudSyncEnable !== undefined) cloudSyncEnable = prefs.cloudSyncEnable;
+                if (prefs.cloudSyncPath !== undefined) cloudSyncPath = prefs.cloudSyncPath;
+                if (prefs.syncItemPref !== undefined) syncItemPref = prefs.syncItemPref;
+                if (prefs.syncItemData !== undefined) syncItemData = prefs.syncItemData;
+                if (prefs.syncItemAe !== undefined) syncItemAe = prefs.syncItemAe;
+                if (prefs.syncItemAep !== undefined) syncItemAep = prefs.syncItemAep;
+            }
+        } catch(e) { console.error("Failed to load cloud prefs:", e); }
+
+        function saveCloudPrefs() {
+            try {
+                fs.writeFileSync(CLOUD_PREFS_FILE, JSON.stringify({
+                    cloudSyncEnable: cloudSyncEnable,
+                    cloudSyncPath: cloudSyncPath,
+                    syncItemPref: syncItemPref,
+                    syncItemData: syncItemData,
+                    syncItemAe: syncItemAe,
+                    syncItemAep: syncItemAep
+                }, null, 2), 'utf8');
+            } catch(e) { console.error("Failed to save cloud prefs:", e); }
+        }
 
         // Set initial toggle states on load
-        window.addEventListener('DOMContentLoaded', (event) => {
+        (function initCloudSyncUI() {
             if (document.getElementById('cloud-sync-path')) {
                 document.getElementById('cloud-sync-path').value = cloudSyncPath;
                 updateToggleState('toggle-cloud-sync-btn', cloudSyncEnable);
                 updateToggleState('toggle-sync-pref-btn', syncItemPref);
                 updateToggleState('toggle-sync-data-btn', syncItemData);
                 updateToggleState('toggle-sync-ae-btn', syncItemAe);
+                if (document.getElementById('toggle-sync-aep-btn')) updateToggleState('toggle-sync-aep-btn', syncItemAep);
             }
-        });
+        })();
 
         function toggleCloudSync() {
             if (!cloudSyncPath) {
@@ -3798,66 +4150,298 @@
                 return;
             }
             cloudSyncEnable = !cloudSyncEnable;
-            localStorage.setItem('motionreis_cloud_sync_enable', cloudSyncEnable ? 'true' : 'false');
+            saveCloudPrefs();
             updateToggleState('toggle-cloud-sync-btn', cloudSyncEnable);
             showToast("Cloud Auto-Sync " + (cloudSyncEnable ? "enabled" : "disabled"), "info");
             if (cloudSyncEnable) triggerAutoSync();
         }
 
+        function forcePushToCloud() {
+            if (!cloudSyncPath || !fs.existsSync(cloudSyncPath)) {
+                showToast("Cloud folder not found. Please set it up first.", "error");
+                return;
+            }
+            showToast("Pushing data to cloud...", "info");
+            if (syncItemAep) {
+                backupCurrentAEP(false);
+            }
+            setTimeout(function() {
+                executeCloudSyncDirectly(cloudSyncPath, "local", "local");
+            }, 100);
+        }
+
         function toggleSyncItem(type) {
             if (type === 'pref') {
                 syncItemPref = !syncItemPref;
-                localStorage.setItem('motionreis_sync_item_pref', syncItemPref ? 'true' : 'false');
+                saveCloudPrefs();
                 updateToggleState('toggle-sync-pref-btn', syncItemPref);
             } else if (type === 'data') {
                 syncItemData = !syncItemData;
-                localStorage.setItem('motionreis_sync_item_data', syncItemData ? 'true' : 'false');
+                saveCloudPrefs();
                 updateToggleState('toggle-sync-data-btn', syncItemData);
             } else if (type === 'ae') {
                 syncItemAe = !syncItemAe;
-                localStorage.setItem('motionreis_sync_item_ae', syncItemAe ? 'true' : 'false');
+                saveCloudPrefs();
                 updateToggleState('toggle-sync-ae-btn', syncItemAe);
+            } else if (type === 'aep') {
+                syncItemAep = !syncItemAep;
+                saveCloudPrefs();
+                updateToggleState('toggle-sync-aep-btn', syncItemAep);
+                if (syncItemAep) backupCurrentAEP(false);
             }
             showToast("Auto-Sync preferences updated", "info");
         }
+
+        function backupCurrentAEP(isManual) {
+            if (!cloudSyncEnable || !cloudSyncPath || !fs.existsSync(cloudSyncPath)) {
+                if (isManual) showToast("Cloud folder not configured.", "error");
+                return;
+            }
+            Bridge.eval('app.project.file ? app.project.file.fsName : ""').then(function(aepPath) {
+                if (!aepPath || aepPath === "") {
+                    if (isManual) showToast("Please save your project first.", "error");
+                    return;
+                }
+                try {
+                    let aepName = path.basename(aepPath);
+                    let localAepFolder = path.join(EASE_LIB_DIR, "AEP_Backups");
+                    if (!fs.existsSync(localAepFolder)) safeMkdirSync(localAepFolder);
+                    let localAepPath = path.join(localAepFolder, aepName);
+                    
+                    safeCopyFileSync(aepPath, localAepPath);
+                    
+                    let tmpAepFolder = path.join(cloudSyncPath, "AEP_Backups");
+                    if (!fs.existsSync(tmpAepFolder)) safeMkdirSync(tmpAepFolder);
+                    let targetAepPath = path.join(tmpAepFolder, aepName);
+                    
+                    safeCopyFileSync(localAepPath, targetAepPath);
+                    if (isManual) showToast("AEP Blueprint Backed Up!", "success");
+                } catch(e) {
+                    console.error("AEP Backup error", e);
+                    if (isManual) showToast("Backup Failed: " + e.message, "error");
+                }
+            });
+        }
+
+        setInterval(function() {
+            if (cloudSyncEnable && syncItemAep) backupCurrentAEP(false);
+        }, 5 * 60 * 1000);
 
         function browseCloudSyncLocation() {
             Bridge.eval('pipeline.selectGenericFolder()').then(function(resData) {
                 if (resData === "Cancelled.") return;
                 
                 const selectedPath = resData.path;
-                cloudSyncPath = selectedPath;
-                localStorage.setItem('motionreis_cloud_sync_path', selectedPath);
-                document.getElementById('cloud-sync-path').value = selectedPath;
-                
-                // Auto-enable
+                const backupPath = path.join(selectedPath, 'Motionreis Backup');
+                cloudSyncPath = backupPath;
                 cloudSyncEnable = true;
-                localStorage.setItem('motionreis_cloud_sync_enable', 'true');
-                updateToggleState('toggle-cloud-sync-btn', true);
-                showToast("Cloud Auto-Sync folder configured!", "success");
+                saveCloudPrefs();
                 
-                // Check if folder contains backup data to restore, else trigger sync
-                const hasBackup = fs.existsSync(path.join(selectedPath, 'localstorage_backup.json')) || fs.existsSync(path.join(selectedPath, 'ease_presets.json'));
+                document.getElementById('cloud-sync-path').value = backupPath;
+                updateToggleState('toggle-cloud-sync-btn', true);
+                
+                // Check if folder contains backup data
+                pendingSyncTarget = backupPath;
+                window.isCloudSyncSetup = true;
+                
+                let hasBackup = false;
+                if (fs.existsSync(backupPath)) {
+                    if (fs.existsSync(path.join(backupPath, 'ease_presets.json')) || fs.existsSync(path.join(backupPath, 'theme_config.json'))) {
+                        hasBackup = true;
+                    }
+                }
+                
                 if (hasBackup) {
-                    showConfirmModal("Restore Found", "We found existing backup data in this cloud folder. Do you want to pull (restore) it to your local system now?", function() {
-                        showToast("Pulling data from cloud...", "info");
-                        // Logic for pulling from cloud to local would go here
-                        setTimeout(function() { showToast("Data restored successfully!", "success"); location.reload(); }, 1500);
-                    });
+                    document.getElementById('sync-conflict-modal').style.display = 'flex';
                 } else {
-                    triggerAutoSync();
+                    executeCloudSyncDirectly(backupPath, "local", "local");
                 }
             }).catch(function(err) {
                 if (err.message && err.message !== "Cancelled.") showToast(err.message, 'error');
             });
         }
+        
+        function executeCloudSyncDirectly(targetPath, settingsChoice, dataChoice) {
+            try {
+                const tmpPath = path.join(EASE_LIB_DIR, '.TMPbackup');
+                if (fs.existsSync(tmpPath)) require('child_process').execSync('rm -rf "' + tmpPath + '"');
+                safeMkdirSync(tmpPath);
+                
+                if (fs.existsSync(targetPath)) {
+                    copyFolderRecursiveSync(targetPath, tmpPath);
+                }
+                
+                let dataFiles = ['ease_presets.json', 'expr_presets.json', 'home_widgets.json'];
+                dataFiles.forEach(function(f) {
+                    let localF = path.join(EASE_LIB_DIR, f);
+                    let targetF = path.join(tmpPath, f);
+                    
+                    if (dataChoice === "merge") {
+                        let localData = []; let targetData = [];
+                        if (fs.existsSync(localF)) localData = JSON.parse(fs.readFileSync(localF, 'utf8'));
+                        if (fs.existsSync(targetF)) targetData = JSON.parse(fs.readFileSync(targetF, 'utf8'));
+                        
+                        let merged = targetData.slice();
+                        localData.forEach(item => {
+                            let exists = merged.find(m => (m.id && item.id && m.id === item.id) || (m.name && item.name && m.name === item.name));
+                            if (!exists) merged.push(item);
+                        });
+                        fs.writeFileSync(localF, JSON.stringify(merged, null, 4), 'utf8');
+                        fs.writeFileSync(targetF, JSON.stringify(merged, null, 4), 'utf8');
+                    } else if (dataChoice === "local") {
+                        if (fs.existsSync(localF)) fs.copyFileSync(localF, targetF);
+                    } else if (dataChoice === "target") {
+                        if (fs.existsSync(targetF)) fs.copyFileSync(targetF, localF);
+                    }
+                });
+                
+                let settingsFiles = ['theme_config.json', 'recent_project_cache.json', 'click_metrics.json'];
+                settingsFiles.forEach(function(f) {
+                    let localF = path.join(EASE_LIB_DIR, f);
+                    let targetF = path.join(tmpPath, f);
+                    if (settingsChoice === "local") {
+                        if (fs.existsSync(localF)) fs.copyFileSync(localF, targetF);
+                    } else if (settingsChoice === "target") {
+                        if (fs.existsSync(targetF)) fs.copyFileSync(targetF, localF);
+                    }
+                });
+                
+                const deployTmpToCloud = function() {
+                    try {
+                        if (!fs.existsSync(targetPath)) {
+                            safeMkdirSync(targetPath);
+                        } else {
+                            // Delete contents of targetPath, keep the root folder
+                            const existingFiles = fs.readdirSync(targetPath);
+                            for (let i = 0; i < existingFiles.length; i++) {
+                                require('child_process').execSync('rm -rf "' + path.join(targetPath, existingFiles[i]) + '"');
+                            }
+                        }
+                        
+                        // Copy contents of tmpPath into targetPath
+                        const tmpFiles = fs.readdirSync(tmpPath);
+                        for (let i = 0; i < tmpFiles.length; i++) {
+                            require('child_process').execSync('cp -R "' + path.join(tmpPath, tmpFiles[i]) + '" "' + targetPath + '/"');
+                        }
+                        
+                        // Cleanup TMP
+                        require('child_process').execSync('rm -rf "' + tmpPath + '"');
+                        
+                        showToast("Cloud Sync Complete!", "success");
+                    } catch(deployErr) {
+                        console.error(deployErr);
+                        showToast("Deploy to Cloud Error: " + deployErr.message, "error");
+                    }
+                };
+                
+                if (syncItemAe) {
+                    let localAE = path.join(EASE_LIB_DIR, "AE_Settings");
+                    let tmpAE = path.join(tmpPath, "AE_Settings");
+                    
+                    if (settingsChoice === "local") {
+                        syncAESettings(EASE_LIB_DIR, "local", function() {
+                            if (fs.existsSync(localAE)) copyFolderRecursiveSync(localAE, tmpAE);
+                            deployTmpToCloud();
+                        });
+                    } else if (settingsChoice === "target") {
+                        if (fs.existsSync(tmpAE)) copyFolderRecursiveSync(tmpAE, localAE);
+                        syncAESettings(EASE_LIB_DIR, "target", function() {
+                            deployTmpToCloud();
+                        });
+                    } else {
+                        syncAESettings(EASE_LIB_DIR, "local", function() {
+                            if (fs.existsSync(localAE)) copyFolderRecursiveSync(localAE, tmpAE);
+                            deployTmpToCloud();
+                        });
+                    }
+                } else {
+                    deployTmpToCloud();
+                }
+            } catch(e) { console.error(e); showToast("Sync Error: " + e.message, "error"); }
+        }
+
+        function syncAESettings(targetPath, choice, callback) {
+            Bridge.eval('pipeline.getAESettingsPaths()').then(function(res) {
+                if (res) {
+                    try {
+                        let aeTarget = path.join(targetPath, "AE_Settings");
+                        if (!fs.existsSync(aeTarget)) safeMkdirSync(aeTarget);
+                        
+                        if (res.prefFolderPath) {
+                            let prefFileName = "Adobe After Effects " + res.majorVersion + " Prefs.txt";
+                            let prefFile = path.join(res.prefFolderPath, prefFileName);
+                            let targetPrefFile = path.join(aeTarget, prefFileName);
+                            if (choice === "local" && fs.existsSync(prefFile)) safeCopyFileSync(prefFile, targetPrefFile);
+                            else if (choice === "target" && fs.existsSync(targetPrefFile)) safeCopyFileSync(targetPrefFile, prefFile);
+                        }
+                        
+                        if (res.modifiedWorkspacesPath) {
+                            let wsTarget = path.join(aeTarget, "ModifiedWorkspaces");
+                            if (choice === "local") copyFolderRecursiveSync(res.modifiedWorkspacesPath, wsTarget);
+                            else if (choice === "target" && fs.existsSync(wsTarget)) copyFolderRecursiveSync(wsTarget, res.modifiedWorkspacesPath);
+                        }
+                        
+                        if (res.userPresetsPath) {
+                            let upTarget = path.join(aeTarget, "User Presets");
+                            if (choice === "local") copyFolderRecursiveSync(res.userPresetsPath, upTarget);
+                            else if (choice === "target" && fs.existsSync(upTarget)) copyFolderRecursiveSync(upTarget, res.userPresetsPath);
+                        }
+                    } catch(e) { console.error("AE Sync error", e); }
+                }
+                if (callback) callback();
+            }).catch(function(e) {
+                console.error(e);
+                if (callback) callback();
+            });
+        }
+
+        function safeMkdirSync(targetDir) {
+            const sep = path.sep;
+            const initDir = path.isAbsolute(targetDir) ? sep : '';
+            targetDir.split(sep).reduce(function(parentDir, childDir) {
+                const curDir = path.resolve(parentDir, childDir);
+                try {
+                    if (!fs.existsSync(curDir)) {
+                        fs.mkdirSync(curDir);
+                    }
+                } catch (err) {
+                    if (err.code !== 'EEXIST') throw err;
+                }
+                return curDir;
+            }, initDir);
+        }
+
+        function safeWriteFileSync(filePath, data) {
+            try {
+                fs.writeFileSync(filePath, data, 'utf8');
+            } catch(e) {
+                if (e.code === 'EROFS' || e.message.indexOf('read-only') !== -1 || e.message.indexOf('ENOENT') !== -1) {
+                    try {
+                        const tempPath = path.join(require('os').tmpdir(), 'motionreis_temp_' + Date.now() + '.txt');
+                        fs.writeFileSync(tempPath, data, 'utf8');
+                        require('child_process').execSync('cp "' + tempPath + '" "' + filePath + '"');
+                        fs.unlinkSync(tempPath);
+                    } catch(err2) { throw new Error("Fallback write failed for " + filePath + ": " + err2.message); }
+                } else { throw e; }
+            }
+        }
+
+        function safeCopyFileSync(src, dest) {
+            try {
+                fs.copyFileSync(src, dest);
+            } catch(e) {
+                if (e.code === 'EROFS' || e.message.indexOf('read-only') !== -1 || e.message.indexOf('ENOENT') !== -1) {
+                    try {
+                        require('child_process').execSync('cp "' + src + '" "' + dest + '"');
+                    } catch(err2) { throw new Error("Fallback copy failed for " + dest + ": " + err2.message); }
+                } else { throw e; }
+            }
+        }
 
         // Helper to copy folder recursively
         function copyFolderRecursiveSync(source, target) {
             let files = [];
-            if (!fs.existsSync(target)) {
-                fs.mkdirSync(target, { recursive: true });
-            }
+            if (!fs.existsSync(target)) safeMkdirSync(target);
             
             if (fs.lstatSync(source).isDirectory()) {
                 files = fs.readdirSync(source);
@@ -3868,7 +4452,7 @@
                         copyFolderRecursiveSync(curSource, curTarget);
                     } else {
                         try {
-                            fs.copyFileSync(curSource, curTarget);
+                            safeCopyFileSync(curSource, curTarget);
                         } catch(e) { console.error("Error copying file:", curSource, e); }
                     }
                 });
@@ -3893,6 +4477,50 @@
                     showToast('Comp Unpinned. Auto-detecting active comp...', 'info');
                 }
             }
+        }
+        function scanProjectEffects() {
+            var q = document.getElementById('effect-search-input').value;
+            if (!q || q.trim() === '') {
+                showToast('Please enter an effect name to search.', 'error');
+                return;
+            }
+            
+            var container = document.getElementById('effect-scan-results');
+            container.innerHTML = '<div style="text-align:center; padding:10px;"><div class="spinner" style="margin:0 auto; width:16px; height:16px; border-width:2px;"></div></div>';
+            
+            Bridge.loadJSX('pipeline.jsx').then(function() {
+                Bridge.callMethod('pipeline', 'run', {action: 'scanEffects', query: q.trim()}).then(function(resStr) {
+                    container.innerHTML = '';
+                    var res = [];
+                    try { res = JSON.parse(resStr); } catch(e) {}
+                    
+                    if (!res || res.length === 0) {
+                        container.innerHTML = '<div style="font-size:10px; color:var(--text-secondary); text-align:center; padding:10px;">No effects found matching "'+q+'".</div>';
+                        return;
+                    }
+                    
+                    res.forEach(function(item) {
+                        var html = '<div class="recent-proj-row" style="flex-shrink:0;" onclick="selectScannedComp(' + item.compId + ', ' + item.layerIndex + ')">' +
+                                     '<div class="proj-icon"><span class="material-symbols-rounded" style="font-size:16px;">lens_blur</span></div>' +
+                                     '<div class="proj-info">' +
+                                         '<div class="proj-name">' + item.compName + '</div>' +
+                                         '<div class="proj-path" style="font-size:9px; opacity:0.8;">Layer: ' + item.layerName + ' • ' + item.effectName + '</div>' +
+                                     '</div>' +
+                                   '</div>';
+                        container.insertAdjacentHTML('beforeend', html);
+                    });
+                }).catch(function(err) {
+                    container.innerHTML = '<div style="font-size:10px; color:var(--accent-danger); text-align:center; padding:10px;">Error: ' + err.message + '</div>';
+                });
+            });
+        }
+        
+        function selectScannedComp(compId, layerIndex) {
+            Bridge.loadJSX('pipeline.jsx').then(function() {
+                Bridge.callMethod('pipeline', 'run', {action: 'selectLayerInTimeline', compId: compId, layerIndex: layerIndex}).then(function(res) {
+                    // Silent success, selection is visual in AE
+                }).catch(function(err) { showToast(err.message, 'error'); });
+            });
         }
     </script>
 </body>

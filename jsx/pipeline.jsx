@@ -54,22 +54,37 @@ var pipeline = {
 
     getAESettingsPaths: function() {
         try {
-            var majorVersion = app.version.split(".")[0] + ".0";
+            var major = app.version.split(".")[0];
+            var minor = app.version.split(".")[1];
+            var possibleVersions = [major + "." + minor, major + ".0", major + ".1", major + ".2"];
             var isMac = (Folder.fs === "Macintosh");
-            var prefFolder;
-            if (isMac) {
-                // home is myDocuments' parent. /Library/Preferences is standard
-                prefFolder = new Folder(Folder.myDocuments.parent.fsName + "/Library/Preferences/Adobe/After Effects/" + majorVersion);
-            } else {
-                prefFolder = new Folder(Folder.userData.fsName + "/Adobe/After Effects/" + majorVersion);
+            var basePath = isMac ? (Folder.myDocuments.parent.fsName + "/Library/Preferences/Adobe/After Effects") : (Folder.userData.fsName + "/Adobe/After Effects");
+            
+            var prefFolder = null;
+            var actualVersion = major + ".0";
+            
+            for (var i = 0; i < possibleVersions.length; i++) {
+                var testFolder = new Folder(basePath + "/" + possibleVersions[i]);
+                if (testFolder.exists) {
+                    prefFolder = testFolder;
+                    actualVersion = possibleVersions[i];
+                    break;
+                }
             }
             
-            var userPresetsFolder = new Folder(Folder.myDocuments.fsName + "/Adobe/After Effects " + majorVersion + "/User Presets");
+            if (!prefFolder) {
+                prefFolder = new Folder(basePath + "/" + major + ".0");
+            }
+            
+            var userPresetsFolder = new Folder(Folder.myDocuments.fsName + "/Adobe/After Effects " + actualVersion + "/User Presets");
+            if (!userPresetsFolder.exists) {
+                userPresetsFolder = new Folder(Folder.myDocuments.fsName + "/Adobe/After Effects " + major + ".0/User Presets");
+            }
             
             var paths = {
-                majorVersion: majorVersion,
+                majorVersion: actualVersion,
                 prefFolderPath: prefFolder.exists ? prefFolder.fsName : "",
-                modifiedWorkspacesPath: new Folder(prefFolder.fsName + "/Modified Workspaces").exists ? prefFolder.fsName + "/Modified Workspaces" : "",
+                modifiedWorkspacesPath: new Folder(prefFolder.fsName + "/ModifiedWorkspaces").exists ? prefFolder.fsName + "/ModifiedWorkspaces" : "",
                 userPresetsPath: userPresetsFolder.exists ? userPresetsFolder.fsName : ""
             };
             
@@ -122,41 +137,7 @@ var pipeline = {
                 return newFolder;
             }
             
-            var memo = {};
-            function getCompDepth(comp) {
-                if (memo[comp.id]) return memo[comp.id];
-                if (comp.usedIn.length === 0) {
-                    memo[comp.id] = 0;
-                    return 0;
-                }
-                var maxParentDepth = 0;
-                for (var j = 0; j < comp.usedIn.length; j++) {
-                    var parentComp = comp.usedIn[j];
-                    var parentDepth = getCompDepth(parentComp);
-                    if (parentDepth > maxParentDepth) {
-                        maxParentDepth = parentDepth;
-                    }
-                }
-                var depth = 1 + maxParentDepth;
-                memo[comp.id] = depth;
-                return depth;
-            }
 
-            function getOrCreateFolderForDepth(depth, parentFolder) {
-                if (depth <= 1) {
-                    return parentFolder;
-                }
-                var currentParent = parentFolder;
-                for (var d = 2; d <= depth; d++) {
-                    var folderName = "Precomp Inner";
-                    for (var k = 3; k <= d; k++) {
-                        folderName += " Inner";
-                    }
-                    currentParent = getOrCreateFolder(folderName, currentParent);
-                }
-                return currentParent;
-            }
-            
             // Build Structure
             for (var rootKey in struct) {
                 var rFolder = getOrCreateFolder(rootKey, proj.rootFolder);
@@ -167,9 +148,24 @@ var pipeline = {
                 }
             }
             
+            function isIgnored(item) {
+                var curr = item;
+                while (curr) {
+                    var lowerName = curr.name.toLowerCase();
+                    if (lowerName.indexOf("-") === 0) return true;
+                    if (lowerName.indexOf("export") !== -1) return true;
+                    
+                    if (curr === proj.rootFolder) break;
+                    curr = curr.parentFolder;
+                }
+                return false;
+            }
+
             var itemsToMove = [];
             for (var i = 1; i <= proj.numItems; i++) {
-                itemsToMove.push(proj.item(i));
+                if (!isIgnored(proj.item(i))) {
+                    itemsToMove.push(proj.item(i));
+                }
             }
             
             for (var i = 0; i < itemsToMove.length; i++) {
@@ -178,8 +174,7 @@ var pipeline = {
                 
                 if (item instanceof CompItem) {
                     if (item.usedIn.length > 0) {
-                        var depth = getCompDepth(item);
-                        dest = getOrCreateFolderForDepth(depth, folders["06_COMP_PRECOMP"]);
+                        dest = folders["06_COMP_PRECOMP"];
                     } else {
                         dest = folders["06_COMP_MAIN"];
                     }
@@ -1298,6 +1293,73 @@ var pipeline = {
         } catch(e) { if(app) app.endUndoGroup(); return MotionreisUtils.sendError(e.message); }
     },
 
+    scanEffects: function(argsStr) {
+        try {
+            var args = JSON.parse(argsStr);
+            var query = (args.query || "").toLowerCase();
+            if (!query) return MotionreisUtils.sendResponse("[]");
+            
+            if (!app.project) return MotionreisUtils.sendError("No project open.");
+            
+            var results = [];
+            for (var i = 1; i <= app.project.numItems; i++) {
+                var item = app.project.item(i);
+                if (item instanceof CompItem) {
+                    for (var j = 1; j <= item.numLayers; j++) {
+                        var layer = item.layer(j);
+                        var effectGroup = layer.property("ADBE Effect Parade");
+                        if (effectGroup) {
+                            for (var k = 1; k <= effectGroup.numProperties; k++) {
+                                var effect = effectGroup.property(k);
+                                var efName = effect.name.toLowerCase();
+                                var matchName = effect.matchName.toLowerCase();
+                                if (efName.indexOf(query) !== -1 || matchName.indexOf(query) !== -1) {
+                                    results.push({
+                                        compId: item.id,
+                                        compName: item.name,
+                                        layerIndex: j,
+                                        layerName: layer.name,
+                                        effectName: effect.name
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return MotionreisUtils.sendResponse(JSON.stringify(results));
+        } catch(e) { return MotionreisUtils.sendError("Scanner Error: " + e.message); }
+    },
+
+    selectLayerInTimeline: function(argsStr) {
+        try {
+            var args = JSON.parse(argsStr);
+            var compId = parseInt(args.compId, 10);
+            var layerIndex = parseInt(args.layerIndex, 10);
+            
+            if (!app.project) return MotionreisUtils.sendError("No project open.");
+            
+            var targetItem = app.project.itemByID(compId);
+            if (targetItem && targetItem instanceof CompItem) {
+                targetItem.openInViewer();
+                
+                // Deselect all layers first
+                for (var i = 1; i <= targetItem.numLayers; i++) {
+                    targetItem.layer(i).selected = false;
+                }
+                
+                // Select the target layer
+                if (layerIndex > 0 && layerIndex <= targetItem.numLayers) {
+                    targetItem.layer(layerIndex).selected = true;
+                }
+                
+                return MotionreisUtils.sendResponse("Success");
+            } else {
+                return MotionreisUtils.sendError("Comp not found.");
+            }
+        } catch(e) { return MotionreisUtils.sendError(e.message); }
+    },
+
     // Router function called from UI
     run: function(argsStr) {
         var args = JSON.parse(argsStr);
@@ -1316,6 +1378,8 @@ var pipeline = {
         if (args.action === 'groupSelectedLayers') return this.groupSelectedLayers();
         if (args.action === 'exportVFXData') return this.exportVFXData(argsStr);
         if (args.action === 'runMacro') return this.runMacro(argsStr);
+        if (args.action === 'scanEffects') return this.scanEffects(argsStr);
+        if (args.action === 'selectLayerInTimeline') return this.selectLayerInTimeline(argsStr);
         
         return MotionreisUtils.sendError("Pipeline function not yet implemented.");
     }
