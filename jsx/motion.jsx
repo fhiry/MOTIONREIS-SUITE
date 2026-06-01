@@ -6,7 +6,7 @@ var motion = {
     anchor: function(argsStr) {
         try {
             app.beginUndoGroup("Anchor Point Engine");
-            var args = JSON.parse(argsStr);
+            var args = MotionreisUtils.safeParse(argsStr);
             var action = args.action; 
             var compensate = args.comp === true;
             
@@ -141,7 +141,7 @@ var motion = {
     nullFromSelection: function(argsStr) {
         try {
             app.beginUndoGroup("Create Null");
-            var args = argsStr ? JSON.parse(argsStr) : {};
+            var args = argsStr ? MotionreisUtils.safeParse(argsStr) : {};
             var comp = MotionreisUtils.getActiveComp();
             var layers = MotionreisUtils.getSelectedLayers(comp);
             
@@ -538,7 +538,7 @@ var motion = {
                 return MotionreisUtils.sendError("Belum ada ease yang di-copy. Copy dulu bro!");
             }
             
-            var copiedData = JSON.parse(app.settings.getSetting("Motionreis", "CopiedEase"));
+            var copiedData = MotionreisUtils.safeParse(app.settings.getSetting("Motionreis", "CopiedEase"));
             
             var easeIn = new KeyframeEase(copiedData.inSpeed, copiedData.inInfluence);
             var easeOut = new KeyframeEase(copiedData.outSpeed, copiedData.outInfluence);
@@ -681,7 +681,7 @@ var motion = {
             app.beginUndoGroup("Library Preset Ease");
             var comp = MotionreisUtils.getActiveComp();
             var layers = MotionreisUtils.getSelectedLayers(comp);
-            var rawData = JSON.parse(args.rawData);
+            var rawData = MotionreisUtils.safeParse(args.rawData);
             
             var easeIn = new KeyframeEase(rawData.inSpeed, rawData.inInfluence);
             var easeOut = new KeyframeEase(rawData.outSpeed, rawData.outInfluence);
@@ -1832,7 +1832,7 @@ var motion = {
 
     // Router function called from UI
     run: function(argsStr) {
-        var args = JSON.parse(argsStr);
+        var args = MotionreisUtils.safeParse(argsStr);
         if (args.action === 'TL' || args.action === 'TC' || args.action === 'TR' || 
             args.action === 'ML' || args.action === 'MC' || args.action === 'MR' || 
             args.action === 'BL' || args.action === 'BC' || args.action === 'BR') {

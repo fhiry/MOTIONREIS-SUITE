@@ -243,8 +243,7 @@
             <button class="tab-btn pr-only" data-target="mod-chat" data-tooltip="AI Command"><span class="material-symbols-rounded">terminal</span> AI Command</button>
             <button class="tab-btn pr-only" data-target="mod-clipper" data-tooltip="AI Clipper"><span class="material-symbols-rounded">content_cut</span> AI Clipper</button>
             <div style="flex-grow:1;"></div>
-            <button class="tab-btn ae-only" data-target="mod-backup" data-tooltip="Project &amp; Sync"><span class="material-symbols-rounded">folder_managed</span> Project</button>
-            <button class="tab-btn pr-only" data-target="mod-backup-pr" data-tooltip="Project &amp; Sync"><span class="material-symbols-rounded">folder_managed</span> Project</button>
+            <button class="tab-btn" data-target="mod-backup" data-tooltip="Project &amp; Sync"><span class="material-symbols-rounded">folder_managed</span> Project</button>
             <button class="tab-btn" data-target="mod-info" data-tooltip="Info & Help"><span class="material-symbols-rounded">settings</span> Info</button>
         </div>
 
@@ -256,16 +255,9 @@
                     <span><span class="material-symbols-rounded" style="vertical-align:bottom; margin-right:4px;">space_dashboard</span> Dashboard</span>
                     <button class="btn" style="padding:4px 8px; font-size:10px;" onclick="openCustomizeModal()"><span class="material-symbols-rounded" style="font-size:12px; margin-right:4px;">settings</span>Customize</button>
                 </div>
-                <!-- Welcome Banner -->
-                <div class="card" id="card-welcome" style="display:none; text-align:center; padding:24px 16px; background:linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(30, 31, 34, 0) 100%); border:1px solid var(--border-strong); position:relative; overflow:hidden;">
-                    <span class="material-symbols-rounded" style="position:absolute; font-size:120px; color:rgba(88, 101, 242, 0.05); top:-20px; right:-20px; transform:rotate(-15deg); pointer-events:none;">rocket_launch</span>
-                    <div style="font-size:20px; font-weight:800; color:var(--text-primary); margin-bottom:2px; letter-spacing:0.5px;">MOTIONREIS</div>
-                    <div style="font-size:10px; font-weight:600; color:var(--accent-primary); margin-bottom:12px; letter-spacing:2px; text-transform:uppercase;">Master Suite</div>
-                    <p style="font-size:11px; color:var(--text-secondary); margin:0; line-height:1.5;">Welcome to your ultimate pipeline companion. Organize files, rig characters, and automate workflows effortlessly.</p>
-                </div>
                 
                 <!-- Recent Projects Card -->
-                <div class="card" id="card-recent-projects" style="display:none;">
+                <div class="card ae-only" id="card-recent-projects" style="display:none;">
                     <div class="section-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <span>Recent Projects</span>
                         <span class="material-symbols-rounded" style="font-size:14px; opacity:0.6; color:var(--accent-primary);">history</span>
@@ -277,7 +269,13 @@
                 
                 <div id="home-widgets" style="display:flex; flex-direction:column; gap:16px;"></div>
                 <!-- Source Templates (Hidden) -->
-
+                <!-- Welcome Banner -->
+                <div class="card" id="card-welcome" style="display:none; text-align:center; padding:24px 16px; background:linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(30, 31, 34, 0) 100%); border:1px solid var(--border-strong); position:relative; overflow:hidden;">
+                    <span class="material-symbols-rounded" style="position:absolute; font-size:120px; color:rgba(88, 101, 242, 0.05); top:-20px; right:-20px; transform:rotate(-15deg); pointer-events:none;">rocket_launch</span>
+                    <div style="font-size:20px; font-weight:800; color:var(--text-primary); margin-bottom:2px; letter-spacing:0.5px;">MOTIONREIS</div>
+                    <div style="font-size:10px; font-weight:600; color:var(--accent-primary); margin-bottom:12px; letter-spacing:2px; text-transform:uppercase;">Master Suite</div>
+                    <p style="font-size:11px; color:var(--text-secondary); margin:0; line-height:1.5;">Welcome to your ultimate pipeline companion. Organize files, rig characters, and automate workflows effortlessly.</p>
+                </div>
                 
 
 
@@ -1169,45 +1167,6 @@
                 </div>
             </div>
 
-            <div id="mod-backup-pr" class="module-container">
-                <div class="module-header"><span class="material-symbols-rounded">folder_managed</span> Project Management (PR)</div>
-                
-                <div class="card" id="card-organizer-pr">
-                    <div class="section-label">Master Organizer</div>
-                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Auto-sort your chaotic files into the standard structured folders based on extensions (.psd, .mp4, etc).</p>
-                    
-                    <button class="btn btn-primary" style="width:100%; margin-bottom:8px; justify-content:center;" onclick="promptOsOrganizeProject()">
-                        <span class="material-symbols-rounded">folder_managed</span> Organize Finder (OS)
-                    </button>
-                    <button class="btn" style="width:100%; justify-content:center;" onclick="triggerPrOrganize()">
-                        <span class="material-symbols-rounded">account_tree</span> Organize Project (PR)
-                    </button>
-                    
-                    <div style="margin-top:8px; padding:8px 10px; background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:6px; display:flex; gap:8px; align-items:flex-start;">
-                        <span class="material-symbols-rounded" style="font-size:14px; color:var(--accent-primary); margin-top:2px;">info</span>
-                        <div style="font-size:10px; color:var(--text-secondary); line-height:1.4;">
-                            <span style="color:var(--text-primary); font-weight:600;">Safe Bins:</span> Tambahkan tanda strip <b>(-)</b> di awal nama Bin atau gunakan kata <b>export</b>. Bin tersebut beserta isinya tidak akan diganggu oleh Organizer.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card" id="card-smartrelinker-pr">
-                    <div class="section-label">Smart Relinker <span style="font-size:8px; background:var(--accent-primary); padding:2px 6px; border-radius:10px; margin-left:6px; color:white;">NEW</span></div>
-                    <p style="font-size:11px; color:var(--text-secondary); margin-top:0; margin-bottom:12px;">Auto-find and relink offline assets in Premiere Pro.</p>
-                    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="triggerPrSmartRelinker()"><span class="material-symbols-rounded">link</span> Find & Relink Assets</button>
-                </div>
-
-                <!-- Local Data Folder (Universal) -->
-                <div class="card" id="card-data-location-pr">
-                    <div class="section-label">Local Data Folder</div>
-                    <div style="font-size:9px; color:var(--text-secondary); line-height:1.3; margin-bottom:8px;">Lokasi utama penyimpanan data plugin. Gunakan drive lokal/SSD untuk performa terbaik.</div>
-                    <div id="data-location-display-backup-pr" style="font-family:monospace; font-size:9px; color:var(--text-secondary); background:var(--bg-hover); padding:6px; border-radius:4px; margin-bottom:8px; word-break:break-all;"></div>
-                    <button class="btn" style="width:100%; justify-content:center;" onclick="promptMoveDataFolder()">
-                        <span class="material-symbols-rounded">drive_file_move</span> Move Local Folder
-                    </button>
-                </div>
-            </div>
-
             <div id="mod-loader" class="module-container">
                 <div class="module-header"><span class="material-symbols-rounded">psychology</span> Intelligent Loader (AI)</div>
                 <div class="card" id="feat-pr-api-config">
@@ -1712,7 +1671,7 @@
         }
 
         // Dynamically find and parse the native After Effects Prefs file
-        function getNativeAERecentProjects() {
+        function getNativeRecentProjects() {
             try {
                 // If variables are null, try to load from persistent JSON cache
                 if (!currentlyOpenProjectPath && fs.existsSync(RECENT_CACHE_FILE)) {
@@ -1745,7 +1704,7 @@
                 }
 
                 // Scan all folders (e.g. 26.2, 26.0) to find version directories
-                var subdirs = fs.readdirSync(aePrefsBaseDir).filter(function(name ) {
+                var subdirs = fs.readdirSync(aePrefsBaseDir).filterfunction(name ) {
                     var fullPath = path.join(aePrefsBaseDir, name);
                     return fs.statSync(fullPath).isDirectory() && /^\d+(\.\d+)*$/.test(name);
                 });
@@ -1765,7 +1724,7 @@
 
                 // Find the Prefs.txt file (e.g., Adobe After Effects 26.2 Prefs.txt)
                 var files = fs.readdirSync(highestVersionDir);
-                var prefsFile = files.find(function(file ) {
+                var prefsFile = files.findfunction(file ) {
                     return file.startsWith('Adobe After Effects') && file.endsWith('Prefs.txt');
                 });
 
@@ -1811,8 +1770,8 @@
 
                 // Convert to array and filter out entries that have no path
                 var list = Object.keys(projects)
-                    .map(function(key) { return projects[key]; })
-                    .filter(function(proj) { return proj.path; });
+                    .mapfunction(key ) { return projects[key]; })
+                    .filterfunction(proj ) { return proj.path; });
 
                 // Dynamically inject/update the last known active project path (which AE hasn't written to disk yet)
                 if (currentlyOpenProjectPath && currentlyOpenProjectPath !== "none") {
@@ -1853,92 +1812,6 @@
             }
         }
 
-        function getNativePRRecentProjects() {
-            try {
-                if (!currentlyOpenProjectPath && fs.existsSync(RECENT_CACHE_FILE)) {
-                    try {
-                        var cache = JSON.parse(fs.readFileSync(RECENT_CACHE_FILE, 'utf8'));
-                        if (cache && cache.path) {
-                            currentlyOpenProjectPath = cache.path;
-                            currentlyOpenProjectLastActive = cache.lastActive;
-                        }
-                    } catch (e) {}
-                }
-
-                var isWin = process.platform === 'win32';
-                var prPrefsBaseDir = "";
-                if (isWin) {
-                    var docPath = path.join(os.homedir(), 'Documents');
-                    prPrefsBaseDir = path.join(docPath, 'Adobe', 'Premiere Pro');
-                } else {
-                    prPrefsBaseDir = path.join(os.homedir(), 'Documents', 'Adobe', 'Premiere Pro');
-                }
-
-                if (!fs.existsSync(prPrefsBaseDir)) return [];
-
-                var subdirs = fs.readdirSync(prPrefsBaseDir).filter(function(name) {
-                    var fullPath = path.join(prPrefsBaseDir, name);
-                    return fs.statSync(fullPath).isDirectory() && /^\d+(\.\d+)*$/.test(name);
-                });
-
-                if (subdirs.length === 0) return [];
-                subdirs.sort(function(a, b) { return parseFloat(b) - parseFloat(a); });
-
-                var highestVersionDir = path.join(prPrefsBaseDir, subdirs[0]);
-                var profileDirs = fs.readdirSync(highestVersionDir).filter(function(name) {
-                    return name.startsWith('Profile-') && fs.statSync(path.join(highestVersionDir, name)).isDirectory();
-                });
-                
-                var profileDir = profileDirs.length > 0 ? path.join(highestVersionDir, profileDirs[0]) : highestVersionDir;
-                var prefsPath = path.join(profileDir, 'Adobe Premiere Pro Prefs');
-                
-                if (!fs.existsSync(prefsPath)) return [];
-
-                var content = fs.readFileSync(prefsPath, 'utf8');
-                var list = [];
-                var match;
-                
-                var prRegex = /<BE\.Prefs\.MRU\.Document\.(\d+)>(.*?)<\/BE\.Prefs\.MRU\.Document\.\d+>/g;
-                while ((match = prRegex.exec(content)) !== null) {
-                    var id = parseInt(match[1], 10);
-                    var filePath = match[2];
-                    if (filePath && filePath.toLowerCase().endsWith('.prproj')) {
-                        list.push({ id: id, path: filePath });
-                    }
-                }
-                
-                list.sort(function(a, b) { return a.id - b.id; });
-                
-                if (currentlyOpenProjectPath && currentlyOpenProjectPath !== "none") {
-                    var normalizedOpenPath = currentlyOpenProjectPath.replace(/\\/g, '/');
-                    var found = false;
-                    for (var i = 0; i < list.length; i++) {
-                        var normalizedProjPath = list[i].path.replace(/\\/g, '/');
-                        if (normalizedProjPath === normalizedOpenPath) {
-                            found = true; break;
-                        }
-                    }
-                    if (!found && currentlyOpenProjectPath.toLowerCase().endsWith('.prproj')) {
-                        list.unshift({ id: -1, path: currentlyOpenProjectPath });
-                    }
-                }
-
-                return list.slice(0, 5);
-            } catch (err) {
-                console.error("[RecentProjects] Error loading PR native recent projects:", err);
-                return [];
-            }
-        }
-
-        function getNativeRecentProjects() {
-            var csInterface = new CSInterface();
-            if (csInterface.getHostEnvironment().appName === "PPRO") {
-                return getNativePRRecentProjects();
-            } else {
-                return getNativeAERecentProjects();
-            }
-        }
-
         // Render projects inside our glassmorphic panel list
         function renderRecentProjectsList() {
             var listEl = document.getElementById('recent-projects-list');
@@ -1955,7 +1828,7 @@
             }
 
             listEl.innerHTML = "";
-            recentProjects.forEach(function(proj ) {
+            recentProjects.forEachfunction(proj ) {
                 var basename = proj.path.split(/[/\\]/).pop();
                 var relativeTime = proj.isoDate ? formatRelativeTime(proj.isoDate) : "";
                 
@@ -1964,7 +1837,7 @@
 
                 var row = document.createElement('div');
                 row.className = "recent-proj-row";
-                row.onclick = function() { openRecentProject(escapedPath); };
+                row.onclick = ()function( ) { return openRecentProject(escapedPath; });
                 row.innerHTML = `
                     <span class="material-symbols-rounded proj-icon" style="font-size:18px;">receipt_long</span>
                     <div class="proj-info">
@@ -1995,10 +1868,10 @@
                 } catch(e) {
                     return JSON.stringify({ error: e.toString() });
                 }
-            })();`;
+            })()`;
             
             Bridge.eval(script)
-                .then(function(res ) {
+                .thenfunction(res ) {
                     if (res && res.success) {
                         showToast("Project opened successfully!", "success");
                         checkProjectStatus(); // Update UI state immediately
@@ -2008,7 +1881,7 @@
                         showToast("Failed to open project.", "error");
                     }
                 })
-                .catch(function(err ) {
+                .catchfunction(err ) {
                     showToast("Failed to open project: " + err.message, "error");
                 });
         }
@@ -2025,10 +1898,10 @@
                 } catch (e) {
                     return JSON.stringify({ path: "none" });
                 }
-            })();`;
+            })()`;
 
             Bridge.eval(script)
-                .then(function(res ) {
+                .thenfunction(res ) {
                     var card = document.getElementById('card-recent-projects');
 
                     if (!card) return;
@@ -2059,7 +1932,7 @@
                             // Slide out and fade away
                             card.classList.add('hidden-proj');
                             // Delay actual display = none to allow transition to complete
-                            setTimeout(function() {
+                            setTimeout(()function( ) {
                                 if (lastProjectState === true) {
                                     card.style.display = 'none';
                                 }
@@ -2074,7 +1947,7 @@
                         }
                     }
                 })
-                .catch(function(err ) {
+                .catchfunction(err ) {
                     console.error("[RecentProjects] Error checking project status:", err);
                 });
         }
@@ -2085,8 +1958,8 @@
         checkProjectStatus();
         setInterval(checkProjectStatus, 3000);
         
-        document.querySelectorAll('.tab-btn').forEach(function(btn ) {
-            btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEachfunction(btn ) {
+            btn.addEventListener('click', ()function( ) {
                 if (btn.getAttribute('data-target') === 'mod-home') {
                     checkProjectStatus();
                 }
@@ -2359,17 +2232,13 @@
             undoAeTimer = setInterval(function() {
                 undoAeCountdown--;
                 if (undoAeCountdown <= 0) {
-                    clearInterval(undoAeTimer);
-                    document.getElementById('undo-ae-container').style.display = 'none';
+                    closeUndoAe();
                 } else {
                     btn.innerText = 'Redo Last (' + undoAeCountdown + 's)';
                 }
             }, 1000);
         }
-
-        function triggerPrOrganize() {
-            exec('pipeline', 'prOrganizeProject');
-        }
+        
         function closeUndoAe() {
             clearInterval(undoAeTimer);
             var container = document.getElementById('undo-ae-container');
@@ -2502,27 +2371,12 @@
 
         // Init on load
         window.addEventListener('DOMContentLoaded', function() {
-            var csInterface = new CSInterface();
-            var appName = csInterface.getHostEnvironment().appName;
-            
-            if (appName === "PPRO") {
-                var aeOnlyEls = document.querySelectorAll('.ae-only');
-                aeOnlyEls.forEach(function(el) { el.style.display = 'none'; });
-            } else if (appName === "AEFT") {
-                var prOnlyEls = document.querySelectorAll('.pr-only');
-                prOnlyEls.forEach(function(el) { el.style.display = 'none'; });
-            }
-
-            renderHomeWidgets();
-            setupDragAndDrop();
-            loadLayoutOrder();
-
             updateWingmanPreview();
             updateWigglePreview();
             renderLibrary();
             renderExprLibrary();
             startContextPolling();
-            initApiConfig();
+            renderHomeWidgets();
             
             // Setup Segmented Control for Time Range
             document.addEventListener('change', function(e) {
@@ -2711,7 +2565,7 @@
             if (l) l.classList.add('hidden');
         }
         // Fallback timeout in case Bridge hangs
-        setTimeout(function() { jsxReady = true; tryHideLoader(); }, 2500);
+        setTimeout(()function( ) { jsxReady = true; tryHideLoader(); }, 2500);
         
         Promise.all([
             Bridge.loadJSX('utils.jsx'),
@@ -2719,8 +2573,8 @@
             Bridge.loadJSX('layers.jsx'),
             Bridge.loadJSX('creative.jsx'),
             Bridge.loadJSX('pipeline.jsx'),
-        ]).then(function() { jsxReady = true; tryHideLoader(); })
-          .catch(function() { jsxReady = true; tryHideLoader(); });
+        ]).then(()function( ) { jsxReady = true; tryHideLoader(); })
+          .catch(()function( ) { jsxReady = true; tryHideLoader(); });
         // ───────────────────────────────────────────────────────────────
 
         // ── Custom Prompts ────────────────────────────────────────────────
@@ -3081,7 +2935,29 @@
             } catch(e) {}
         }
 
+        // Init on load
+        window.addEventListener('DOMContentLoaded', function() {
+            var csInterface = new CSInterface();
+            var appName = csInterface.getHostEnvironment().appName;
+            
+            if (appName === "PPRO") {
+                var aeOnlyEls = document.querySelectorAll('.ae-only');
+                aeOnlyEls.forEach(function(el) { el.style.display = 'none'; });
+            } else if (appName === "AEFT") {
+                var prOnlyEls = document.querySelectorAll('.pr-only');
+                prOnlyEls.forEach(function(el) { el.style.display = 'none'; });
+            }
 
+            setupDragAndDrop();
+            loadLayoutOrder();
+
+            updateWingmanPreview();
+            updateWigglePreview();
+            renderLibrary();
+            renderExprLibrary();
+            startContextPolling();
+            initApiConfig();
+        });
 
         // ==========================================
         // AI Loader: API Configuration
@@ -3099,6 +2975,8 @@
             var appName = csInterface.getHostEnvironment().appName;
             var storageKey = 'motionreis_ai_config_' + appName;
 
+            var fs = require('fs');
+            var path = require('path');
             var crypto = require('crypto');
             var sysPath = csInterface.getSystemPath(SystemPath.USER_DATA);
             var fsConfigPath = path.join(sysPath, 'motionreis_ai_config_' + appName + '.json');
@@ -3746,12 +3624,14 @@
                 statusTextEl.style.color = "var(--text-secondary)";
                 
                 var csInt = new CSInterface();
+                var fsObj = require('fs');
+                var pathObj = require('path');
                 var pluginRoot = csInt.getSystemPath(SystemPath.EXTENSION);
-                var panduanPath = path.join(pluginRoot, 'panduan_fungsi.md');
+                var panduanPath = pathObj.join(pluginRoot, 'panduan_fungsi.md');
                 var sysText = "ExtendScript dev in Premiere Pro CEP panel. Target app.project.activeSequence.";
                 try {
-                    if (fs.existsSync(panduanPath)) {
-                        sysText += "\n\n--- API REFERENCE ---\n" + fs.readFileSync(panduanPath, 'utf8');
+                    if (fsObj.existsSync(panduanPath)) {
+                        sysText += "\n\n--- API REFERENCE ---\n" + fsObj.readFileSync(panduanPath, 'utf8');
                     }
                 } catch(e) {}
                 
@@ -4062,11 +3942,11 @@
         var { spawn } = require('child_process');
 
         function killAllActiveRenders() {
-            activeRenderProcesses.forEach(function(proc ) {
+            activeRenderProcesses.forEachfunction(proc ) {
                 try { proc.kill(); } catch(e) {}
             });
             activeRenderProcesses = [];
-            renderWatchdogs.forEach(function(w) { clearInterval(w); });
+            renderWatchdogs.forEachfunction(w ) { return clearInterval(w; }));
             renderWatchdogs = [];
             
             document.getElementById('aerender-status').innerText = 'Render Canceled.';
@@ -4075,7 +3955,7 @@
 
         function startRenderV2() {
             // Check if project path is saved
-            Bridge.eval('app.project.file ? app.project.file.fsName : ""').then(function(projPath ) {
+            Bridge.eval('app.project.file ? app.project.file.fsName : ""').thenfunction(projPath ) {
                 if (!projPath) {
                     showToast("Please save your project first (File > Save) before CLI Rendering!", "error");
                     return;
@@ -4213,12 +4093,12 @@
             var stderrLog = '';
             
             // Watchdog: kill if no stdout for 10 minutes (600,000 ms)
-            var watchdog = setInterval(function() {
+            var watchdog = setInterval(()function( ) {
                 if (Date.now() - lastActivity > 600000) {
                     console.warn(`Watchdog: Render stuck (10m no output). Killing...`);
                     clearInterval(watchdog);
                     try { proc.kill('SIGKILL'); } catch(e) {}
-                    activeRenderProcesses = activeRenderProcesses.filter(function(p) { return p !== proc; });
+                    activeRenderProcesses = activeRenderProcesses.filterfunction(p ) { return p !== proc; });
                     document.getElementById('aerender-status').innerText = 'Render killed by Watchdog (hang detected).';
                     document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
                 }
@@ -4233,7 +4113,7 @@
                 var output = data.toString();
                 
                 var lines = output.split('\n');
-                lines.forEach(function(line) {
+                lines.forEachfunction(line ) {
                     var frameMatch = line.match(/PROGRESS:.*frame\s+(\d+)/i) || line.match(/PROGRESS:.*\(\s*(\d+)\s*\)/i);
                     if (frameMatch) {
                         var framesDone = parseInt(frameMatch[1], 10);
@@ -4253,10 +4133,10 @@
             
             proc.on('close', function(code) {
                 clearInterval(watchdog);
-                activeRenderProcesses = activeRenderProcesses.filter(function(p) { return p !== proc; });
+                activeRenderProcesses = activeRenderProcesses.filterfunction(p ) { return p !== proc; });
                 
                 if (code !== 0 || stderrLog.toLowerCase().includes('error')) {
-                    var errLines = stderrLog.split('\n').filter(l => l.trim());
+                    var errLines = stderrLog.split('\n').filterfunction(l ) { return l.trim(; }));
                     var lastErr = errLines.pop() || ('Exit code: ' + code);
                     document.getElementById('aerender-status').innerText = `Error: ${lastErr.trim().slice(0, 120)}`;
                     document.getElementById('aerender-progress-bar').style.background = 'var(--accent-danger)';
@@ -4589,7 +4469,7 @@
                         document.getElementById('ffmpeg-setup-progress-bar').style.background = '#10b981';
                         
                         showToast("FFmpeg parallel engine configured successfully!", "success");
-                        setTimeout(function() {
+                        setTimeout(()function( ) {
                             checkFFmpegInstalled();
                         }, 1200);
                     });
@@ -4637,7 +4517,7 @@
                         // Gyan.dev extract yields a nested directory with "bin/ffmpeg.exe". Let's locate it and move it to bin/win/ffmpeg.exe
                         try {
                             var dirs = fs.readdirSync(binDir);
-                            var nestedDir = dirs.find(function(d) { return d.startsWith('ffmpeg-') && fs.lstatSync(path.join(binDir, d)).isDirectory(); });
+                            var nestedDir = dirs.findfunction(d ) { return d.startsWith('ffmpeg-'; }) && fs.lstatSync(path.join(binDir, d)).isDirectory());
                             if (nestedDir) {
                                 var nestedFF = path.join(binDir, nestedDir, 'bin', 'ffmpeg.exe');
                                 if (fs.existsSync(nestedFF)) {
@@ -4654,7 +4534,7 @@
                         document.getElementById('ffmpeg-setup-progress-bar').style.background = '#10b981';
                         
                         showToast("FFmpeg parallel engine configured successfully!", "success");
-                        setTimeout(function() {
+                        setTimeout(()function( ) {
                             checkFFmpegInstalled();
                         }, 1200);
                     });
@@ -5040,8 +4920,8 @@
                         if (fs.existsSync(targetF)) targetData = JSON.parse(fs.readFileSync(targetF, 'utf8'));
                         
                         var merged = targetData.slice();
-                        localData.forEach(function(item ) {
-                            var exists = merged.find(function(m) { return (m.id && item.id && m.id === item.id) || (m.name && item.name && m.name === item.name); });
+                        localData.forEachfunction(item ) {
+                            var exists = merged.findfunction(m ) { return (m.id && item.id && m.id === item.id; }) || (m.name && item.name && m.name === item.name));
                             if (!exists) merged.push(item);
                         });
                         fs.writeFileSync(targetF, JSON.stringify(merged, null, 4));
@@ -5113,28 +4993,6 @@
 
         var pendingRelinkedItems = [];
         
-        function triggerPrSmartRelinker() {
-            var res = window.cep.fs.showOpenDialog(false, true, "Select a folder to search for offline assets in Premiere Pro", "", []);
-            if (res.data && res.data.length > 0) {
-                var folderPath = res.data[0];
-                showToast("Scanning folder... this may take a moment.", "info");
-                Bridge.eval('pipeline.prSmartRelink("' + folderPath.replace(/\\/g, '/') + '")').then(function(resData) {
-                    if (resData && resData.startsWith('{')) {
-                        var data = JSON.parse(resData);
-                        if (data.count === 0) {
-                            showToast("No missing assets found in PR project.", "info");
-                        } else {
-                            showToast("Successfully relinked " + data.count + " assets.", "success");
-                        }
-                    } else if (resData) {
-                        showToast(resData, "success");
-                    }
-                }).catch(function(e) {
-                    showToast(e.toString(), "error");
-                });
-            }
-        }
-        
         function triggerSmartRelinker() {
             var res = window.cep.fs.showOpenDialog(false, true, "Select a folder to search for offline assets", "", []);
             if (res.data && res.data.length > 0) {
@@ -5154,7 +5012,7 @@
                     } else if (resData) {
                         showToast(resData, "error");
                     }
-                }).catch(function(e ) {
+                }).catchfunction(e ) {
                     showToast("Error during relink", "error");
                 });
             }
@@ -5267,13 +5125,13 @@
                     if (backupLoc1Enable && backupLoc1Path) targetDirs.push(path.join(backupLoc1Path, 'Live_Sync'));
                     if (backupLoc2Enable && backupLoc2Path) targetDirs.push(path.join(backupLoc2Path, 'Live_Sync'));
                     
-                    targetDirs.forEach(function(dir ) {
+                    targetDirs.forEachfunction(dir ) {
                         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
                         fs.copyFileSync(src, path.join(dir, filename));
                     });
                     
                     if (filename === 'theme_config.json' || filename === 'click_metrics.json') {
-                        targetDirs.forEach(function(dir ) {
+                        targetDirs.forEachfunction(dir ) {
                             var lsDump = {};
                             for (var i = 0; i < localStorage.length; i++) {
                                 var k = localStorage.key(i);
@@ -5292,7 +5150,7 @@
             try {
                 if (!fs.existsSync(EASE_LIB_DIR)) return;
                 var files = fs.readdirSync(EASE_LIB_DIR);
-                files.forEach(function(f ) {
+                files.forEachfunction(f ) {
                     if (f.endsWith('.json')) {
                         debounceSyncFile(f);
                     }
@@ -5304,9 +5162,6 @@
             // Update Data Location displays on both Info and Backup panels
             var dispBackup = document.getElementById('data-location-display-backup');
             if (dispBackup) dispBackup.innerText = EASE_LIB_DIR;
-            
-            var dispBackupPr = document.getElementById('data-location-display-backup-pr');
-            if (dispBackupPr) dispBackupPr.innerText = EASE_LIB_DIR;
             
             var dispInfo = document.getElementById('data-location-display');
             if (dispInfo) dispInfo.innerText = EASE_LIB_DIR;
@@ -5524,8 +5379,8 @@
                         if (fs.existsSync(targetF)) targetData = JSON.parse(fs.readFileSync(targetF, 'utf8'));
                         
                         var merged = targetData.slice();
-                        localData.forEach(function(item ) {
-                            var exists = merged.find(function(m) { return (m.id && item.id && m.id === item.id) || (m.name && item.name && m.name === item.name); });
+                        localData.forEachfunction(item ) {
+                            var exists = merged.findfunction(m ) { return (m.id && item.id && m.id === item.id; }) || (m.name && item.name && m.name === item.name));
                             if (!exists) merged.push(item);
                         });
                         fs.writeFileSync(localF, JSON.stringify(merged, null, 4), 'utf8');

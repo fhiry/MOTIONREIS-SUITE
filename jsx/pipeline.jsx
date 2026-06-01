@@ -215,6 +215,380 @@ var pipeline = {
             return MotionreisUtils.sendError(e.message);
         }
     },
+    
+    // -----------------------------------------------------------------------------------
+    // PROJECT ORGANIZER (PR PANEL)
+    // -----------------------------------------------------------------------------------
+    prOrganizeProject: function(argsStr) {
+        try {
+            if (!app.project) return MotionreisUtils.sendError("No project open.");
+            
+            var proj = app.project;
+            
+            var struct = {
+                "01_ASSET": ["3D", "PSD", "PNG", "AI", "JPEG"],
+                "02_AUDIO": ["SCORING", "SFX", "MUSIC", "VO", "FMIX"],
+                "03_EXPORT": [],
+                "04_IMAGE": ["PSD", "PNG", "AI", "JPEG", "TIFF"],
+                "05_BRIEF": [],
+                "06_SEQUENCE": ["MAIN", "PRECOMP", "NEST"],
+                "07_CG": [],
+                "08_VIDEO DATA": ["PRORESS", "REPORT", "RAW"]
+            };
+            
+            var folders = {};
+            
+            function getOrCreateBin(name, parentBin) {
+                var children = parentBin.children;
+                for (var i = 0; i < children.numItems; i++) {
+                    var child = children[i];
+                    if (child.type === ProjectItemType.BIN && child.name === name) {
+                        return child;
+                    }
+                }
+                return parentBin.createBin(name);
+            }
+
+            // Build Structure
+            for (var rootKey in struct) {
+                var rBin = getOrCreateBin(rootKey, proj.rootItem);
+                folders[rootKey] = rBin;
+                var subs = struct[rootKey];
+                for (var i=0; i<subs.length; i++) {
+                    folders[rootKey + "_" + subs[i]] = getOrCreateBin(subs[i], rBin);
+                }
+            }
+            
+            function isIgnored(item) {
+                if (item.treePath) {
+                    var lowerPath = item.treePath.toLowerCase();
+                    if (lowerPath.indexOf("\\-") !== -1 || lowerPath.indexOf("/-") !== -1 || lowerPath.indexOf("export") !== -1) return true;
+                }
+                var lowerName = item.name.toLowerCase();
+                if (lowerName.indexOf("-") === 0) return true;
+                if (lowerName.indexOf("export") !== -1) return true;
+                return false;
+            }
+
+            var itemsToMove = [];
+            
+            // Recursive function to gather all items
+            function gatherItems(bin) {
+                var children = bin.children;
+                for (var i = 0; i < children.numItems; i++) {
+                    var child = children[i];
+                    if (!isIgnored(child)) {
+                        itemsToMove.push(child);
+                    }
+                    if (child.type === ProjectItemType.BIN && !isIgnored(child)) {
+                        gatherItems(child);
+                    }
+                }
+            }
+            
+            gatherItems(proj.rootItem);
+            
+            for (var i = 0; i < itemsToMove.length; i++) {
+                var item = itemsToMove[i];
+                var dest = null;
+                
+                if (item.type === ProjectItemType.BIN) {
+                    var isMaster = false;
+                    for (var k in folders) {
+                        if (item.nodeId === folders[k].nodeId) { isMaster = true; break; }
+                    }
+                    if (!isMaster) {
+                        dest = folders["01_ASSET"];
+                    }
+                } else if (item.type === ProjectItemType.CLIP) {
+                    if (item.isSequence()) {
+                        dest = folders["06_SEQUENCE_MAIN"];
+                    } else {
+                        var mediaPath = item.getMediaPath();
+                        if (mediaPath) {
+                            var ext = mediaPath.toLowerCase().split('.').pop();
+                            if (ext === "psd") dest = folders["01_ASSET_PSD"];
+                            else if (ext === "png") dest = folders["01_ASSET_PNG"];
+                            else if (ext === "jpg" || ext === "jpeg") dest = folders["01_ASSET_JPEG"];
+                            else if (ext === "ai" || ext === "eps") dest = folders["01_ASSET_AI"];
+                            else if (ext === "wav" || ext === "mp3" || ext === "aac" || ext === "m4a") dest = folders["02_AUDIO_SFX"];
+                            else if (ext === "mp4" || ext === "mov" || ext === "avi" || ext === "mxf") dest = folders["08_VIDEO DATA_RAW"];
+                            else dest = folders["01_ASSET"];
+                        } else {
+                            dest = folders["01_ASSET"];
+                        }
+                    }
+                }
+                
+                if (dest && item.nodeId !== dest.nodeId) {
+                    try {
+                        item.moveBin(dest);
+                    } catch(err) {}
+                }
+            }
+            
+            return MotionreisUtils.sendResponse("Premiere Pro Project Panel successfully organized!");
+            
+        } catch(e) {
+            return MotionreisUtils.sendError("PR Organize Error: " + e.message);
+        }
+    },
+
+    // -----------------------------------------------------------------------------------
+    // AI LOADER (PR PANEL)
+    // -----------------------------------------------------------------------------------
+    prGetFolderFootage: function(argsStr) {
+        try {
+            if (!app.project) return MotionreisUtils.sendError("No project open.");
+            if (!app.project.activeSequence) return MotionreisUtils.sendError("No active sequence found. Please open an empty sequence first.");
+            
+            var proj = app.project;
+            var groups = {};
+            
+            function gather(bin, currentPath) {
+                var children = bin.children;
+                if (!children) return;
+                for (var i = 0; i < children.numItems; i++) {
+                    var child = children[i];
+                    if (child.type === ProjectItemType.BIN) {
+                        var nextPath = currentPath ? currentPath + "/" + child.name : child.name;
+                        gather(child, nextPath);
+                    } else if (child.type === ProjectItemType.CLIP && !child.isSequence()) {
+                        var parentPath = currentPath || "Root";
+                        if (!groups[parentPath]) groups[parentPath] = [];
+                        
+                        var duration = 0;
+                        try {
+                            duration = child.getOutPoint().seconds - child.getInPoint().seconds;
+                        } catch(e) {}
+                        
+                        groups[parentPath].push({
+                            id: child.nodeId,
+                            name: child.name,
+                            duration: duration
+                        });
+                    }
+                }
+            }
+            
+            gather(proj.rootItem, "");
+            
+            return MotionreisUtils.sendResponse(groups);
+        } catch(e) {
+            return MotionreisUtils.sendError(e.message);
+        }
+    },
+    
+    prBuildAISequence: function(argsStr) {
+        try {
+            if (!app.project) return MotionreisUtils.sendError("No project open.");
+            var seq = app.project.activeSequence;
+            if (!seq) return MotionreisUtils.sendError("Active sequence lost.");
+            
+            var args = MotionreisUtils.safeParse(argsStr);
+            var groupedFootage = args.groupedFootage;
+            var labels = args.labels;
+            var addMarkers = args.addMarkers;
+            
+            var proj = app.project;
+            
+            function findItem(nodeId, bin) {
+                var children = bin.children;
+                for (var i = 0; i < children.numItems; i++) {
+                    var child = children[i];
+                    if (child.nodeId === nodeId) return child;
+                    if (child.type === ProjectItemType.BIN) {
+                        var res = findItem(nodeId, child);
+                        if (res) return res;
+                    }
+                }
+                return null;
+            }
+            
+            function getClipDimensions(projectItem) {
+                try {
+                    if (!projectItem) return null;
+                    if (ExternalObject.AdobeXMPScript === undefined) {
+                        ExternalObject.AdobeXMPScript = new ExternalObject("lib:AdobeXMPScript");
+                    }
+                    var xmpString = projectItem.getProjectMetadata();
+                    if (!xmpString) return null;
+                    var xmp = new XMPMeta(xmpString);
+                    var PProMetaURI = "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
+                    if (xmp.doesPropertyExist(PProMetaURI, "Column.Intrinsic.VideoInfo")) {
+                        var info = xmp.getProperty(PProMetaURI, "Column.Intrinsic.VideoInfo").value;
+                        var parts = info.split('x');
+                        if (parts.length >= 2) {
+                            var w = parseInt(parts[0].replace(/[^0-9]/g, ''), 10);
+                            var h = parseInt(parts[1].split('(')[0].replace(/[^0-9]/g, ''), 10);
+                            if (w > 0 && h > 0) return { width: w, height: h };
+                        }
+                    }
+                } catch(e) {}
+                return null;
+            }
+
+            var seqW = 0, seqH = 0;
+            try {
+                if (seq.frameSizeHorizontal) seqW = seq.frameSizeHorizontal;
+                if (seq.frameSizeVertical) seqH = seq.frameSizeVertical;
+                if (!seqW && seq.getSettings) {
+                    var s = seq.getSettings();
+                    seqW = s.videoFrameWidth;
+                    seqH = s.videoFrameHeight;
+                }
+            } catch(e) {}
+            
+            var currentSecs = 0;
+            if (seq.videoTracks.numTracks > 0 && seq.videoTracks[0].clips.numItems > 0) {
+                var lastClip = seq.videoTracks[0].clips[seq.videoTracks[0].clips.numItems - 1];
+                currentSecs = lastClip.end.seconds;
+            } else if (seq.audioTracks.numTracks > 0 && seq.audioTracks[0].clips.numItems > 0) {
+                var lastAudio = seq.audioTracks[0].clips[seq.audioTracks[0].clips.numItems - 1];
+                currentSecs = lastAudio.end.seconds;
+            }
+            
+            var gapSecs = 120; // 2 minutes gap
+            var colorIndex = 0;
+            
+            for (var path in groupedFootage) {
+                var clips = groupedFootage[path];
+                var label = labels[path] || path.split('/').pop();
+                
+                var startSecs = currentSecs;
+                
+                for (var i = 0; i < clips.length; i++) {
+                    var item = findItem(clips[i].id, proj.rootItem);
+                    if (item) {
+                        try {
+                            var ticks = Math.round(currentSecs * 254016000000).toString();
+                            var inserted = false;
+                            var insertedTrack = null;
+                            try {
+                                if (seq.videoTracks.numTracks > 0) {
+                                    seq.videoTracks[0].insertClip(item, ticks);
+                                    inserted = true;
+                                    insertedTrack = seq.videoTracks[0];
+                                }
+                            } catch(e) {}
+                            
+                            if (!inserted) {
+                                try {
+                                    if (seq.audioTracks.numTracks > 0) {
+                                        seq.audioTracks[0].insertClip(item, ticks);
+                                        inserted = true;
+                                    }
+                                } catch(e) {}
+                            }
+                            
+                            if (inserted && insertedTrack && seqW > 0 && seqH > 0) {
+                                try {
+                                    var insertedClip = insertedTrack.clips[insertedTrack.clips.numItems - 1];
+                                    if (insertedClip) {
+                                        var dims = getClipDimensions(item);
+                                        if (dims && dims.width > 0 && dims.height > 0) {
+                                            var scaleW = (seqW / dims.width) * 100;
+                                            var scaleH = (seqH / dims.height) * 100;
+                                            var finalScale = Math.min(scaleW, scaleH);
+                                            if (Math.abs(finalScale - 100) > 1) {
+                                                for (var c = 0; c < insertedClip.components.numItems; c++) {
+                                                    var comp = insertedClip.components[c];
+                                                    if (comp.displayName === "Motion") {
+                                                        for (var p = 0; p < comp.properties.numItems; p++) {
+                                                            var prop = comp.properties[p];
+                                                            if (prop.displayName === "Scale") {
+                                                                prop.setValue(finalScale, true);
+                                                                break;
+                                                            }
+                                                        }
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch(e) {}
+                            }
+                            
+                            if (inserted) {
+                                var d = item.getOutPoint().seconds - item.getInPoint().seconds;
+                                currentSecs += d;
+                            }
+                        } catch(e) {}
+                    }
+                }
+                
+                if (addMarkers && currentSecs > startSecs) {
+                    var m = seq.markers.createMarker(startSecs);
+                    if (m) {
+                        m.name = label;
+                        m.end = currentSecs;
+                        try { m.setColorByIndex(colorIndex); } catch(e) {}
+                    }
+                }
+                
+                if (currentSecs > startSecs) {
+                    currentSecs += gapSecs;
+                    colorIndex = (colorIndex + 1) % 8;
+                }
+            }
+            
+            return MotionreisUtils.sendResponse({ success: true });
+        } catch(e) {
+            return MotionreisUtils.sendError("PR Build Error: " + e.message);
+        }
+    },
+    prDeleteDisabledClips: function(argsStr) {
+        try {
+            if (!app.project) return MotionreisUtils.sendError("No project open.");
+            var seq = app.project.activeSequence;
+            if (!seq) return MotionreisUtils.sendError("No active sequence.");
+
+            var args = argsStr ? MotionreisUtils.safeParse(argsStr) : {};
+            var useRipple = args.ripple === true;
+
+            var deletedCount = 0;
+
+            function processTracks(tracks) {
+                for (var i = 0; i < tracks.numTracks; i++) {
+                    var track = tracks[i];
+                    for (var j = track.clips.numItems - 1; j >= 0; j--) {
+                        var clip = track.clips[j];
+                        if (clip.disabled === true) {
+                            try {
+                                clip.remove(useRipple ? 1 : 0, 0);
+                                deletedCount++;
+                            } catch(e) {}
+                        }
+                    }
+                }
+            }
+
+            processTracks(seq.videoTracks);
+            processTracks(seq.audioTracks);
+
+            return MotionreisUtils.sendResponse({ success: true, count: deletedCount, message: "Deleted " + deletedCount + " disabled clips" + (useRipple ? " (Ripple)." : ".") });
+        } catch(e) {
+            return MotionreisUtils.sendError("Error deleting clips: " + e.message);
+        }
+    },
+    prExecuteScript: function(argsStr) {
+        try {
+            var args = argsStr ? MotionreisUtils.safeParse(argsStr) : {};
+            if (!args.code) return MotionreisUtils.sendError("No code provided.");
+            
+            // Execute the code
+            // Wrap the code in an IIFE to support the 'return' statement correctly inside eval.
+            var wrappedCode = "(function(){\n" + args.code + "\n})();";
+            var result = eval(wrappedCode);
+            var msg = "Script executed successfully.";
+            if (result !== undefined) msg += " Result: " + result;
+            
+            return MotionreisUtils.sendResponse({ success: true, message: msg });
+        } catch(e) {
+            return MotionreisUtils.sendError("Script Error: " + e.message + " (Line: " + e.line + ")");
+        }
+    },
     selectGenericFolder: function() {
         try {
             var targetFolder = Folder.selectDialog("Select Folder:");
@@ -250,7 +624,7 @@ var pipeline = {
     
     osOrganizeProject: function(argsStr) {
         try {
-            var args = JSON.parse(argsStr);
+            var args = MotionreisUtils.safeParse(argsStr);
             var targetFolderPath = args.path;
             var targetFolder = new Folder(targetFolderPath);
             
@@ -573,7 +947,7 @@ var pipeline = {
             configFile.open("r");
             var configContent = configFile.read();
             configFile.close();
-            var config = JSON.parse(configContent);
+            var config = MotionreisUtils.safeParse(configContent);
             
             // Force Viewer Focus to get correct active item!
             try { app.activeViewer.setActive(); } catch(e) {}
@@ -762,7 +1136,7 @@ var pipeline = {
     applyIDEExpression: function(argsStr) {
         try {
             app.beginUndoGroup("Apply IDE Expression");
-            var args = JSON.parse(argsStr);
+            var args = MotionreisUtils.safeParse(argsStr);
             var comp = MotionreisUtils.getActiveComp();
             
             if (!args.expression || args.expression === "") {
@@ -798,7 +1172,7 @@ var pipeline = {
             app.beginUndoGroup("Deep Duplicator");
             if (!app.project) return MotionreisUtils.sendError("No project open.");
             
-            var args = JSON.parse(argsStr);
+            var args = MotionreisUtils.safeParse(argsStr);
             var activeItem = app.project.activeItem;
             if (!activeItem || !(activeItem instanceof CompItem)) {
                 return MotionreisUtils.sendError("Select or open a Composition to duplicate.");
@@ -1051,10 +1425,86 @@ var pipeline = {
         } catch(e) { app.endUndoGroup(); return MotionreisUtils.sendError(e.message); }
     },
     
+    prSmartRelink: function(folderPath) {
+        try {
+            if (!app.project) return MotionreisUtils.sendError("No project open.");
+            
+            var missingItems = [];
+            
+            function scanProjectForMissing(bin) {
+                var children = bin.children;
+                for (var i = 0; i < children.numItems; i++) {
+                    var child = children[i];
+                    if (child.type === ProjectItemType.BIN) {
+                        scanProjectForMissing(child);
+                    } else if (child.type === ProjectItemType.CLIP && !child.isSequence()) {
+                        var mediaPath = child.getMediaPath();
+                        if (mediaPath) {
+                            var f = new File(mediaPath);
+                            if (!f.exists) {
+                                missingItems.push(child);
+                            }
+                        }
+                    }
+                }
+            }
+            scanProjectForMissing(app.project.rootItem);
+            
+            if (missingItems.length === 0) {
+                return MotionreisUtils.sendResponse(JSON.stringify({ count: 0, items: [] }));
+            }
+            
+            var fileMap = {};
+            function scanFolder(folder, depth) {
+                if (depth > 12) return;
+                var files = folder.getFiles();
+                for (var i = 0; i < files.length; i++) {
+                    var f = files[i];
+                    if (f instanceof Folder) {
+                        scanFolder(f, depth + 1);
+                    } else if (f instanceof File) {
+                        var name = decodeURI(f.name).toLowerCase();
+                        if (!fileMap[name]) {
+                            fileMap[name] = f;
+                        }
+                    }
+                }
+            }
+            
+            var rootFolder = new Folder(folderPath);
+            if (!rootFolder.exists) {
+                return MotionreisUtils.sendError("Selected folder does not exist.");
+            }
+            scanFolder(rootFolder, 0);
+            
+            var relinked = [];
+            var count = 0;
+            for (var i = 0; i < missingItems.length; i++) {
+                var item = missingItems[i];
+                var oldName = item.name.toLowerCase();
+                var pathVal = item.getMediaPath();
+                if (pathVal) {
+                    var parts = pathVal.split(/[\/\\]/);
+                    oldName = parts[parts.length-1].toLowerCase();
+                }
+                
+                if (fileMap[oldName]) {
+                    try {
+                        item.changeMediaPath(fileMap[oldName].fsName);
+                        count++;
+                        relinked.push(decodeURI(fileMap[oldName].name));
+                    } catch(e) {}
+                }
+            }
+            
+            return MotionreisUtils.sendResponse(JSON.stringify({ count: count, items: relinked }));
+        } catch(e) { return MotionreisUtils.sendError(e.message); }
+    },
+    
     relinkToNewPaths: function(argsStr) {
         try {
             app.beginUndoGroup("Move & Relink");
-            var mappings = JSON.parse(argsStr);
+            var mappings = MotionreisUtils.safeParse(argsStr);
             var count = 0;
             
             for (var m = 0; m < mappings.length; m++) {
@@ -1181,7 +1631,7 @@ var pipeline = {
     // Export selected layers transform data as .chan (Nuke/Blender/Maya compatible)
     exportVFXData: function(argsStr) {
         try {
-            var args = argsStr ? JSON.parse(argsStr) : {};
+            var args = argsStr ? MotionreisUtils.safeParse(argsStr) : {};
             var format = args.format || 'chan';
             var comp = MotionreisUtils.getActiveComp();
             var layers = MotionreisUtils.getSelectedLayers(comp);
@@ -1233,7 +1683,7 @@ var pipeline = {
     // ---- CUSTOM SCRIPTS (MACRO) ----
     runMacro: function(argsStr) {
         try {
-            var args = argsStr ? JSON.parse(argsStr) : {};
+            var args = argsStr ? MotionreisUtils.safeParse(argsStr) : {};
             var id = args.id || 1;
 
             // -- SLOT 1: Rename selected layers sequentially --
@@ -1295,7 +1745,7 @@ var pipeline = {
 
     scanEffects: function(argsStr) {
         try {
-            var args = JSON.parse(argsStr);
+            var args = MotionreisUtils.safeParse(argsStr);
             var query = (args.query || "").toLowerCase();
             if (!query) return MotionreisUtils.sendResponse("[]");
             
@@ -1333,7 +1783,7 @@ var pipeline = {
 
     selectLayerInTimeline: function(argsStr) {
         try {
-            var args = JSON.parse(argsStr);
+            var args = MotionreisUtils.safeParse(argsStr);
             var compId = parseInt(args.compId, 10);
             var layerIndex = parseInt(args.layerIndex, 10);
             
@@ -1362,9 +1812,10 @@ var pipeline = {
 
     // Router function called from UI
     run: function(argsStr) {
-        var args = JSON.parse(argsStr);
+        var args = MotionreisUtils.safeParse(argsStr);
         
         if (args.action === 'organizeProject') return this.organizeProject(argsStr);
+        if (args.action === 'prOrganizeProject') return this.prOrganizeProject(argsStr);
         if (args.action === 'osOrganizeProject') return this.osOrganizeProject(argsStr);
         if (args.action === 'purgeCache') return this.purgeCache(argsStr);
         if (args.action === 'collectFilesToOS') return this.collectFilesToOS(argsStr);
@@ -1384,3 +1835,107 @@ var pipeline = {
         return MotionreisUtils.sendError("Pipeline function not yet implemented.");
     }
 };
+
+// --- GLOBAL FUNCTIONS FOR AI VIRAL CLIPPER ---
+
+function getTimelineSourceFile() {
+    try {
+        var seq = app.project.activeSequence;
+        if (!seq) return "Error: Tidak ada sequence aktif";
+        if (seq.videoTracks.numTracks === 0) return "Error: Tidak ada track video";
+        
+        var clip = null;
+        for (var i = 0; i < seq.videoTracks[0].clips.numItems; i++) {
+            clip = seq.videoTracks[0].clips[i];
+            break; // Ambil klip pertama
+        }
+        
+        if (!clip) return "Error: Tidak ada klip di V1";
+        
+        var projItem = clip.projectItem;
+        if (!projItem) return "Error: Project Item tidak ditemukan";
+        
+        var path = projItem.getMediaPath();
+        return path ? path : "Error: Media path kosong";
+    } catch(e) {
+        return "Error: " + e.message;
+    }
+}
+
+function createVerticalHighlight(startSec, endSec, srtPath) {
+    try {
+        var seq = app.project.activeSequence;
+        if (!seq) return "Error: Tidak ada sequence aktif";
+        
+        var seqName = seq.name;
+        var clone = seq.clone(); 
+        if (!clone) return "Error: Gagal duplikasi sequence";
+        
+        clone.name = seqName + "_VIRAL_CLIP";
+        app.project.activeSequence = clone; // Buka sequence hasil clone
+        
+        // Hapus klip yang berada di luar range startSec - endSec
+        // Kita iterasi mundur supaya indeks tidak bergeser
+        for (var i = 0; i < clone.videoTracks.numTracks; i++) {
+            var track = clone.videoTracks[i];
+            var toRemove = [];
+            for (var j = 0; j < track.clips.numItems; j++) {
+                var c = track.clips[j];
+                var cStart = parseFloat(c.start.seconds);
+                var cEnd = parseFloat(c.end.seconds);
+                
+                // Jika klip berada DILUAR rentang (berakhir sebelum start, atau mulai setelah end)
+                if (cEnd <= startSec || cStart >= endSec) {
+                    toRemove.push(c);
+                } else {
+                    // Klip berpotongan dengan area viral, kita biarkan atau potong sedikit (sulit via DOM standar).
+                    // Asumsi: klip utuh dibiarkan, nanti dirapihkan
+                }
+            }
+            
+            for (var k = toRemove.length - 1; k >= 0; k--) {
+                toRemove[k].remove(0, 1); // argumen: remove(shift, ripple). 0,1 berarti ripple delete
+            }
+        }
+        
+        // Lakukan hal yang sama untuk audio
+        for (var a = 0; a < clone.audioTracks.numTracks; a++) {
+            var aTrack = clone.audioTracks[a];
+            var aToRemove = [];
+            for (var b = 0; b < aTrack.clips.numItems; b++) {
+                var ac = aTrack.clips[b];
+                var acStart = parseFloat(ac.start.seconds);
+                var acEnd = parseFloat(ac.end.seconds);
+                if (acEnd <= startSec || acStart >= endSec) {
+                    aToRemove.push(ac);
+                }
+            }
+            for (var c2 = aToRemove.length - 1; c2 >= 0; c2--) {
+                aToRemove[c2].remove(0, 1);
+            }
+        }
+        
+        try {
+            // Auto reframe ke TikTok/Reels (Vertical 9:16)
+            clone.autoReframeSequence("9x16", "default");
+        } catch(e) {
+            // Jika gagal (versi lama), ubah manual
+            clone.frameSizeHorizontal = 1080;
+            clone.frameSizeVertical = 1920;
+        }
+        
+        // Import SRT jika ada
+        if (srtPath) {
+            try {
+                // Import file srt ke root project bin
+                app.project.importFiles([srtPath], false, app.project.rootItem, false);
+            } catch(e) {
+                // Abaikan error import srt
+            }
+        }
+        
+        return "Success";
+    } catch(e) {
+        return "Error: " + e.message;
+    }
+}

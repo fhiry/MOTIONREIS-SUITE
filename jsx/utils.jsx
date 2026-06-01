@@ -24,6 +24,16 @@ var MotionreisUtils = {
         return JSON.stringify({ ok: true, data: data });
     },
 
+    // Safe JSON parse wrapper
+    safeParse: function(str) {
+        try {
+            if (!str) return {};
+            return JSON.parse(str);
+        } catch(e) {
+            return {};
+        }
+    },
+
     // Standard Error Wrapper
     sendError: function(message) {
         return JSON.stringify({ ok: false, error: message });

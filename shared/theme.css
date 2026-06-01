@@ -311,13 +311,9 @@ body, html {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  opacity: 0;
+  opacity: 1; /* SELALU VISIBLE */
   transition: opacity 0.2s;
   overflow: hidden;
-}
-
-.card-wrapper:hover .reorder-handle {
-  opacity: 1;
 }
 
 .reorder-handle-btn {

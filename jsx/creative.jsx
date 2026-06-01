@@ -448,7 +448,7 @@ var creative = {
 
     // Router function called from UI
     run: function(argsStr) {
-        var args = JSON.parse(argsStr);
+        var args = MotionreisUtils.safeParse(argsStr);
         
         if (args.action === 'animateText') {
             return this.animateText(args);

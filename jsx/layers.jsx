@@ -791,7 +791,7 @@ var layers = {
         }
     },
     run: function(argsStr) {
-        var args = JSON.parse(argsStr);
+        var args = MotionreisUtils.safeParse(argsStr);
         
         if (args.action === 'batchRename') {
             return this.batchRename(args);
